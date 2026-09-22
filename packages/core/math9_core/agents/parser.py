@@ -1,26 +1,19 @@
-"""Agent Parser.
+"""Agent Parser: ảnh -> latex (OCR/VLM). Chỉ chạy khi đầu vào là ảnh.
 
-Model: VLM/OCR
-Đầu vào: ảnh hoặc text thô
-Đầu ra: latex, entities
-
-Chạy song song: không
+Với đầu vào text, Pipeline bỏ qua agent này và dùng thẳng raw_input.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from ..state import ProblemState
 from .base import Agent
-
-PROMPT = Path(__file__).resolve().parents[4].parent / "prompts" / "parser.md"
 
 
 class ParserAgent(Agent):
     role = "parser"
 
     def run(self, state: ProblemState) -> ProblemState:
-        raise NotImplementedError(
-            "TODO: nạp prompts/parser.md, gọi self.llm.complete(), ghi kết quả vào state"
-        )
+        if not state.image_path:
+            state.latex = state.latex or state.raw_input
+            return state
+        raise NotImplementedError("Đầu vào ảnh: nối Mathpix (math9_ingest.extract.ocr) hoặc VLM tại đây")

@@ -12,9 +12,11 @@ kèm nhãn độ tin cậy, không cố nữa.
 
 from __future__ import annotations
 
+import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from math9_curriculum.guardrail import check as guardrail_check
 from math9_curriculum.guardrail import feedback_message
@@ -35,6 +37,11 @@ from .agents.solver import SolverAgent
 from .enums import Confidence
 from .state import ProblemState
 
+if TYPE_CHECKING:
+    from math9_retrieval.service import RagService
+
+    from .llm.client import LLMClient
+
 log = logging.getLogger(__name__)
 
 
@@ -52,7 +59,7 @@ class Pipeline:
     # -- luồng chính ------------------------------------------------------
 
     def run(self, state: ProblemState) -> ProblemState:
-        state = self.parser(state) if state.image_path else state
+        state = self.parser(state)
         state = self.router(state)
         self._retrieve(state)          # RAG: nạp chiến lược + bài mẫu vào state
 
@@ -66,6 +73,7 @@ class Pipeline:
             state.attempts += 1
             log.info("Kiểm chứng thất bại, thử lại lần %d", state.attempts)
             state = self.critic(state)
+            self._draftsman_feedback(state)
             if state.difficulty >= 3:
                 self._attach_lemmas(state)
 
@@ -105,11 +113,15 @@ class Pipeline:
     def _solve_and_draw(self, state: ProblemState) -> ProblemState:
         """Solver và Draftsman chạy SONG SONG — tiết kiệm khoảng 40% độ trễ.
 
-        Cả hai chỉ cần đề bài đã chuẩn hóa, không phụ thuộc nhau.
+        Cả hai chỉ cần đề bài đã chuẩn hóa, không phụ thuộc nhau. Ở lượt giải
+        lại, hình đã dựng được và khớp lời giải thì giữ nguyên, chỉ gọi Solver.
         """
         if not state.is_geometry():
             return self.solver(state)
+        if state.construction and state.attempts > 0 and not state.verification.cross_check:
+            return self.solver(state)
 
+        n0 = len(state.trace)
         with ThreadPoolExecutor(max_workers=2) as ex:
             fs = ex.submit(self.solver, state.model_copy(deep=True))
             fd = ex.submit(self.draftsman, state.model_copy(deep=True))
@@ -118,7 +130,9 @@ class Pipeline:
         state.subproblems = solved.subproblems
         state.construction = drawn.construction
         state.entities = drawn.entities or solved.entities
-        state.trace += solved.trace + drawn.trace
+        state.verification.detail.update(solved.verification.detail)
+        state.verification.detail.update(drawn.verification.detail)
+        state.trace += solved.trace[n0:] + drawn.trace[n0:]
         return state
 
     def _verify(self, state: ProblemState) -> ProblemState:
@@ -154,7 +168,10 @@ class Pipeline:
             v.geometry_ok = verdict.ok
             v.detail["geometry"] = {
                 "n_configs": verdict.n_configs,
-                "failures": [repr(f.predicate) for f in verdict.failures()],
+                # sai thật khi kiểm bằng số
+                "failures": [repr(f.predicate) for f in verdict.failures() if f.error is None],
+                # không kiểm được (thường do nhắc tới điểm không có trên hình)
+                "unresolved": [f"{f.predicate!r}: {f.error}" for f in verdict.failures() if f.error],
                 "build_errors": verdict.build_errors,
             }
             # 4. Đối chiếu chéo lời giải với hình
@@ -164,17 +181,40 @@ class Pipeline:
         return state
 
     def _claims(self, state: ProblemState) -> list[Predicate]:
-        """Trích mệnh đề cần kiểm chứng từ lời giải.
+        """Trích mệnh đề cần kiểm chứng từ trường `predicate` của mỗi bước.
 
-        Trong bản đầy đủ, Solver xuất kèm trường `predicate` cho mỗi kết luận.
+        Predicate sai định dạng (kind lạ, thiếu args) được ghi nhận, không làm
+        hỏng cả lượt kiểm chứng.
         """
         out: list[Predicate] = []
+        bad: list[str] = []
         for sp in state.subproblems:
             for st in sp.steps:
-                p = getattr(st, "predicate", None)
-                if p:
-                    out.append(Predicate(**p))
+                if not st.predicate:
+                    continue
+                try:
+                    out.append(Predicate(st.predicate["kind"], list(st.predicate["args"]), st.predicate.get("value")))
+                except (KeyError, ValueError, TypeError) as e:
+                    bad.append(f"{st.id}: {e}")
+        if bad:
+            state.verification.detail["bad_predicates"] = bad
         return out
+
+    def _draftsman_feedback(self, state: ProblemState) -> None:
+        """Lời giải dùng điểm phụ mà hình chưa có -> bảo Draftsman dựng thêm, kèm
+        các câu trong lời giải định nghĩa điểm đó."""
+        missing = [m.split("'")[1] for m in state.verification.cross_check if "nhắc tới '" in m]
+        if not missing or not state.construction:
+            state.verification.detail.pop("draftsman_feedback", None)
+            return
+        lines = [f"Lời giải cần thêm các điểm chưa có trên hình: {', '.join(missing)}. "
+                 "Hãy giữ nguyên kịch bản cũ và DỰNG THÊM các điểm này theo mô tả sau:"]
+        for sp in state.subproblems:
+            for st in sp.steps:
+                if any(m in st.refs or m in st.highlight or f" {m} " in f" {st.claim} " for m in missing):
+                    lines.append(f"- {st.claim} ({st.justification})")
+        lines.append("Kịch bản cũ:\n" + state.construction.model_dump_json())
+        state.verification.detail["draftsman_feedback"] = "\n".join(lines)
 
     def _attach_lemmas(self, state: ProblemState) -> None:
         """Bài mức 3: dò bổ đề bằng tọa độ để bẻ bài khó thành chuỗi bài dễ."""
@@ -203,6 +243,8 @@ class Pipeline:
     @staticmethod
     def _passed(state: ProblemState) -> bool:
         v = state.verification
+        if state.is_geometry() and state.construction is None:
+            return False
         return (
             not v.violations
             and not v.cross_check
@@ -211,16 +253,59 @@ class Pipeline:
         )
 
 
+def build_pipeline(
+    llm: "LLMClient | None" = None, model: str | None = None, rag: bool = True,
+    require_reviewed: bool = True, enable_hints: bool = True,
+) -> Pipeline:
+    """Dựng Pipeline hoàn chỉnh từ biến môi trường.
+
+    `model` ghi đè MODEL_POLICY cho mọi agent — dùng khi chỉ có một model khả
+    dụng (giai đoạn hiện tại). Khi có model local, bỏ tham số này để chính sách
+    định tuyến theo độ khó có hiệu lực.
+    """
+    from .llm.client import client_from_env, default_model
+
+    llm = llm or client_from_env()
+    model = model or default_model()
+    rag_service = None
+    if rag:
+        from math9_retrieval.service import RagService
+
+        rag_service = RagService(require_reviewed=require_reviewed)
+    return Pipeline(
+        parser=ParserAgent(llm, model),
+        router=RouterAgent(llm, model),
+        solver=SolverAgent(llm, model),
+        draftsman=DraftsmanAgent(llm, model),
+        critic=CriticAgent(llm, model),
+        pedagogue=PedagogueAgent(llm, model),
+        rag=rag_service,
+        enable_hints=enable_hints,
+    )
+
+
 def retry_prompt(state: ProblemState) -> str:
     """Thông điệp gửi lại Solver ở vòng lặp thứ hai."""
     parts = []
     v = state.verification
     if v.violations:
         parts.append(feedback_message([type("V", (), x)() for x in v.violations]))
+    if v.detail.get("algebra", {}).get("results"):
+        wrong = [r for r in v.detail["algebra"]["results"] if not r.get("ok")]
+        if wrong:
+            parts.append("SymPy giải lại không khớp với đáp án của bạn: " + json.dumps(wrong, ensure_ascii=False))
+    if v.detail.get("draftsman_error"):
+        parts.append("Không dựng được hình từ đề: " + v.detail["draftsman_error"])
     if v.detail.get("geometry", {}).get("failures"):
         parts.append(
             "Các kết luận sau KHÔNG đúng khi kiểm tra bằng số trên nhiều cấu hình: "
             + ", ".join(v.detail["geometry"]["failures"])
+        )
+    if v.detail.get("geometry", {}).get("unresolved"):
+        parts.append(
+            "Các kết luận sau KHÔNG kiểm chứng được vì nhắc tới đối tượng không có trên hình "
+            "(hình sẽ được dựng lại có thêm các điểm này; nếu vẫn cần, hãy định nghĩa rõ cách dựng "
+            "chúng trong claim): " + ", ".join(v.detail["geometry"]["unresolved"])
         )
     if v.cross_check:
         parts.append("Lời giải và hình vẽ không khớp: " + "; ".join(v.cross_check))

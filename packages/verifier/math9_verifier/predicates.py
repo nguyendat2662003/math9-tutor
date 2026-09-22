@@ -40,6 +40,7 @@ class PredKind(StrEnum):
     RATIO_EQUAL = "ratio_equal"
     IS_ISOSCELES = "is_isosceles"
     RIGHT_ANGLE = "right_angle"
+    PRODUCT_EQUAL = "product_equal"
 
 
 class Predicate:
@@ -164,6 +165,16 @@ def _r_is_isosceles(fig: Figure, a: list[str], v: float | None) -> float:
     return _r_equal_length(fig, [a[0], a[1], a[0], a[2]], None)
 
 
+def _r_product_equal(fig: Figure, a: list[str], v: float | None) -> float:
+    """args = [A,B,C,D,E,F,G,H] — AB·CD = value·EF·GH (value mặc định 1).
+
+    AB² = AE·AD viết là [A,B,A,B,A,E,A,D]."""
+    p = _pts(fig, a)
+    lhs = dist(p[0], p[1]) * dist(p[2], p[3])
+    rhs = (v or 1.0) * dist(p[4], p[5]) * dist(p[6], p[7])
+    return abs(lhs - rhs) / max(lhs, rhs, 1e-9)
+
+
 def _as_line(fig: Figure, ref: str) -> Line:
     o = fig.objects.get(ref)
     if isinstance(o, Line):
@@ -189,6 +200,7 @@ RESIDUALS: dict[PredKind, Callable[[Figure, list[str], float | None], float]] = 
     PredKind.RATIO_EQUAL: _r_ratio_equal,
     PredKind.IS_ISOSCELES: _r_is_isosceles,
     PredKind.RIGHT_ANGLE: _r_right_angle,
+    PredKind.PRODUCT_EQUAL: _r_product_equal,
 }
 
 

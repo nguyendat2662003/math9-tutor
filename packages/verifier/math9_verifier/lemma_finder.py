@@ -114,6 +114,7 @@ def format_for_prompt(lemmas: list[Predicate]) -> str:
         "on_object": "{0} thuộc {1}",
         "concurrent": "{0}, {1}, {2} đồng quy",
         "right_angle": "góc {0}{1}{2} vuông",
+        "product_equal": "{0}{1}·{2}{3} = {4}{5}·{6}{7}",
         "is_isosceles": "tam giác {0}{1}{2} cân tại {0}",
     }
     lines = []

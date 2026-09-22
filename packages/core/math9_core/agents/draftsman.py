@@ -1,26 +1,66 @@
-"""Agent Draftsman.
+"""Agent Draftsman: latex -> kịch bản dựng hình (DSL). Không bao giờ sinh tọa độ.
 
-Model: model trung bình
-Đầu vào: latex + entities
-Đầu ra: construction (kịch bản dựng hình)
-
-Chạy song song: Solver và Draftsman cùng nhận latex, không phụ thuộc nhau
+Kịch bản sai (tham chiếu chưa dựng, suy biến...) được gửi lại cho LLM sửa,
+tối đa MAX_ATTEMPTS lượt — vòng lặp nội bộ, độc lập với vòng Solver↔Verifier.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
+import json
+import logging
 
-from ..state import ProblemState
+from math9_geometry.construct import Figure, build
+from math9_geometry.dsl import Construction, op_catalog, validate_ops
+from math9_geometry.primitives import Circle, GeometryError, Line, Point, Segment
+
+from ..state import Entity, ProblemState
 from .base import Agent
 
-PROMPT = Path(__file__).resolve().parents[4].parent / "prompts" / "draftsman.md"
+log = logging.getLogger(__name__)
+MAX_ATTEMPTS = 2
+
+
+def try_build(raw: dict) -> tuple[Construction | None, str]:
+    """(construction, lỗi). Lỗi rỗng nghĩa là dựng được ít nhất một cấu hình."""
+    try:
+        c = Construction.model_validate(raw)
+    except Exception as e:
+        return None, f"JSON không đúng schema: {e}"
+    errs = validate_ops(c.ops)
+    if errs:
+        return None, "Kịch bản không hợp lệ:\n" + "\n".join(f"- {x}" for x in errs)
+    try:
+        build(c, seed=1)
+    except GeometryError as e:
+        return None, f"Engine không dựng được: {e}"
+    return c, ""
+
+
+def entities_from(fig: Figure) -> list[Entity]:
+    kind = {Point: "point", Line: "line", Segment: "segment", Circle: "circle"}
+    return [Entity(name=n, kind=kind[type(o)], role="constructed") for n, o in fig.objects.items() if type(o) in kind]
 
 
 class DraftsmanAgent(Agent):
     role = "draftsman"
+    prompt_file = "draftsman.md"
 
     def run(self, state: ProblemState) -> ProblemState:
-        raise NotImplementedError(
-            "TODO: nạp prompts/draftsman.md, gọi self.llm.complete(), ghi kết quả vào state"
-        )
+        feedback, raw = state.verification.detail.get("draftsman_feedback", ""), {}
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            user = self.render(op_catalog=op_catalog(), latex=state.latex or state.raw_input, retry_feedback=feedback)
+            raw = self.parse_json(self.complete(
+                state, user, system="Bạn là kỹ sư dựng hình cho phần mềm hình học. Chỉ trả JSON hợp lệ.",
+                max_tokens=3000,
+            ))
+            c, err = try_build(raw)
+            if c:
+                state.construction = c
+                state.entities = entities_from(build(c, seed=1))
+                state.verification.detail.pop("draftsman_error", None)
+                return state
+            log.info("Draftsman lượt %d lỗi: %s", attempt, err.splitlines()[0])
+            feedback = err + "\n\nKịch bản đã gửi:\n" + json.dumps(raw, ensure_ascii=False)
+
+        state.verification.detail["draftsman_error"] = feedback.split("\n\nKịch bản")[0]
+        return state

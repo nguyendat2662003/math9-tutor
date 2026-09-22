@@ -1,0 +1,268 @@
+{
+  "raw_input": "Cho phương trình x^2 - 2(m+1)x + m^2 + 2 = 0 (m là tham số). a) Giải phương trình khi m = 1. b) Tìm m để phương trình có hai nghiệm phân biệt x1, x2 thỏa mãn x1^2 + x2^2 = 10.",
+  "image_path": null,
+  "latex": "Cho phương trình x^2 - 2(m+1)x + m^2 + 2 = 0 (m là tham số). a) Giải phương trình khi m = 1. b) Tìm m để phương trình có hai nghiệm phân biệt x1, x2 thỏa mãn x1^2 + x2^2 = 10.",
+  "mode": "exam10",
+  "topic": "ALG-6",
+  "subtopics": [],
+  "difficulty": 2,
+  "router_confidence": 0.99,
+  "router_alternatives": [],
+  "entities": [],
+  "subproblems": [
+    {
+      "label": "a",
+      "statement": "Giải phương trình x^2 - 2(m+1)x + m^2 + 2 = 0 khi m = 1.",
+      "goal_type": "solve_equation",
+      "difficulty": 1,
+      "steps": [
+        {
+          "id": "a1",
+          "claim": "Khi m = 1, phương trình trở thành x^2 - 4x + 3 = 0.",
+          "justification": "Thay m = 1 vào phương trình đã cho: x^2 - 2(1+1)x + 1^2 + 2 = 0.",
+          "refs": [],
+          "highlight": [],
+          "predicate": null
+        },
+        {
+          "id": "a2",
+          "claim": "Phương trình x^2 - 4x + 3 = 0 có Δ = 4 > 0.",
+          "justification": "Với a = 1, b = -4, c = 3, ta có Δ = b^2 - 4ac = (-4)^2 - 4.1.3 = 4 > 0 nên phương trình có hai nghiệm phân biệt.",
+          "refs": [],
+          "highlight": [],
+          "predicate": null
+        },
+        {
+          "id": "a3",
+          "claim": "Các nghiệm của phương trình là x_1 = 3 và x_2 = 1.",
+          "justification": "Theo công thức nghiệm, x = (-b ± √Δ)/(2a) = (4 ± 2)/2, suy ra x_1 = 3, x_2 = 1.",
+          "refs": [],
+          "highlight": [],
+          "predicate": null
+        }
+      ],
+      "answer": "Khi m = 1, phương trình có hai nghiệm x_1 = 3, x_2 = 1.",
+      "confidence": "low"
+    },
+    {
+      "label": "b",
+      "statement": "Tìm m để phương trình có hai nghiệm phân biệt x1, x2 thỏa mãn x1^2 + x2^2 = 10.",
+      "goal_type": "find_parameter",
+      "difficulty": 2,
+      "steps": [
+        {
+          "id": "b1",
+          "claim": "Phương trình có hai nghiệm phân biệt khi m > 1/2.",
+          "justification": "Ta có Δ = [-2(m+1)]^2 - 4(m^2+2) = 4(m+1)^2 - 4(m^2+2) = 4(2m-1). Phương trình có hai nghiệm phân biệt khi Δ > 0, tức là 4(2m-1) > 0, suy ra m > 1/2.",
+          "refs": [],
+          "highlight": [],
+          "predicate": null
+        },
+        {
+          "id": "b2",
+          "claim": "Theo định lí Viète, x_1 + x_2 = 2(m+1) và x_1x_2 = m^2 + 2.",
+          "justification": "Phương trình có dạng x^2 - 2(m+1)x + m^2 + 2 = 0 nên theo định lí Viète, tổng hai nghiệm bằng 2(m+1), tích hai nghiệm bằng m^2+2.",
+          "refs": [],
+          "highlight": [],
+          "predicate": null
+        },
+        {
+          "id": "b3",
+          "claim": "Ta có x_1^2 + x_2^2 = [2(m+1)]^2 - 2(m^2+2) = 2m^2 + 8m.",
+          "justification": "Dùng hằng đẳng thức x_1^2+x_2^2=(x_1+x_2)^2-2x_1x_2 và thay các giá trị tổng, tích theo định lí Viète.",
+          "refs": [],
+          "highlight": [],
+          "predicate": null
+        },
+        {
+          "id": "b4",
+          "claim": "Điều kiện x_1^2 + x_2^2 = 10 tương đương với m^2 + 4m - 5 = 0.",
+          "justification": "Từ 2m^2+8m=10, chia hai vế cho 2 được m^2+4m-5=0.",
+          "refs": [],
+          "highlight": [],
+          "predicate": null
+        },
+        {
+          "id": "b5",
+          "claim": "Phương trình m^2 + 4m - 5 = 0 có hai nghiệm m = 1 và m = -5.",
+          "justification": "Ta có m^2+4m-5=(m-1)(m+5)=0 nên m=1 hoặc m=-5.",
+          "refs": [],
+          "highlight": [],
+          "predicate": null
+        },
+        {
+          "id": "b6",
+          "claim": "Đối chiếu điều kiện m > 1/2, chỉ nhận m = 1.",
+          "justification": "Giá trị m=-5 không thỏa mãn điều kiện để phương trình có hai nghiệm phân biệt; giá trị m=1 thỏa mãn.",
+          "refs": [],
+          "highlight": [],
+          "predicate": null
+        }
+      ],
+      "answer": "Giá trị cần tìm là m = 1.",
+      "confidence": "low"
+    }
+  ],
+  "construction": null,
+  "figure_quality": null,
+  "figure_seed": null,
+  "verification": {
+    "algebra_ok": true,
+    "geometry_ok": null,
+    "violations": [],
+    "lemmas_found": [],
+    "cross_check": [],
+    "detail": {
+      "algebra_checks": [
+        {
+          "kind": "equation",
+          "equation": "x**2-4*x+3",
+          "var": "x",
+          "claimed": [
+            "1",
+            "3"
+          ]
+        },
+        {
+          "kind": "equation",
+          "equation": "m**2+4*m-5",
+          "var": "m",
+          "claimed": [
+            "-5",
+            "1"
+          ]
+        },
+        {
+          "kind": "identity",
+          "lhs": "(2*(m+1))**2-2*(m**2+2)",
+          "rhs": "2*m**2+8*m"
+        }
+      ],
+      "algebra": {
+        "results": [
+          {
+            "check": {
+              "kind": "equation",
+              "equation": "x**2-4*x+3",
+              "var": "x",
+              "claimed": [
+                "1",
+                "3"
+              ]
+            },
+            "ok": true,
+            "sympy": [
+              "1",
+              "3"
+            ],
+            "claimed": [
+              "1",
+              "3"
+            ]
+          },
+          {
+            "check": {
+              "kind": "equation",
+              "equation": "m**2+4*m-5",
+              "var": "m",
+              "claimed": [
+                "-5",
+                "1"
+              ]
+            },
+            "ok": true,
+            "sympy": [
+              "-5",
+              "1"
+            ],
+            "claimed": [
+              "-5",
+              "1"
+            ]
+          },
+          {
+            "check": {
+              "kind": "identity",
+              "lhs": "(2*(m+1))**2-2*(m**2+2)",
+              "rhs": "2*m**2+8*m"
+            },
+            "ok": true,
+            "difference": "0"
+          }
+        ]
+      }
+    }
+  },
+  "retrieved": {
+    "method_notes": "# Giải phương trình\n\n## Hướng 1 — Phương trình bậc hai một ẩn (Bài 19)\n\n**Các bước:** đưa về ax² + bx + c = 0 → tính Δ = b² − 4ac (hoặc Δ′ = b′² − ac khi\nb chẵn) → kết luận theo dấu Δ, tính nghiệm.\n\n**Mẹo nhẩm nghiệm:** nếu a + b + c = 0 thì x₁ = 1, x₂ = c/a. Nếu a − b + c = 0\nthì x₁ = −1, x₂ = −c/a. Dùng được sẽ tiết kiệm nhiều thời gian trong phòng thi.\n\n**Khi nào KHÔNG dùng:** khi hệ số a chứa tham số và có thể bằng 0 — phải xét\nriêng trường hợp a = 0 (khi đó là phương trình bậc nhất).\n\n**Bẫy thường gặp:**\n- Quên xét a = 0 khi hệ số chứa tham số.\n- Nhầm dấu khi tính Δ, đặc biệt khi c âm (−4ac thành cộng).\n- Dùng Δ′ nhưng quên rằng b′ = b/2, và công thức nghiệm cũng khác.\n- Δ = 0 kết luận \"vô nghiệm\" thay vì \"nghiệm kép\".\n\n\n**Ví dụ:** Giải x² − 5x + 6 = 0. Vì 1 + (−5) + 6 = 2 ≠ 0 nên không nhẩm được theo mẹo; tính Δ = 25 − 24 = 1 > 0, √Δ = 1. Nghiệm x₁ = (5+1)/2 = 3; x₂ = (5−1)/2 = 2.\n\n_Công cụ: T-QUADRATIC-FORMULA, T-DELTA-PRIME_\n\n## Hướng 2 — Phương trình tích (Bài 4)\n\n**Khi nào dùng:** đưa được về dạng A·B = 0.\n\n**Khi nào KHÔNG dùng:** khi không phân tích được thành nhân tử — thử đặt ẩn phụ\nhoặc dùng công thức nghiệm.\n\n**Bẫy thường gặp:**\n- Chia cả hai vế cho một biểu thức chứa ẩn (làm mất nghiệm). Phải chuyển vế và đặt nhân tử chung.\n- Chỉ giải một nhân tử, quên nhân tử còn lại.\n- Kết luận thiếu nghiệm khi một nhân tử là phương trình bậc hai.\n\n**Ví dụ:** Giải (x − 1)(x² − 4) = 0. Phương trình tích: x − 1 = 0 hoặc x² − 4 = 0, suy ra x = 1; x = 2; x = −2.\n\n## Hướng 3 — Phương trình chứa ẩn ở mẫu (Bài 4)\n\n**Các bước:**\n1. Đặt ĐIỀU KIỆN XÁC ĐỊNH (mẫu ≠ 0) — bắt buộc.\n2. Quy đồng, khử mẫu.\n3. Giải phương trình thu được.\n4. ĐỐI CHIẾU điều kiện, loại nghiệm không thỏa.\n\n**Khi nào KHÔNG dùng:** khi phương trình có thể rút gọn trực tiếp mà không cần\nquy đồng (ví dụ hai vế cùng mẫu).\n\n**Bẫy thường gặp:**\n- Quên đối chiếu điều kiện — lỗi mất điểm phổ biến nhất của dạng này.\n- Đặt điều kiện sau khi đã khử mẫu (phải đặt TRƯỚC).\n- Quy đồng sai, đặc biệt khi mẫu cần phân tích thành nhân tử trước.\n\n**Ví dụ:** Giải 1/(x−1) + 2/(x+1) = 1. Điều kiện x ≠ ±1. Quy đồng: (x+1) + 2(x−1) = x² − 1 ⟺ 3x − 1 = x² − 1 ⟺ x² − 3x = 0 ⟺ x = 0 hoặc x = 3. Cả hai thỏa điều kiện.\n\n## Hướng 4 — Phương trình chứa căn\n\n**Các bước:**\n1. Đặt điều kiện (biểu thức dưới căn ≥ 0, và vế còn lại ≥ 0 nếu bình phương).\n2. Bình phương hai vế hoặc đặt ẩn phụ.\n3. THỬ LẠI nghiệm.\n\n**Khi nào KHÔNG dùng bình phương trực tiếp:** khi vế còn lại có thể âm — phải\nđặt thêm điều kiện, nếu không sẽ sinh nghiệm ngoại lai.\n\n**Bẫy thường gặp:**\n- Bình phương hai vế sinh nghiệm ngoại lai — BẮT BUỘC thử lại.\n- Quên điều kiện vế phải ≥ 0 trước khi bình phương.\n- Bình phương sai với biểu thức có hai căn (phải chuyển vế để còn một căn mỗi lần).\n\n**Ví dụ:** Giải √(x + 3) = x − 3. Điều kiện x ≥ −3 và x − 3 ≥ 0, tức x ≥ 3. Bình phương: x + 3 = x² − 6x + 9 ⟺ x² − 7x + 6 = 0 ⟺ x = 1 hoặc x = 6. Đối chiếu x ≥ 3: chỉ nhận x = 6.\n\n## Hướng 5 — Đặt ẩn phụ\n\n**Khi nào dùng:** phương trình có biểu thức lặp lại, hoặc dạng trùng phương\nax⁴ + bx² + c = 0 (đặt t = x², t ≥ 0).\n\n**Khi nào KHÔNG dùng:** khi biểu thức lặp không thực sự giống nhau hoàn toàn —\nđặt ẩn phụ sẽ làm phương trình phức tạp hơn.\n\n**Bẫy thường gặp:**\n- Quên điều kiện của ẩn phụ (t = x² thì t ≥ 0) — nhận cả nghiệm t âm.\n- Giải ra t rồi quên quay lại tìm x.\n- Với t = x² và t > 0, quên rằng x có HAI giá trị ±√t.\n\n**Ví dụ:** Giải x⁴ − 5x² + 4 = 0. Đặt t = x², t ≥ 0: t² − 5t + 4 = 0 ⟺ t = 1 hoặc t = 4 (cả hai đều ≥ 0). Với t = 1: x = ±1. Với t = 4: x = ±2. Vậy phương trình có 4 nghiệm.\n\n===\n\n# Tìm giá trị tham số m thỏa điều kiện cho trước\n\n> Dạng cực kỳ phổ biến — gần như đề vào 10 nào cũng có. Chìa khóa gần như luôn\n> là định lý Viète (Bài 20).\n\n## Quy trình chung (làm trước mọi hướng)\n\n1. **Điều kiện có nghiệm:** tính Δ (hoặc Δ′), đặt Δ ≥ 0 (hoặc > 0 nếu cần hai\n   nghiệm phân biệt). Bước học sinh HAY QUÊN nhất.\n2. **Viết Viète:** x₁ + x₂ = −b/a ; x₁·x₂ = c/a.\n3. **Biến đổi điều kiện đề bài** về dạng chứa tổng S và tích P.\n4. **Giải tìm m**, rồi ĐỐI CHIẾU với điều kiện bước 1.\n\n## Hướng 1 — Điều kiện đối xứng với hai nghiệm\n\n**Khi nào dùng:** điều kiện đối xứng (đổi chỗ x₁, x₂ không đổi), ví dụ x₁² + x₂²,\nx₁³ + x₂³, 1/x₁ + 1/x₂.\n\n**Công thức chuyển đổi:**\n- x₁² + x₂² = S² − 2P\n- x₁³ + x₂³ = S³ − 3PS\n- 1/x₁ + 1/x₂ = S/P (cần P ≠ 0)\n- (x₁ − x₂)² = S² − 4P\n\n**Khi nào KHÔNG dùng:** khi điều kiện KHÔNG đối xứng (ví dụ x₁ = 2x₂) — lúc đó\nphải kết hợp thêm phương trình, dùng Hướng 2.\n\n**Bẫy thường gặp:**\n- Quên điều kiện Δ ≥ 0, dẫn tới nhận cả những m làm phương trình vô nghiệm.\n- Quên điều kiện mẫu khác 0 khi biểu thức có phân thức (P ≠ 0, hoặc x₁, x₂ ≠ 0).\n- Biến đổi sai công thức: hay nhầm x₁² + x₂² = S² − 2P thành S² + 2P.\n- Tìm được m nhưng quên đối chiếu điều kiện, không loại nghiệm ngoại lai.\n\n\n**Ví dụ:** Cho x² − 2(m+1)x + m² + 3 = 0. Tìm m để x₁² + x₂² = 20.\nΔ′ = (m+1)² − (m²+3) = 2m − 2 ≥ 0 ⟺ m ≥ 1.\nViète: S = 2(m+1), P = m² + 3.\nx₁² + x₂² = S² − 2P = 4(m+1)² − 2(m²+3) = 2m² + 8m − 2 = 20 ⟺ m² + 4m − 11 = 0 ⟺ m = −2 ± √15.\nĐối chiếu m ≥ 1: chỉ nhận m = −2 + √15.\n\n_Công cụ: T-VIETE_\n\n## Hướng 2 — Điều kiện không đối xứng\n\n> Nếu điều kiện chứa bình phương của một nghiệm (ví dụ x₁² + 2x₂ = 5), kỹ thuật\n> **hạ bậc bằng cách thay nghiệm vào phương trình** thường nhanh hơn giải hệ ba\n> phương trình. Xem sổ tay `evaluate_root_expression`, Hướng 2 — kỹ thuật này có mặt\n> ở 4/5 đề phổ thông năm 2026.\n\n**Khi nào dùng:** điều kiện dạng x₁ = 2x₂, x₁ − x₂ = 3, hoặc một nghiệm cho trước.\n\n**Các bước:**\n1. Viết Viète (2 phương trình).\n2. Thêm phương trình từ điều kiện đề.\n3. Giải hệ 3 phương trình tìm x₁, x₂, m.\n4. Đối chiếu điều kiện có nghiệm.\n\n**Khi nào KHÔNG dùng:** khi điều kiện đối xứng — dùng Hướng 1 gọn hơn nhiều.\n\n**Bẫy thường gặp:**\n- Giải hệ ra m nhưng quên kiểm tra Δ ≥ 0 với giá trị m đó.\n- Với điều kiện x₁ = 2x₂, quên rằng vai trò x₁, x₂ có thể hoán đổi — cần xét cả hai trường hợp nếu đề không chỉ rõ.\n- Thay nghiệm cho trước vào phương trình rồi quên tìm nghiệm còn lại khi đề hỏi.\n\n\n**Ví dụ:** Cho x² − 5x + m = 0. Tìm m để x₁ = 4x₂.\nViète: x₁ + x₂ = 5 và x₁x₂ = m. Kết hợp x₁ = 4x₂ được 5x₂ = 5 nên x₂ = 1, x₁ = 4.\nSuy ra m = 4·1 = 4. Kiểm tra Δ = 25 − 16 = 9 > 0, thỏa mãn. Vậy m = 4.\n\n_Công cụ: T-VIETE_\n\n## Hướng 3 — Điều kiện về dấu của nghiệm\n\n**Khi nào dùng:** đề hỏi hai nghiệm cùng dấu, trái dấu, cùng dương, cùng âm.\n\n**Bảng điều kiện:**\n- Trái dấu: P < 0 (KHÔNG cần xét Δ, vì P < 0 đã kéo theo Δ > 0)\n- Cùng dấu: Δ ≥ 0 và P > 0\n- Cùng dương: Δ ≥ 0, P > 0, S > 0\n- Cùng âm: Δ ≥ 0, P > 0, S < 0\n\n**Khi nào KHÔNG dùng:** khi đề hỏi về độ lớn nghiệm (|x₁| > |x₂|) chứ không phải\ndấu — cần cách tiếp cận khác.\n\n**Bẫy thường gặp:**\n- Xét thừa điều kiện Δ ở trường hợp trái dấu.\n- Quên điều kiện a ≠ 0 khi hệ số a chứa tham số m.\n- Nhầm \"hai nghiệm dương\" với \"hai nghiệm không âm\" (nghiệm bằng 0 có được nhận không).\n\n\n**Ví dụ:** Cho x² − 2mx + m − 2 = 0. Tìm m để phương trình có hai nghiệm trái dấu.\nHai nghiệm trái dấu ⟺ P < 0 ⟺ m − 2 < 0 ⟺ m < 2. (Không cần xét Δ vì P < 0 đã kéo theo Δ > 0.)\n\n_Công cụ: T-VIETE_\n\n---\n### Ghi chú cho giáo viên\n- Dạng đại số quan trọng nhất — bổ sung nhiều bài minh họa cho cả ba hướng.\n- Bảng dấu ở Hướng 3 nên được kiểm tra kỹ và bổ sung ví dụ.",
+    "worked_examples": ""
+  },
+  "hints": [
+    "Ý a) Em hãy thay m=1 vào phương trình đã cho rồi thu gọn.",
+    "Ý a) Với phương trình bậc hai nhận được, em tính Δ và áp dụng công thức nghiệm để tìm x_1, x_2.",
+    "Ý b) Em hãy tính biệt thức Δ theo m và đặt điều kiện để phương trình có hai nghiệm phân biệt.",
+    "Ý b) Dùng định lí Viète để biểu diễn x_1+x_2 và x_1x_2 theo m, rồi áp dụng x_1^2+x_2^2=(x_1+x_2)^2-2x_1x_2.",
+    "Ý b) Giải phương trình theo m rồi đối chiếu các giá trị tìm được với điều kiện Δ>0."
+  ],
+  "attempts": 0,
+  "max_attempts": 2,
+  "trace": [
+    {
+      "agent": "parser",
+      "model": "gpt-5.6-luna",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "ms": 0,
+      "note": null
+    },
+    {
+      "agent": "router.llm",
+      "model": "gpt-5.6-luna",
+      "tokens_in": 918,
+      "tokens_out": 229,
+      "ms": 0,
+      "note": null
+    },
+    {
+      "agent": "router",
+      "model": "gpt-5.6-luna",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "ms": 6834,
+      "note": null
+    },
+    {
+      "agent": "solver.llm",
+      "model": "gpt-5.6-luna",
+      "tokens_in": 4627,
+      "tokens_out": 1465,
+      "ms": 0,
+      "note": null
+    },
+    {
+      "agent": "solver",
+      "model": "gpt-5.6-luna",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "ms": 13945,
+      "note": null
+    },
+    {
+      "agent": "pedagogue.llm",
+      "model": "gpt-5.6-luna",
+      "tokens_in": 1052,
+      "tokens_out": 168,
+      "ms": 0,
+      "note": null
+    },
+    {
+      "agent": "pedagogue",
+      "model": "gpt-5.6-luna",
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "ms": 3677,
+      "note": null
+    }
+  ],
+  "created_at": "2026-09-22T09:05:25.850512Z"
+}

@@ -6,7 +6,7 @@ agent đọc và ghi vào ĐÂY, không nhận text thô từ agent trước.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Literal
 
 from math9_curriculum.schema import Mode
@@ -29,6 +29,7 @@ class Step(BaseModel):
     justification: str                          # căn cứ — guardrail đối chiếu trường này
     refs: list[str] = Field(default_factory=list)
     highlight: list[str] = Field(default_factory=list)  # đối tượng cần tô sáng trên hình
+    predicate: dict[str, Any] | None = None     # {kind, args, value?} — Verifier kiểm bằng số
 
 
 class SubProblem(BaseModel):
@@ -98,7 +99,7 @@ class ProblemState(BaseModel):
     attempts: int = 0
     max_attempts: int = 2
     trace: list[TraceEntry] = Field(default_factory=list)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     def confidence(self) -> Confidence:
         v = self.verification

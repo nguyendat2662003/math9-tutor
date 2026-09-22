@@ -1,26 +1,22 @@
-"""Agent Critic.
+"""Agent Critic: chuyển kết quả Verifier thành thông điệp sửa lỗi cho Solver.
 
-Model: model trung bình
-Đầu vào: state + violations
-Đầu ra: danh sách lỗi cần sửa
-
-Chạy song song: không
+Phiên bản này KHÔNG gọi LLM: Verifier đã nói chính xác sai ở đâu (vị từ nào
+sai, từ khóa nào vượt cấp, điểm nào không có trên hình). Diễn đạt lại bằng LLM
+chỉ thêm chi phí mà không thêm thông tin. Nâng cấp lên LLM khi cần phân tích
+lỗi lập luận mà Verifier không bắt được.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from ..state import ProblemState
 from .base import Agent
-
-PROMPT = Path(__file__).resolve().parents[4].parent / "prompts" / "critic.md"
 
 
 class CriticAgent(Agent):
     role = "critic"
 
     def run(self, state: ProblemState) -> ProblemState:
-        raise NotImplementedError(
-            "TODO: nạp prompts/critic.md, gọi self.llm.complete(), ghi kết quả vào state"
-        )
+        from ..graph import retry_prompt
+
+        state.verification.detail["retry_feedback"] = retry_prompt(state)
+        return state
