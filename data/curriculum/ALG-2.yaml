@@ -1,0 +1,41 @@
+id: ALG-2
+name: Phương trình quy về bậc nhất một ẩn; bất đẳng thức; bất phương trình bậc nhất một ẩn
+prerequisites: []
+goal_types: [solve_equation, prove_inequality, find_max_min, word_problem]
+allowed_tools:
+  - id: T-PRODUCT-EQUATION
+    statement: Phương trình tích A·B = 0 khi và chỉ khi A = 0 hoặc B = 0
+    aliases: [phương trình tích, tích bằng 0]
+    modes: [basic, exam10, advanced]
+  - id: T-RATIONAL-EQUATION
+    statement: Phương trình chứa ẩn ở mẫu — đặt điều kiện xác định, quy đồng khử mẫu, đối chiếu điều kiện
+    aliases: [điều kiện xác định, quy đồng khử mẫu, ẩn ở mẫu, ĐKXĐ]
+    modes: [basic, exam10, advanced]
+  - id: T-INEQUALITY-PROPERTIES
+    statement: Tính chất của bất đẳng thức — cộng cùng một số, nhân với số dương hoặc số âm (đổi chiều)
+    aliases: [tính chất bất đẳng thức, đổi chiều bất đẳng thức, liên hệ thứ tự và phép nhân]
+    modes: [basic, exam10, advanced]
+  - id: T-LINEAR-INEQUALITY
+    statement: Giải bất phương trình bậc nhất một ẩn ax + b > 0 (hoặc <, ≥, ≤)
+    aliases: [bất phương trình bậc nhất, tập nghiệm bất phương trình]
+    modes: [basic, exam10, advanced]
+  - id: T-AM-GM-2
+    statement: Bất đẳng thức Cô-si cho hai số không âm a + b ≥ 2√(ab), dấu bằng khi a = b
+    aliases: [Cauchy, Cô si, Cô-si, AM-GM, bất đẳng thức Cauchy]
+    modes: [exam10, advanced]
+  - id: T-SQUARE-NONNEGATIVE
+    statement: Bình phương của mọi số thực đều không âm (A² ≥ 0), dùng biến đổi tương đương để chứng minh bất đẳng thức
+    aliases: [bình phương không âm, biến đổi tương đương, hằng đẳng thức]
+    modes: [basic, exam10, advanced]
+  - id: T-WORD-PROBLEM-EQUATION
+    statement: Giải bài toán bằng cách lập phương trình (chọn ẩn, đặt điều kiện, lập phương trình, giải, đối chiếu)
+    aliases: [lập phương trình, chọn ẩn, đặt điều kiện cho ẩn]
+    modes: [basic, exam10, advanced]
+forbidden_keywords: [đạo hàm, bất đẳng thức bunhiacopxki, bunyakovsky, schwarz, bất đẳng thức jensen]
+notation:
+  or: "hoặc"
+presentation_template: |
+  Điều kiện xác định: {ĐKXĐ}.
+  {biến đổi từng bước, mỗi bước nêu căn cứ}
+  Đối chiếu điều kiện: {nhận/loại nghiệm}.
+  Vậy phương trình có nghiệm {tập nghiệm}.

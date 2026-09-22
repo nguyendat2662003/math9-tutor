@@ -1,0 +1,37 @@
+id: PRO-8
+name: Xác suất của biến cố trong một số mô hình xác suất đơn giản
+prerequisites: []
+goal_types: [compute_probability]
+allowed_tools:
+  - id: T-SAMPLE-SPACE
+    statement: Không gian mẫu là tập hợp tất cả các kết quả có thể xảy ra của phép thử; liệt kê hoặc dùng bảng, sơ đồ cây để đếm số phần tử
+    aliases: [không gian mẫu, phép thử, kết quả có thể, sơ đồ cây, bảng liệt kê, Ω]
+    modes: [basic, exam10, advanced]
+  - id: T-EQUALLY-LIKELY
+    statement: Các kết quả của phép thử là đồng khả năng khi chúng có cùng khả năng xảy ra (xúc xắc cân đối, đồng xu cân đối, chọn ngẫu nhiên)
+    aliases: [đồng khả năng, cân đối và đồng chất, ngẫu nhiên]
+    modes: [basic, exam10, advanced]
+  - id: T-CLASSICAL-PROBABILITY
+    statement: Xác suất của biến cố E trong phép thử có các kết quả đồng khả năng là P(E) = n(E)/n(Ω), với n(E) là số kết quả thuận lợi
+    aliases: [xác suất của biến cố, kết quả thuận lợi, số kết quả thuận lợi, P(E), công thức xác suất]
+    modes: [basic, exam10, advanced]
+  - id: T-TWO-STAGE-EXPERIMENT
+    statement: Phép thử hai giai đoạn (gieo hai xúc xắc, tung hai đồng xu, chọn hai lần) — số kết quả bằng tích số kết quả mỗi giai đoạn, liệt kê bằng bảng hoặc sơ đồ cây
+    aliases: [phép thử hai giai đoạn, gieo hai xúc xắc, bảng kết quả, cặp số]
+    modes: [basic, exam10, advanced]
+  - id: T-PROBABILITY-BOUNDS
+    statement: 0 ≤ P(E) ≤ 1; biến cố chắc chắn có xác suất 1, biến cố không thể có xác suất 0
+    aliases: [biến cố chắc chắn, biến cố không thể]
+    modes: [basic, exam10, advanced]
+  - id: T-COMPLEMENT
+    statement: Xác suất của biến cố đối — P(không E) = 1 − P(E)
+    aliases: [biến cố đối, 1 − P]
+    modes: [exam10, advanced]
+forbidden_keywords: [tổ hợp, chỉnh hợp, hoán vị, "C(n, k)", xác suất có điều kiện, biến cố độc lập, quy tắc nhân xác suất, phân phối]
+notation:
+  probability: "P(E) = \\dfrac{n(E)}{n(\\Omega)}"
+presentation_template: |
+  Không gian mẫu Ω = {liệt kê hoặc mô tả}, n(Ω) = {số phần tử}.
+  Các kết quả là đồng khả năng vì {lý do}.
+  Biến cố E: "{mô tả}". Các kết quả thuận lợi cho E là {liệt kê}, n(E) = {số}.
+  Vậy P(E) = {n(E)}/{n(Ω)} = {kết quả}.

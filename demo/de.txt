@@ -1,0 +1,4 @@
+Cho đường tròn (O) và điểm A nằm ngoài đường tròn. Kẻ hai tiếp tuyến AB, AC với đường tròn (B, C là các tiếp điểm). Gọi H là giao điểm của OA và BC. Kẻ đường kính BD của (O). Đường thẳng AD cắt (O) tại điểm thứ hai E.
+a) Chứng minh tứ giác ABOC nội tiếp.
+b) Chứng minh OA vuông góc với BC tại H.
+c) Chứng minh AB² = AE·AD.

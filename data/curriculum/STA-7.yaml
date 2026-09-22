@@ -1,0 +1,33 @@
+id: STA-7
+name: Tần số và tần số tương đối
+prerequisites: []
+goal_types: [analyze_statistics]
+allowed_tools:
+  - id: T-FREQUENCY-TABLE
+    statement: Bảng tần số — tần số của một giá trị là số lần xuất hiện của giá trị đó trong mẫu dữ liệu; tổng các tần số bằng cỡ mẫu N
+    aliases: [bảng tần số, tần số, cỡ mẫu, tổng tần số]
+    modes: [basic, exam10, advanced]
+  - id: T-RELATIVE-FREQUENCY
+    statement: Tần số tương đối f = (n/N)·100% với n là tần số và N là cỡ mẫu; tổng các tần số tương đối bằng 100%
+    aliases: [tần số tương đối, phần trăm, bảng tần số tương đối]
+    modes: [basic, exam10, advanced]
+  - id: T-GROUPED-FREQUENCY
+    statement: Bảng tần số ghép nhóm và tần số tương đối ghép nhóm — mỗi nhóm là một nửa khoảng [a; b), tần số nhóm là số giá trị thuộc nhóm
+    aliases: [ghép nhóm, bảng tần số ghép nhóm, nửa khoảng, nhóm số liệu]
+    modes: [basic, exam10, advanced]
+  - id: T-STAT-CHARTS
+    statement: Biểu diễn dữ liệu bằng biểu đồ tần số (cột, đoạn thẳng), biểu đồ tần số tương đối (cột, hình quạt tròn) và biểu đồ tần số tương đối ghép nhóm (cột, đoạn thẳng)
+    aliases: [biểu đồ tần số, biểu đồ cột, biểu đồ hình quạt tròn, biểu đồ đoạn thẳng, góc ở tâm của hình quạt]
+    modes: [basic, exam10, advanced]
+  - id: T-DATA-READING
+    statement: Đọc và phân tích số liệu từ bảng, biểu đồ — xác định giá trị có tần số lớn nhất, nhỏ nhất, so sánh tỉ lệ giữa các nhóm
+    aliases: [đọc biểu đồ, phân tích số liệu, nhận xét]
+    modes: [basic, exam10, advanced]
+forbidden_keywords: [phương sai, độ lệch chuẩn, trung vị, tứ phân vị, mốt, số trung bình cộng]
+notation:
+  relative_frequency: "f_i = \\dfrac{n_i}{N} \\cdot 100\\%"
+presentation_template: |
+  Cỡ mẫu N = {tổng tần số}.
+  Tần số tương đối của {giá trị/nhóm} là {n}/{N} · 100% = {kết quả}%.
+  {lập bảng tần số / tần số tương đối}
+  Nhận xét: {kết luận theo yêu cầu đề}.

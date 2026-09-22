@@ -1,0 +1,43 @@
+id: GEO-10
+name: Một số hình khối trong thực tiễn — hình trụ, hình nón, hình cầu
+prerequisites: [GEO-5]
+goal_types: [compute_area, compute_length, find_max_min, word_problem]
+allowed_tools:
+  - id: T-CYLINDER
+    statement: Hình trụ bán kính đáy r, chiều cao h — diện tích xung quanh 2πrh, diện tích toàn phần 2πrh + 2πr², thể tích πr²h
+    aliases: [hình trụ, diện tích xung quanh hình trụ, thể tích hình trụ, 2πrh, πr²h]
+    modes: [basic, exam10, advanced]
+  - id: T-CONE
+    statement: Hình nón bán kính đáy r, chiều cao h, đường sinh l = √(r² + h²) — diện tích xung quanh πrl, diện tích toàn phần πrl + πr², thể tích (1/3)πr²h
+    aliases: [hình nón, đường sinh, diện tích xung quanh hình nón, thể tích hình nón, πrl, 1/3 πr²h]
+    modes: [basic, exam10, advanced]
+  - id: T-SPHERE
+    statement: Hình cầu bán kính R — diện tích mặt cầu 4πR², thể tích (4/3)πR³
+    aliases: [hình cầu, mặt cầu, diện tích mặt cầu, thể tích hình cầu, 4πR², 4/3 πR³]
+    modes: [basic, exam10, advanced]
+  - id: T-SOLID-COMPOSITE
+    statement: Tính diện tích, thể tích hình khối ghép bằng cách tách thành các khối cơ bản rồi cộng hoặc trừ
+    aliases: [hình ghép, tách thành, khối cơ bản, phần còn lại]
+    modes: [basic, exam10, advanced]
+  - id: T-PYTHAGORE
+    statement: Định lý Pythagore — dùng để tính đường sinh, chiều cao hoặc bán kính khi biết hai yếu tố còn lại
+    aliases: [Pythagore, Py-ta-go, Pitago]
+    modes: [basic, exam10, advanced]
+  - id: T-ARC-LENGTH-SECTOR
+    statement: Độ dài cung, diện tích hình quạt, chu vi và diện tích hình tròn — dùng cho mặt đáy và khai triển mặt xung quanh
+    aliases: [hình quạt, chu vi đường tròn, diện tích hình tròn, khai triển]
+    modes: [basic, exam10, advanced]
+  - id: T-UNIT-CONVERSION
+    statement: Đổi đơn vị đo độ dài, diện tích, thể tích (1 m³ = 1000 dm³ = 1000 lít, 1 dm³ = 1 lít, 1 cm³ = 1 ml) và làm tròn theo yêu cầu
+    aliases: [đổi đơn vị, lít, làm tròn, xấp xỉ, "lấy π ≈ 3,14", "π ≈ 3,14"]
+    modes: [basic, exam10, advanced]
+forbidden_keywords: [tích phân, hình chóp cụt, hình nón cụt, đa diện, khối lăng trụ]
+notation:
+  pi: "\\pi"
+  volume: "V"
+  lateral_area: "S_{xq}"
+  total_area: "S_{tp}"
+presentation_template: |
+  {Hình khối} có bán kính đáy r = {giá trị}, chiều cao h = {giá trị}.
+  {Đại lượng cần tính} = {công thức} = {thay số} ≈ {kết quả} ({đơn vị}).
+  Vậy {kết luận theo ngữ cảnh thực tế, làm tròn theo yêu cầu}.

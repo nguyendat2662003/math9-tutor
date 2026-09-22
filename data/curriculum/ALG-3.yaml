@@ -1,0 +1,45 @@
+id: ALG-3
+name: Căn bậc hai và căn bậc ba
+prerequisites: [ALG-2]
+goal_types: [simplify_expression, evaluate_root_expression, solve_equation, find_parameter, find_max_min]
+allowed_tools:
+  - id: T-SQRT-DEFINITION
+    statement: Căn bậc hai số học của số a không âm là số x không âm sao cho x² = a; điều kiện có nghĩa của √A là A ≥ 0
+    aliases: [căn bậc hai số học, điều kiện có nghĩa, điều kiện xác định của căn, A ≥ 0]
+    modes: [basic, exam10, advanced]
+  - id: T-SQRT-SQUARE
+    statement: Hằng đẳng thức √(A²) = |A|
+    aliases: [căn của bình phương, giá trị tuyệt đối, √A² = |A|]
+    modes: [basic, exam10, advanced]
+  - id: T-RADICAL-OPERATIONS
+    statement: Quy tắc khai phương một tích, một thương; nhân chia các căn bậc hai; đưa thừa số ra ngoài và vào trong dấu căn
+    aliases: [khai phương một tích, khai phương một thương, đưa thừa số ra ngoài dấu căn, đưa thừa số vào trong dấu căn, nhân các căn bậc hai]
+    modes: [basic, exam10, advanced]
+  - id: T-RATIONALIZE
+    statement: Khử mẫu của biểu thức lấy căn và trục căn thức ở mẫu (nhân với biểu thức liên hợp)
+    aliases: [trục căn thức, khử mẫu, biểu thức liên hợp, nhân liên hợp]
+    modes: [basic, exam10, advanced]
+  - id: T-RADICAL-IDENTITIES
+    statement: Hằng đẳng thức với căn thức — a − b = (√a − √b)(√a + √b), a ± 2√(ab) + b = (√a ± √b)²
+    aliases: [hằng đẳng thức căn, hiệu hai bình phương, bình phương một tổng, bình phương một hiệu]
+    modes: [basic, exam10, advanced]
+  - id: T-CBRT
+    statement: Căn bậc ba của số a là số x sao cho x³ = a; căn bậc ba xác định với mọi số thực
+    aliases: [căn bậc ba]
+    modes: [basic, exam10, advanced]
+  - id: T-RADICAL-EQUATION
+    statement: Giải phương trình chứa căn bằng cách đặt điều kiện, bình phương hai vế hoặc đặt ẩn phụ rồi thử lại
+    aliases: [bình phương hai vế, đặt ẩn phụ, thử lại nghiệm, nghiệm ngoại lai]
+    modes: [basic, exam10, advanced]
+  - id: T-INTEGER-VALUE
+    statement: Tìm x nguyên để biểu thức nhận giá trị nguyên bằng cách tách phần nguyên và xét ước
+    aliases: [giá trị nguyên, ước của, tách phần nguyên]
+    modes: [exam10, advanced]
+forbidden_keywords: [đạo hàm, logarit, số phức]
+notation:
+  sqrt: "\\sqrt{a}"
+  cbrt: "\\sqrt[3]{a}"
+presentation_template: |
+  Điều kiện: {x ≥ 0, x ≠ ...}.
+  {rút gọn từng bước, nêu căn cứ (khai phương một tích / trục căn thức / hằng đẳng thức)}
+  Vậy {biểu thức} = {kết quả} với {điều kiện}.

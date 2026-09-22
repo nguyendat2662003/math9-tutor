@@ -1,0 +1,50 @@
+id: GEO-4
+name: Hệ thức lượng trong tam giác vuông
+prerequisites: []
+goal_types: [compute_length, compute_angle, compute_area, prove_equal_length, prove_similar, find_max_min]
+allowed_tools:
+  - id: T-PYTHAGORE
+    statement: Định lý Pythagore — trong tam giác vuông, bình phương cạnh huyền bằng tổng bình phương hai cạnh góc vuông
+    aliases: [Pythagore, Py-ta-go, Pitago, định lý Pythagoras]
+    modes: [basic, exam10, advanced]
+  - id: T-PYTHAGORE-CONVERSE
+    statement: Định lý Pythagore đảo — tam giác có bình phương một cạnh bằng tổng bình phương hai cạnh kia là tam giác vuông
+    aliases: [Pythagore đảo, Py-ta-go đảo, Pitago đảo]
+    modes: [basic, exam10, advanced]
+  - id: T-TRIG-RATIO
+    statement: Tỉ số lượng giác của góc nhọn — sin, cos, tan, cot — và tỉ số lượng giác của hai góc phụ nhau
+    aliases: [tỉ số lượng giác, sin, cos, tan, cot, hai góc phụ nhau]
+    modes: [basic, exam10, advanced]
+  - id: T-RIGHT-TRIANGLE-RELATIONS
+    statement: Hệ thức giữa cạnh và góc trong tam giác vuông — cạnh góc vuông bằng cạnh huyền nhân sin góc đối hoặc nhân cos góc kề
+    aliases: [hệ thức giữa cạnh và góc, cạnh huyền nhân sin, cạnh góc vuông bằng]
+    modes: [basic, exam10, advanced]
+  - id: T-ALTITUDE-RELATIONS
+    statement: Hệ thức lượng với đường cao trong tam giác vuông — b² = ab', c² = ac', h² = b'c', ah = bc, 1/h² = 1/b² + 1/c²
+    aliases: [hệ thức lượng, đường cao trong tam giác vuông, h² = b'c', ah = bc]
+    modes: [exam10, advanced]
+  - id: T-SIMILAR-TRIANGLE
+    statement: Hai tam giác đồng dạng có các góc tương ứng bằng nhau và các cạnh tương ứng tỉ lệ
+    aliases: [tam giác đồng dạng, đồng dạng, cạnh tương ứng tỉ lệ]
+    modes: [basic, exam10, advanced]
+  - id: T-SIMILAR-AA
+    statement: Hai tam giác có hai cặp góc bằng nhau thì đồng dạng (trường hợp góc-góc)
+    aliases: [góc-góc, g.g, g-g, trường hợp đồng dạng góc góc]
+    modes: [basic, exam10, advanced]
+  - id: T-TRIANGLE-AREA
+    statement: Diện tích tam giác bằng nửa tích một cạnh với đường cao tương ứng
+    aliases: [diện tích tam giác, nửa tích cạnh và đường cao]
+    modes: [basic, exam10, advanced]
+  - id: T-SOLVE-RIGHT-TRIANGLE
+    statement: Giải tam giác vuông — tính các cạnh và góc còn lại khi biết hai yếu tố (trong đó có ít nhất một cạnh)
+    aliases: [giải tam giác vuông]
+    modes: [basic, exam10, advanced]
+forbidden_keywords: [định lý sin, định lý cosin, vectơ, tọa độ hóa, công thức heron]
+notation:
+  angle: "\\widehat{ABC}"
+  right_triangle: "\\triangle ABC vuông tại A"
+presentation_template: |
+  Xét tam giác {TÊN} vuông tại {ĐỈNH}, ta có:
+    {hệ thức} (theo {căn cứ})
+  Suy ra {kết quả}.
+  Vậy {kết luận, làm tròn theo yêu cầu đề}.

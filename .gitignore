@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+node_modules/
+.next/
+.env
+evals/reports/*.json
+demo/out*/
+*.egg-info/
+demo/*.png

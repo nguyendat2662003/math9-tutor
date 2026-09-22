@@ -1,0 +1,70 @@
+id: GEO-5
+name: Đường tròn — cung, dây, độ dài cung, vị trí tương đối, tiếp tuyến
+prerequisites: [GEO-4]
+goal_types: [prove_tangent, prove_equal_length, prove_perpendicular, prove_midpoint, prove_parallel, compute_length, compute_angle, compute_area, find_max_min, prove_concyclic]
+allowed_tools:
+  - id: T-DISTANCE-EQ-RADIUS
+    statement: Điểm nằm trên đường tròn khi và chỉ khi khoảng cách từ điểm đó đến tâm bằng bán kính
+    aliases: [cách đều tâm, bằng bán kính, thuộc đường tròn]
+    modes: [basic, exam10, advanced]
+  - id: T-CIRCLE-SYMMETRY
+    statement: Đường tròn có tâm đối xứng là tâm và mọi đường kính là trục đối xứng
+    aliases: [tâm đối xứng, trục đối xứng của đường tròn]
+    modes: [basic, exam10, advanced]
+  - id: T-DIAMETER-CHORD
+    statement: Đường kính vuông góc với một dây thì đi qua trung điểm của dây; đường kính đi qua trung điểm của dây không qua tâm thì vuông góc với dây
+    aliases: [đường kính vuông góc với dây, đường kính đi qua trung điểm, quan hệ đường kính và dây]
+    modes: [basic, exam10, advanced]
+  - id: T-DIAMETER-LONGEST
+    statement: Trong một đường tròn, đường kính là dây lớn nhất
+    aliases: [dây lớn nhất, đường kính là dây lớn nhất]
+    modes: [basic, exam10, advanced]
+  - id: T-CENTRAL-ANGLE
+    statement: Số đo cung nhỏ bằng số đo góc ở tâm chắn cung đó; hai dây bằng nhau căng hai cung bằng nhau
+    aliases: [góc ở tâm, số đo cung, cung bị chắn, dây bằng nhau]
+    modes: [basic, exam10, advanced]
+  - id: T-ARC-LENGTH-SECTOR
+    statement: Độ dài cung n° là πRn/180; diện tích hình quạt tròn là πR²n/360; chu vi đường tròn 2πR; diện tích hình tròn πR²
+    aliases: [độ dài cung, hình quạt, diện tích hình quạt, chu vi đường tròn, diện tích hình tròn, hình vành khuyên]
+    modes: [basic, exam10, advanced]
+  - id: T-LINE-CIRCLE-POSITION
+    statement: Vị trí tương đối của đường thẳng và đường tròn theo khoảng cách d từ tâm đến đường thẳng so với bán kính R (d < R cắt, d = R tiếp xúc, d > R không giao)
+    aliases: [vị trí tương đối, khoảng cách từ tâm đến đường thẳng, d = R]
+    modes: [basic, exam10, advanced]
+  - id: T-TWO-CIRCLES-POSITION
+    statement: Vị trí tương đối của hai đường tròn theo khoảng cách hai tâm so với tổng và hiệu hai bán kính
+    aliases: [hai đường tròn cắt nhau, tiếp xúc ngoài, tiếp xúc trong, đường nối tâm]
+    modes: [basic, exam10, advanced]
+  - id: T-TANGENT-PERP
+    statement: Tiếp tuyến vuông góc với bán kính tại tiếp điểm; ngược lại đường thẳng qua một điểm của đường tròn và vuông góc với bán kính tại điểm đó là tiếp tuyến
+    aliases: [tiếp tuyến vuông góc với bán kính, dấu hiệu nhận biết tiếp tuyến, vuông góc với bán kính tại tiếp điểm]
+    modes: [basic, exam10, advanced]
+  - id: T-TWO-TANGENTS
+    statement: Hai tiếp tuyến cắt nhau tại một điểm — điểm đó cách đều hai tiếp điểm, tia kẻ từ điểm đó qua tâm là phân giác của góc tạo bởi hai tiếp tuyến, tia kẻ từ tâm là phân giác của góc tạo bởi hai bán kính
+    aliases: [hai tiếp tuyến cắt nhau, tính chất hai tiếp tuyến, cách đều hai tiếp điểm]
+    modes: [basic, exam10, advanced]
+  - id: T-PERP-BISECTOR
+    statement: Điểm cách đều hai đầu đoạn thẳng nằm trên đường trung trực của đoạn thẳng đó; tâm đường tròn nằm trên đường trung trực của mọi dây
+    aliases: [đường trung trực, cách đều hai đầu đoạn thẳng]
+    modes: [basic, exam10, advanced]
+  - id: T-CONGRUENT-TRIANGLE
+    statement: Hai tam giác bằng nhau theo các trường hợp cạnh-cạnh-cạnh, cạnh-góc-cạnh, góc-cạnh-góc, cạnh huyền-góc nhọn, cạnh huyền-cạnh góc vuông
+    aliases: [tam giác bằng nhau, c.c.c, c.g.c, g.c.g, cạnh huyền góc nhọn, cạnh huyền cạnh góc vuông]
+    modes: [basic, exam10, advanced]
+  - id: T-ISOSCELES
+    statement: Tam giác cân có hai góc ở đáy bằng nhau; đường trung tuyến ứng với cạnh đáy đồng thời là đường cao và phân giác
+    aliases: [tam giác cân, góc ở đáy, tam giác đều]
+    modes: [basic, exam10, advanced]
+  - id: T-POWER-OF-POINT
+    statement: Phương tích của một điểm đối với đường tròn — MA·MB không đổi với mọi cát tuyến qua M
+    aliases: [phương tích, cát tuyến]
+    modes: [advanced]
+forbidden_keywords: [vectơ, tọa độ hóa, phương tích, trục đẳng phương, định lý sin, định lý cosin]
+notation:
+  circle: "(O; R)"
+  arc: "\\overparen{AB}"
+  angle: "\\widehat{ABC}"
+presentation_template: |
+  Vì {tiếp tuyến/dây/...} nên {hệ thức góc hoặc độ dài} (theo {căn cứ}).
+  Xét tam giác {TÊN}, ta có: {luận cứ} (theo {căn cứ}).
+  Suy ra {kết luận}.

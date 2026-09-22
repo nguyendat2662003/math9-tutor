@@ -1,0 +1,71 @@
+id: ALG-6
+name: Hàm số y = ax² (a ≠ 0); phương trình bậc hai một ẩn; định lí Viète
+prerequisites: [ALG-2, ALG-3]
+goal_types: [solve_equation, find_parameter, analyze_function, evaluate_root_expression, prove_inequality, find_max_min, word_problem]
+allowed_tools:
+  - id: T-QUADRATIC-FUNCTION
+    statement: Hàm số y = ax² (a ≠ 0) — đồ thị là parabol đỉnh O, nhận trục Oy làm trục đối xứng, nằm phía trên trục hoành nếu a > 0 và phía dưới nếu a < 0
+    aliases: [parabol, đồ thị hàm số y = ax², đỉnh O, trục đối xứng Oy, đồng biến, nghịch biến]
+    modes: [basic, exam10, advanced]
+  - id: T-LINE-PARABOLA
+    statement: Hoành độ giao điểm của đường thẳng và parabol là nghiệm của phương trình hoành độ giao điểm
+    aliases: [phương trình hoành độ giao điểm, tương giao, giao điểm của đường thẳng và parabol, cắt parabol tại hai điểm phân biệt]
+    modes: [exam10, advanced]
+  - id: T-QUADRATIC-FORMULA
+    statement: Công thức nghiệm của phương trình bậc hai ax² + bx + c = 0 theo biệt thức Δ = b² − 4ac
+    aliases: [công thức nghiệm, delta, biệt thức, Δ, Δ > 0, Δ = 0, Δ < 0]
+    modes: [basic, exam10, advanced]
+  - id: T-DELTA-PRIME
+    statement: Công thức nghiệm thu gọn với Δ' = b'² − ac khi b = 2b'
+    aliases: [delta phẩy, Δ', công thức nghiệm thu gọn]
+    modes: [basic, exam10, advanced]
+  - id: T-QUICK-ROOTS
+    statement: Nhẩm nghiệm — nếu a + b + c = 0 thì x₁ = 1, x₂ = c/a; nếu a − b + c = 0 thì x₁ = −1, x₂ = −c/a
+    aliases: [nhẩm nghiệm, a + b + c = 0, a − b + c = 0]
+    modes: [basic, exam10, advanced]
+  - id: T-VIETE
+    statement: Định lí Viète — nếu x₁, x₂ là hai nghiệm của ax² + bx + c = 0 thì x₁ + x₂ = −b/a và x₁·x₂ = c/a
+    aliases: [Viète, Vi-ét, Vi-et, Viet, hệ thức Viète, tổng và tích hai nghiệm, tổng tích hai nghiệm]
+    modes: [basic, exam10, advanced]
+  - id: T-VIETE-CONVERSE
+    statement: Hai số có tổng S và tích P (S² ≥ 4P) là nghiệm của phương trình x² − Sx + P = 0
+    aliases: [Viète đảo, tìm hai số biết tổng và tích]
+    modes: [basic, exam10, advanced]
+  - id: T-FACTORING
+    statement: Phân tích tam thức bậc hai thành nhân tử — ax² + bx + c = a(x − x₁)(x − x₂)
+    aliases: [phân tích thành nhân tử, tam thức bậc hai]
+    modes: [basic, exam10, advanced]
+  - id: T-ROOT-SIGN
+    statement: Điều kiện về dấu của nghiệm — hai nghiệm trái dấu khi P < 0; hai nghiệm cùng dấu khi Δ ≥ 0 và P > 0; cùng dương khi thêm S > 0; cùng âm khi thêm S < 0
+    aliases: [hai nghiệm trái dấu, hai nghiệm cùng dấu, hai nghiệm dương, hai nghiệm âm, dấu của nghiệm]
+    modes: [exam10, advanced]
+  - id: T-SYMMETRIC-EXPRESSION
+    statement: Biến đổi biểu thức đối xứng của hai nghiệm theo tổng và tích — x₁² + x₂² = S² − 2P, |x₁ − x₂|² = S² − 4P, x₁³ + x₂³ = S³ − 3SP
+    aliases: [biểu thức đối xứng, x₁² + x₂², biểu thức nghiệm, S² − 2P, S² − 4P]
+    modes: [exam10, advanced]
+  - id: T-ROOT-SUBSTITUTION
+    statement: Hạ bậc biểu thức chứa nghiệm bằng cách thay x₁² = −bx₁/a − c/a (vì x₁ là nghiệm của phương trình)
+    aliases: [hạ bậc, thay x₁ là nghiệm, vì x₁ là nghiệm nên]
+    modes: [exam10, advanced]
+  - id: T-BIQUADRATIC
+    statement: Phương trình trùng phương ax⁴ + bx² + c = 0 giải bằng cách đặt t = x² với t ≥ 0
+    aliases: [trùng phương, đặt t = x²]
+    modes: [exam10, advanced]
+  - id: T-AM-GM-2
+    statement: Bất đẳng thức Cô-si cho hai số không âm a + b ≥ 2√(ab), dấu bằng khi a = b
+    aliases: [Cauchy, Cô si, Cô-si, AM-GM]
+    modes: [exam10, advanced]
+  - id: T-WORD-PROBLEM-QUADRATIC
+    statement: Giải bài toán bằng cách lập phương trình bậc hai (chọn ẩn, đặt điều kiện, lập phương trình, giải, đối chiếu)
+    aliases: [lập phương trình, chọn ẩn, đặt điều kiện cho ẩn]
+    modes: [basic, exam10, advanced]
+forbidden_keywords: [đạo hàm, số phức, bảng biến thiên, đỉnh parabol -b/2a, tọa độ đỉnh]
+notation:
+  delta: "\\Delta"
+  roots: "x_1, x_2"
+presentation_template: |
+  Phương trình {PT} có Δ = {biểu thức} = {giá trị}.
+  Vì Δ {so sánh} 0 nên phương trình {kết luận về nghiệm} với mọi m (hoặc: khi {điều kiện}).
+  Theo định lí Viète: x₁ + x₂ = {S}; x₁·x₂ = {P}.
+  {biến đổi biểu thức theo S, P}
+  Vậy {kết luận}.

@@ -1,0 +1,164 @@
+id: GEO-9
+name: Góc nội tiếp; đường tròn ngoại tiếp và nội tiếp; tứ giác nội tiếp; đa giác đều
+prerequisites: [GEO-4, GEO-5]
+goal_types: [prove_concyclic, prove_equal_angle, prove_equal_length, prove_similar, prove_perpendicular, prove_parallel, prove_collinear, prove_concurrent, prove_midpoint, prove_tangent, find_fixed_point, find_locus, find_max_min, compute_angle, compute_length, compute_area]
+allowed_tools:
+  - id: T-INSCRIBED-ANGLE
+    statement: Góc nội tiếp bằng nửa số đo cung bị chắn và bằng nửa góc ở tâm cùng chắn một cung
+    aliases: [góc nội tiếp, nửa góc ở tâm, cùng chắn một cung, cùng chắn cung]
+    modes: [basic, exam10, advanced]
+  - id: T-INSCRIBED-EQUAL
+    statement: Các góc nội tiếp cùng chắn một cung hoặc chắn các cung bằng nhau thì bằng nhau
+    aliases: [góc nội tiếp cùng chắn, hai góc nội tiếp bằng nhau, chắn hai cung bằng nhau]
+    modes: [basic, exam10, advanced]
+  - id: T-SEMICIRCLE
+    statement: Góc nội tiếp chắn nửa đường tròn là góc vuông
+    aliases: [chắn nửa đường tròn, góc vuông nội tiếp, đường kính nhìn dưới góc vuông]
+    modes: [basic, exam10, advanced]
+  - id: T-TANGENT-CHORD-ANGLE
+    statement: Góc tạo bởi tia tiếp tuyến và dây cung bằng nửa số đo cung bị chắn, bằng góc nội tiếp cùng chắn cung đó
+    aliases: [góc tạo bởi tia tiếp tuyến và dây, góc tiếp tuyến dây cung]
+    # KNTT 9 không có bài riêng cho định lý này — chờ giáo viên xác nhận (xem _BAN-DO-CHUONG-TRINH.md).
+    # Tạm chỉ cho phép ở advanced để Solver không dùng ở basic/exam10.
+    modes: [advanced]
+  - id: T-CIRCUMCIRCLE
+    statement: Đường tròn ngoại tiếp tam giác có tâm là giao ba đường trung trực; tam giác vuông có tâm đường tròn ngoại tiếp là trung điểm cạnh huyền, bán kính bằng nửa cạnh huyền; tam giác đều cạnh a có R = a√3/3
+    aliases: [đường tròn ngoại tiếp, tâm đường tròn ngoại tiếp, giao ba đường trung trực, trung điểm cạnh huyền]
+    modes: [basic, exam10, advanced]
+  - id: T-INCIRCLE
+    statement: Đường tròn nội tiếp tam giác có tâm là giao ba đường phân giác, bán kính bằng khoảng cách từ tâm đến một cạnh; tam giác đều cạnh a có r = a√3/6
+    aliases: [đường tròn nội tiếp, tâm đường tròn nội tiếp, giao ba đường phân giác]
+    modes: [basic, exam10, advanced]
+  - id: T-TRIANGLE-CENTERS
+    statement: Các điểm đặc biệt của tam giác — trọng tâm (giao ba trung tuyến, chia trung tuyến theo tỉ số 2:1), trực tâm (giao ba đường cao), tâm đường tròn ngoại tiếp, tâm đường tròn nội tiếp
+    aliases: [trọng tâm, trực tâm, giao ba đường trung tuyến, tỉ số 2:1]
+    modes: [basic, exam10, advanced]
+  - id: T-ORTHOCENTER
+    statement: Trực tâm là giao điểm ba đường cao; trong tam giác, đường thẳng qua một đỉnh và trực tâm vuông góc với cạnh đối diện
+    aliases: [trực tâm, ba đường cao đồng quy, đường cao thứ ba]
+    modes: [basic, exam10, advanced]
+  - id: T-CYC-DEFINITION
+    statement: Tứ giác nội tiếp là tứ giác có bốn đỉnh cùng nằm trên một đường tròn
+    aliases: [tứ giác nội tiếp, bốn đỉnh cùng thuộc một đường tròn, đồng viên]
+    modes: [basic, exam10, advanced]
+  - id: T-CYC-OPPOSITE-SUM
+    statement: Trong tứ giác nội tiếp, tổng hai góc đối bằng 180 độ
+    aliases: [tổng hai góc đối, góc đối bù nhau, hai góc đối bù nhau]
+    modes: [basic, exam10, advanced]
+  - id: T-CYC-CONVERSE-SUM
+    statement: Tứ giác có tổng hai góc đối bằng 180 độ thì nội tiếp được đường tròn
+    aliases: [tổng hai góc đối bằng 180, dấu hiệu nhận biết tứ giác nội tiếp]
+    modes: [basic, exam10, advanced]
+  - id: T-CYC-SAME-SIDE
+    statement: Tứ giác có hai đỉnh kề nhau cùng nhìn cạnh chứa hai đỉnh còn lại dưới hai góc bằng nhau thì nội tiếp
+    aliases: [cùng nhìn một cạnh, cùng nhìn đoạn, cùng nhìn cạnh dưới góc bằng nhau, hai góc vuông cùng nhìn]
+    modes: [basic, exam10, advanced]
+  - id: T-CYC-EXTERIOR
+    statement: Trong tứ giác nội tiếp, góc ngoài tại một đỉnh bằng góc trong của đỉnh đối diện; ngược lại tứ giác có tính chất này thì nội tiếp
+    aliases: [góc ngoài bằng góc trong đối diện, góc ngoài tại đỉnh]
+    modes: [basic, exam10, advanced]
+  - id: T-CYC-EQUIDISTANT
+    statement: Bốn điểm cách đều một điểm thì cùng thuộc một đường tròn tâm là điểm đó
+    aliases: [cách đều một điểm, bốn điểm cách đều]
+    modes: [basic, exam10, advanced]
+  - id: T-CYC-RECT-SQUARE
+    statement: Hình chữ nhật và hình vuông nội tiếp đường tròn có tâm là giao hai đường chéo, bán kính bằng nửa đường chéo
+    aliases: [hình chữ nhật nội tiếp, hình vuông nội tiếp, nửa đường chéo]
+    modes: [basic, exam10, advanced]
+  - id: T-REGULAR-POLYGON
+    statement: Đa giác đều có các cạnh bằng nhau và các góc bằng nhau; nội tiếp được một đường tròn; góc ở tâm ứng với mỗi cạnh bằng 360°/n; phép quay tâm O góc 360°/n biến đa giác đều thành chính nó
+    aliases: [đa giác đều, lục giác đều, ngũ giác đều, 360/n, phép quay]
+    modes: [basic, exam10, advanced]
+  - id: T-SIMILAR-TRIANGLE
+    statement: Hai tam giác đồng dạng có các góc tương ứng bằng nhau và các cạnh tương ứng tỉ lệ
+    aliases: [tam giác đồng dạng, đồng dạng, cạnh tương ứng tỉ lệ, tỉ số đồng dạng]
+    modes: [basic, exam10, advanced]
+  - id: T-SIMILAR-AA
+    statement: Hai tam giác có hai cặp góc bằng nhau thì đồng dạng (trường hợp góc-góc)
+    aliases: [góc-góc, g.g, g-g, trường hợp đồng dạng góc góc]
+    modes: [basic, exam10, advanced]
+  - id: T-SIMILAR-PRODUCT
+    statement: Từ hai tam giác đồng dạng suy ra tỉ lệ thức, từ đó suy ra hệ thức tích các đoạn thẳng (ví dụ AB² = AH·AO)
+    aliases: [tỉ lệ thức, hệ thức tích, tích các đoạn thẳng, suy ra tỉ số]
+    modes: [basic, exam10, advanced]
+  - id: T-CONGRUENT-TRIANGLE
+    statement: Hai tam giác bằng nhau theo các trường hợp cạnh-cạnh-cạnh, cạnh-góc-cạnh, góc-cạnh-góc, cạnh huyền-góc nhọn, cạnh huyền-cạnh góc vuông
+    aliases: [tam giác bằng nhau, c.c.c, c.g.c, g.c.g, cạnh huyền góc nhọn]
+    modes: [basic, exam10, advanced]
+  - id: T-PARALLEL-ANGLES
+    statement: Hai đường thẳng song song khi có cặp góc so le trong hoặc đồng vị bằng nhau, hoặc cùng vuông góc với một đường thẳng thứ ba
+    aliases: [so le trong, đồng vị, cùng vuông góc với, song song]
+    modes: [basic, exam10, advanced]
+  - id: T-THALES
+    statement: Định lý Thalès và hệ quả — đường thẳng song song với một cạnh của tam giác định ra trên hai cạnh còn lại các đoạn thẳng tương ứng tỉ lệ; đường trung bình của tam giác song song và bằng nửa cạnh thứ ba
+    aliases: [Thalès, Ta-lét, Talet, đường trung bình, đoạn thẳng tỉ lệ]
+    modes: [basic, exam10, advanced]
+  - id: T-ANGLE-BISECTOR-RATIO
+    statement: Tính chất đường phân giác trong tam giác — chia cạnh đối diện thành hai đoạn tỉ lệ với hai cạnh kề
+    aliases: [tính chất đường phân giác, phân giác chia cạnh đối diện]
+    modes: [exam10, advanced]
+  - id: T-COLLINEAR-ANGLE
+    statement: Ba điểm thẳng hàng khi góc tạo bởi chúng bằng 180 độ, hoặc hai đường thẳng qua một điểm chung cùng song song (hoặc cùng vuông góc) với một đường thẳng thứ ba
+    aliases: [thẳng hàng, góc bẹt, tiên đề Euclid, cùng song song với, cùng vuông góc với]
+    modes: [basic, exam10, advanced]
+  - id: T-FIXED-POINT-METHOD
+    statement: Chứng minh đường thẳng đi qua điểm cố định bằng cách dự đoán điểm từ vị trí đặc biệt rồi chứng minh bằng quan hệ không đổi (thẳng hàng, thuộc đường tròn cố định, trung điểm cố định)
+    aliases: [điểm cố định, đường tròn cố định, không đổi, vị trí đặc biệt]
+    modes: [exam10, advanced]
+  - id: T-LOCUS
+    statement: Quỹ tích điểm — chứng minh phần thuận và phần đảo, giới hạn quỹ tích; cung chứa góc
+    aliases: [quỹ tích, tập hợp điểm, cung chứa góc, phần thuận, phần đảo]
+    # KNTT 9 không có bài quỹ tích — tạm để advanced, chờ giáo viên xác nhận.
+    modes: [advanced]
+  - id: T-DISTANCE-EQ-RADIUS
+    statement: Điểm nằm trên đường tròn khi và chỉ khi khoảng cách từ điểm đó đến tâm bằng bán kính
+    aliases: [cách đều tâm, bằng bán kính, thuộc đường tròn]
+    modes: [basic, exam10, advanced]
+  - id: T-TANGENT-PERP
+    statement: Tiếp tuyến vuông góc với bán kính tại tiếp điểm; ngược lại đường thẳng qua một điểm của đường tròn và vuông góc với bán kính tại điểm đó là tiếp tuyến
+    aliases: [tiếp tuyến vuông góc với bán kính, dấu hiệu nhận biết tiếp tuyến]
+    modes: [basic, exam10, advanced]
+  - id: T-TWO-TANGENTS
+    statement: Hai tiếp tuyến cắt nhau tại một điểm — điểm đó cách đều hai tiếp điểm, tia kẻ từ điểm đó qua tâm là phân giác của góc tạo bởi hai tiếp tuyến
+    aliases: [hai tiếp tuyến cắt nhau, tính chất hai tiếp tuyến, cách đều hai tiếp điểm]
+    modes: [basic, exam10, advanced]
+  - id: T-DIAMETER-CHORD
+    statement: Đường kính vuông góc với một dây thì đi qua trung điểm của dây; đường kính đi qua trung điểm của dây không qua tâm thì vuông góc với dây
+    aliases: [đường kính vuông góc với dây, đường kính đi qua trung điểm]
+    modes: [basic, exam10, advanced]
+  - id: T-CENTRAL-ANGLE
+    statement: Số đo cung nhỏ bằng số đo góc ở tâm chắn cung đó; hai dây bằng nhau căng hai cung bằng nhau
+    aliases: [góc ở tâm, số đo cung, cung bị chắn]
+    modes: [basic, exam10, advanced]
+  - id: T-PYTHAGORE
+    statement: Định lý Pythagore — trong tam giác vuông, bình phương cạnh huyền bằng tổng bình phương hai cạnh góc vuông
+    aliases: [Pythagore, Py-ta-go, Pitago]
+    modes: [basic, exam10, advanced]
+  - id: T-RIGHT-TRIANGLE-RELATIONS
+    statement: Hệ thức giữa cạnh và góc trong tam giác vuông và hệ thức lượng với đường cao (b² = ab', h² = b'c', ah = bc)
+    aliases: [hệ thức lượng, hệ thức giữa cạnh và góc, đường cao trong tam giác vuông]
+    modes: [basic, exam10, advanced]
+  - id: T-AM-GM-2
+    statement: Bất đẳng thức Cô-si cho hai số không âm a + b ≥ 2√(ab), dấu bằng khi a = b — dùng cho bài cực trị hình học
+    aliases: [Cauchy, Cô si, Cô-si, AM-GM]
+    modes: [exam10, advanced]
+  - id: T-POWER-OF-POINT
+    statement: Phương tích của một điểm đối với đường tròn — MA·MB = MC·MD với hai cát tuyến qua M, và MT² = MA·MB với tiếp tuyến MT
+    aliases: [phương tích, cát tuyến, tiếp tuyến cát tuyến]
+    modes: [advanced]
+  - id: T-PTOLEMY
+    statement: Định lý Ptolemy — trong tứ giác nội tiếp, tích hai đường chéo bằng tổng các tích hai cặp cạnh đối
+    aliases: [Ptolemy, Ptô-lê-mê]
+    modes: [advanced]
+forbidden_keywords: [vectơ, đạo hàm, định lý sin, định lý cosin, tọa độ hóa, phương tích, trục đẳng phương, ptolemy, menelaus, ceva, hàng điểm điều hòa, đường đối trung, nghịch đảo]
+notation:
+  angle: "\\widehat{ABC}"
+  arc: "\\overparen{AB}"
+  similar: "\\backsim"
+  cyclic: "tứ giác ABCD nội tiếp"
+presentation_template: |
+  Xét tứ giác {TÊN}, ta có:
+    {luận cứ 1} (theo {căn cứ})
+    {luận cứ 2} (theo {căn cứ})
+  Suy ra {kết luận}.
+  Vậy tứ giác {TÊN} nội tiếp đường tròn.

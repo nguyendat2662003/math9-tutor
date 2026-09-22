@@ -1,0 +1,38 @@
+id: ALG-1
+name: Phương trình và hệ hai phương trình bậc nhất hai ẩn
+prerequisites: []
+goal_types: [solve_system, word_problem, find_parameter]
+allowed_tools:
+  - id: T-LINEAR-2VAR
+    statement: Phương trình bậc nhất hai ẩn ax + by = c có vô số nghiệm, biểu diễn bởi một đường thẳng
+    aliases: [phương trình bậc nhất hai ẩn, nghiệm tổng quát]
+    modes: [basic, exam10, advanced]
+  - id: T-SYSTEM-SUBSTITUTION
+    statement: Giải hệ phương trình bằng phương pháp thế
+    aliases: [phương pháp thế, thế vào]
+    modes: [basic, exam10, advanced]
+  - id: T-SYSTEM-ELIMINATION
+    statement: Giải hệ phương trình bằng phương pháp cộng đại số
+    aliases: [phương pháp cộng đại số, cộng vế với vế, trừ vế với vế]
+    modes: [basic, exam10, advanced]
+  - id: T-SYSTEM-SOLUTION-COUNT
+    statement: Hệ hai phương trình bậc nhất hai ẩn có nghiệm duy nhất, vô nghiệm hoặc vô số nghiệm tùy vị trí tương đối hai đường thẳng
+    aliases: [số nghiệm của hệ, hệ vô nghiệm, hệ vô số nghiệm, nghiệm duy nhất]
+    modes: [basic, exam10, advanced]
+  - id: T-SYSTEM-AUX-VARIABLE
+    statement: Đặt ẩn phụ để đưa hệ về hệ bậc nhất hai ẩn
+    aliases: [đặt ẩn phụ]
+    modes: [exam10, advanced]
+  - id: T-WORD-PROBLEM-SYSTEM
+    statement: Giải bài toán bằng cách lập hệ phương trình (chọn ẩn, đặt điều kiện, lập hệ, giải, đối chiếu)
+    aliases: [lập hệ phương trình, chọn ẩn, đặt điều kiện cho ẩn]
+    modes: [basic, exam10, advanced]
+forbidden_keywords: [định thức, ma trận, cramer]
+notation:
+  system: "\\begin{cases} ... \\end{cases}"
+presentation_template: |
+  Gọi {ẩn} là ... (điều kiện: ...).
+  Theo đề bài, ta có hệ phương trình: {hệ}
+  Giải hệ: {các bước thế/cộng đại số}
+  Ta được {nghiệm} (thỏa mãn điều kiện).
+  Vậy {kết luận theo ngữ cảnh bài toán}.
