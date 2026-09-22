@@ -73,11 +73,15 @@ def load(path: str) -> list[dict]:
 # --------------------------------------------------------------------------
 
 _RE_NEEDS_OPTIONS = re.compile(r"nào (?:sau|dưới) đây|khẳng định nào|mệnh đề nào|phát biểu nào", re.I)
-_RE_HAS_OPTIONS = re.compile(r"(?:^|\s)[A-D][.)]\s")
+_RE_OPTION_A = re.compile(r"(?:^|\s)A[.)]\s")
+_RE_OPTION_B = re.compile(r"(?:^|\s)B[.)]\s")
 
 
 def _needs_options(statement: str) -> bool:
-    return bool(_RE_NEEDS_OPTIONS.search(statement)) and not _RE_HAS_OPTIONS.search(statement)
+    """'Khẳng định nào sau đây' mà không thấy cả phương án A lẫn B (một chữ 'A.' lẻ
+    có thể chỉ là tên điểm: 'vuông tại A.')."""
+    has_options = _RE_OPTION_A.search(statement) and _RE_OPTION_B.search(statement)
+    return bool(_RE_NEEDS_OPTIONS.search(statement)) and not has_options
 
 
 def run_item(pipe, item: dict) -> dict:
