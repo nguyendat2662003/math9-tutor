@@ -66,8 +66,30 @@ do cột `predicates` trong eval đáng công điền.
 ## Công cụ
 
 ```bash
-python evals/run.py --set smoke     # mỗi commit
-python evals/run.py --set core      # mỗi PR
+python evals/run.py --set smoke                       # mỗi commit, ~4 phút, 3 workers
+python evals/run.py --set core --workers 4            # mỗi PR
+python evals/run.py --regrade evals/reports/<f>.json  # chấm lại bằng grader mới, không gọi LLM
+python evals/run.py --report  evals/reports/<f>.json  # in lại báo cáo
 ```
 
-Runner hiện là khung (`evals/run.py`), nối Pipeline vào sau Sprint 2.
+Báo cáo JSON gồm `metrics` và `rows` từng bài (đáp án dự đoán, vị từ sai, token,
+thời gian) — mở `rows` để xem bài nào sai và vì sao.
+
+## Baseline đầu tiên (2026-09-22, smoke, một model API)
+
+| Chỉ số | Kết quả | Ngưỡng core |
+|---|---|---|
+| Đáp án đúng | 100% (26/26 chấm được) | ≥ 95% |
+| Sai mà tự tin | 0% | < 1% |
+| Router topic / goal_type | 96.6% / 89.7% | ≥ 90% |
+| Vi phạm chương trình | 0% | < 2% |
+| Độ trễ p50 / p95 | 12s / 66s | 12s / 60s |
+| Token TB mỗi bài | 5.7k vào / 2.4k ra | — |
+
+Hai bài học từ lần chạy đầu:
+- **Grader từng chấm sai 8/30 bài** vì lời giải kèm điều kiện ("với x > 0"), xấp xỉ
+  ("≈ 9,93") hay nhắc lại đề ("∛(−27) = −3"). Khi thấy "sai mà tự tin" tăng, đọc
+  `rows` trước khi kết luận model sai.
+- **81/82 bài trắc nghiệm trong eval không lưu 4 phương án.** Dạng "tính giá trị"
+  vẫn chấm được; dạng "khẳng định nào sau đây" bị đánh dấu `data_issue`, không
+  chấm. Cần bổ sung phương án vào `statement` khi nhập đề.
