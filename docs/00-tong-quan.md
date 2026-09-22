@@ -38,10 +38,11 @@ cũng là tài sản thật của dự án.
 | 6 agent (Parser…Pedagogue) | ✅ Router/Solver/Draftsman/Critic/Pedagogue chạy với LLM thật; Parser ảnh 🔲 | ✅ |
 | Bộ eval (`evals/run.py`) | ✅ Chấm tự động 5 chỉ số, có baseline smoke | — |
 | Demo Streamlit (`apps/demo_streamlit.py`) | ✅ Giải toán + dựng hình | ✅ AppTest |
-| API + frontend Next.js | 🔲 Khung + tầng dữ liệu | — |
+| API FastAPI + SSE | ✅ Nối Pipeline | — |
+| Frontend Next.js | ✅ MVP: gợi ý trước, nhãn tin cậy, hình tô sáng theo bước | ✅ CDP golden path |
 
-53 test đều xanh, chạy `make test` (~1 giây). Chạy thử: `make ui` (Streamlit)
-hoặc `python tools/solve.py "<đề bài>"`.
+56 test đều xanh, chạy `make test` (~2 giây). Chạy sản phẩm: `make api` + `make web`
+(http://localhost:3000). Công cụ phát triển: `make ui` (Streamlit), `python tools/solve.py "<đề>"`.
 
 ## Ba việc lớn còn lại
 
@@ -49,5 +50,5 @@ hoặc `python tools/solve.py "<đề bài>"`.
    máy sinh (`data/problems/`). Chưa soát thì RAG không nạp. Ở `04`.
 2. **Nâng chất lượng theo eval** — chạy `python evals/run.py --set smoke` sau
    mỗi thay đổi prompt; xem báo cáo trong `evals/reports/`. Ở `06`.
-3. **Sản phẩm người dùng** — API nối Pipeline (SSE), frontend Next.js với ba
-   yêu cầu sư phạm. Ở `02`.
+3. **Vận hành** — model local để `MODEL_POLICY` có hiệu lực, tracing Langfuse,
+   cache, Docker; MathLive và đầu vào ảnh cho frontend. Ở `02`.

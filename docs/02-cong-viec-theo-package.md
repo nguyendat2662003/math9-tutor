@@ -150,15 +150,21 @@ nghiệm trong eval phải kèm đủ 4 phương án, không thì hệ thống t
 
 ---
 
-## api + web 🔲
+## api + web ✅ (MVP)
 
-**Đã xong:** khung FastAPI, endpoint solve (stream), SSE, tầng dữ liệu frontend
-(types, client SSE).
+**Đã xong:** FastAPI dựng Pipeline một lần khi khởi động; `POST /api/solve`
+stream SSE theo giai đoạn (kể cả lần giải lại và lý do) rồi trả `done` với
+ProblemState; `GET /api/topics`. Frontend Next.js 15: nhập đề, tiến trình, gợi ý
+trước – lời giải sau, nhãn độ tin cậy kèm lý do, hình SVG **tô sáng theo bước**
+(engine bọc mỗi đối tượng trong `<g data-name data-pts>`). Đã kiểm tra golden
+path trong Edge headless qua CDP (`demo/browser_check.mjs`).
+
+```bash
+make api    # :8000
+make web    # :3000
+```
 
 **Còn thiếu:**
-- 🔲 Nối Pipeline vào endpoint (chờ agent).
-- 🔲 UI: chat, MathLive input, solution-view, JSXGraph figure.
-- 🔲 Ba yêu cầu đặc thù: hình đồng bộ bước giải, chế độ gợi ý mặc định, nhãn
-  độ tin cậy. Xem `apps/web/README.md`.
-
-**Việc tiếp theo:** làm sau khi có Pipeline chạy được end-to-end.
+- 🔲 MathLive (bàn phím toán ảo cho mobile), JSXGraph tương tác.
+- 🔲 Đầu vào ảnh (Parser), đăng nhập, lịch sử bài, giới hạn tần suất.
+- 🔲 Production: `RAG_REQUIRE_REVIEWED=1`, `CORS_ORIGINS`, Docker.
