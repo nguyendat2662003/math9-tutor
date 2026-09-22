@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -62,12 +63,33 @@ class Agent(ABC):
 
     @staticmethod
     def parse_json(resp: LLMResponse) -> dict:
-        """Bóc JSON kể cả khi model bọc trong ```json hoặc kèm text thừa."""
+        """Bóc JSON kể cả khi model bọc trong ```json, kèm text thừa, hoặc viết
+        LaTeX với backslash không hợp lệ (\\sqrt, \\frac...) trong chuỗi."""
+        t = resp.text.strip()
+        if t.startswith("```"):
+            t = t.split("\n", 1)[1].rsplit("```", 1)[0]
+        a, b = t.find("{"), t.rfind("}")
+        if a >= 0 and b > a:
+            t = t[a:b + 1]
+        t = _RE_AMBIG.sub(r"\\\\\1", t)
         try:
-            return resp.json()
+            return json.loads(t, strict=False)
         except json.JSONDecodeError:
-            t = resp.text
-            a, b = t.find("{"), t.rfind("}")
-            if a >= 0 and b > a:
-                return json.loads(t[a:b + 1])
-            raise
+            return json.loads(_repair_latex_escapes(t), strict=False)
+
+
+#: Lệnh LaTeX bắt đầu bằng ký tự trùng escape JSON (\b \f \n \r \t \u) — nếu không
+#: nhận diện, "\frac" thành form-feed + "rac". Lệnh khác (\sqrt, \cdot...) bắt bằng regex chung.
+_LATEX_AMBIGUOUS = (
+    "frac", "tfrac", "dfrac", "times", "theta", "tan", "text", "triangle", "to", "top",
+    "beta", "bar", "bigcap", "bigcup", "binom", "boldsymbol", "backsim",
+    "neq", "ne", "nabla", "not", "nu", "notin",
+    "right", "rho", "rightarrow", "Rightarrow",
+    "underline", "underbrace", "upsilon",
+)
+_RE_AMBIG = re.compile(r"\\(" + "|".join(sorted(_LATEX_AMBIGUOUS, key=len, reverse=True)) + r")(?![A-Za-z])")
+
+
+def _repair_latex_escapes(t: str) -> str:
+    """\\ theo sau không phải escape JSON hợp lệ -> nhân đôi."""
+    return re.sub(r'\\(?!["\\/bfnrtu])', r"\\\\", t)

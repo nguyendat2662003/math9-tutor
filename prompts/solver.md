@@ -46,6 +46,10 @@ Hệ thống sẽ kiểm tra kết luận của bạn bằng số, độc lập 
 - {"kind":"identity","lhs":"(x+1)**2","rhs":"x**2+2*x+1"}
 - {"kind":"value","expr":"sqrt(16)+1","claimed":"5"}
 
+## Ký hiệu trong chuỗi JSON
+Dùng ký hiệu Unicode và chữ, KHÔNG dùng lệnh LaTeX có dấu gạch chéo ngược:
+√, ², ³, ≤, ≥, ≠, ∠, ⊥, ∥, ∆, π, ·, x₁, x₂, "góc ABC", "tam giác ABC", "1/2".
+
 ## Đầu ra — CHỈ JSON
 {
   "subproblems": [{
