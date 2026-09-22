@@ -42,7 +42,7 @@ class RagService:
     ):
         emb = embedder or HashingEmbedder()
         methods = load_methods(methods_dir, require_reviewed) if methods_dir.exists() else []
-        worked = load_worked_examples(problems_dir) if problems_dir.exists() else []
+        worked = load_worked_examples(problems_dir, require_reviewed) if problems_dir.exists() else []
 
         self.methods = Retriever(methods, emb) if methods else None
         self.worked = Retriever(worked, emb) if worked else None

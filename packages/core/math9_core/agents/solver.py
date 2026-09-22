@@ -34,7 +34,7 @@ class SolverAgent(Agent):
         )
         data = self.parse_json(self.complete(
             state, user, system="Bạn là giáo viên Toán THCS giàu kinh nghiệm luyện thi vào 10. Chỉ trả JSON.",
-            max_tokens=6000,
+            max_tokens=16000,
         ))
 
         by_label = {sp.label: sp for sp in state.subproblems}

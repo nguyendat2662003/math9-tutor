@@ -114,43 +114,39 @@ giáo viên soát.
 
 ---
 
-## core ⚙️
+## core ✅
 
-ProblemState và orchestrator. Khung đầy đủ, một số chỗ chờ agent.
+ProblemState và orchestrator chạy end-to-end với LLM thật.
 
-**Đã xong:** `ProblemState` đầy đủ, orchestrator (đồ thị cố định, vòng lặp giới
-hạn, Solver∥Draftsman song song, nối RAG), chính sách định tuyến model.
+**Đã xong:** `ProblemState` (có `Step.predicate`), orchestrator (đồ thị cố định,
+vòng lặp giới hạn 2, Solver∥Draftsman song song, RAG, Draftsman dựng thêm điểm
+phụ mà Solver dùng), `build_pipeline()` dựng từ `.env`, `OpenAICompatClient`
+(OpenAI hoặc vLLM local), test pipeline với LLM giả.
 
 **Còn thiếu:**
-- 🔲 Dependency injection: dựng Pipeline từ config (agent nào dùng model nào).
-- 🔲 `_claims` hiện lấy predicate từ Solver output — cần test khi Solver thật chạy.
-- 🔲 LLM client thật (`llm/client.py`) — hiện là abstract, cần nối SDK.
-
-**Việc tiếp theo:** nối LLM client (Anthropic SDK + vLLM), rồi mới làm được agent.
+- 🔲 `MODEL_POLICY` chưa có hiệu lực — mọi agent dùng một model (`MODEL_NAME`)
+  vì chưa có model local. Khi có vLLM, bỏ tham số `model=` trong `build_pipeline`.
+- 🔲 Tracing (Langfuse) — có key trong `.env`, chưa nối.
+- 🔲 Cache kết quả theo hash đề bài.
 
 ---
 
-## agents 🔲
+## agents ✅ (trừ Parser ảnh)
 
-Sáu agent. Stub + prompt template, chưa có logic.
+| Agent | Trạng thái | Ghi chú |
+|---|---|---|
+| Parser | 🔲 ảnh | Text đi thẳng; ảnh chưa nối OCR/VLM |
+| Router | ✅ | Chấm được bằng eval (`router_accuracy`) |
+| Solver | ✅ | Xuất `predicate` mỗi bước + `algebra_checks` cho SymPy |
+| Draftsman | ✅ | Vòng lặp nội bộ 2 lượt; nhận feedback điểm phụ từ lời giải |
+| Critic | ✅ không LLM | Tổng hợp phản hồi Verifier thành `retry_feedback` |
+| Pedagogue | ✅ | Gợi ý Socratic, chỉ chạy khi confidence ≠ low |
 
-| Agent | Model gợi ý | Đầu vào | Đầu ra | Prompt |
-|---|---|---|---|---|
-| Parser | VLM/OCR | ảnh | latex, entities | 🔲 |
-| Router | Qwen3-8B → PhoBERT | latex | topic, goal_type, difficulty | ✅ |
-| Solver | Qwen3-32B / API | latex + RAG + guardrail | steps | ✅ |
-| Draftsman | Qwen3-14B/32B | latex + entities | construction | ✅ |
-| Critic | Qwen3-14B/32B | state + violations | lỗi cần sửa | 🔲 |
-| Pedagogue | Qwen3-8B | solution | hints | 🔲 |
+**Lưu ý đã học từ chạy thật:** LLM hay viết LaTeX (`\frac`, `\sqrt`) trong
+JSON → `Agent.parse_json` tự sửa; prompt yêu cầu ký hiệu Unicode. Bài trắc
+nghiệm trong eval phải kèm đủ 4 phương án, không thì hệ thống trả LOW (đúng).
 
-**Việc cho mỗi agent:** nạp prompt template từ `prompts/`, gọi `self.llm.complete()`,
-parse kết quả, ghi vào ProblemState. Xem stub trong `packages/core/math9_core/agents/`.
-
-**Thứ tự làm (theo eval tuần đầu quyết định):**
-1. Solver + Verifier trước (đại số) — chứng minh vòng lặp hoạt động.
-2. Router — khi số chuyên đề đủ nhiều.
-3. Draftsman — khi làm hình học.
-4. Parser, Critic, Pedagogue — sau cùng.
+**Việc tiếp theo:** đọc báo cáo eval, sửa prompt theo trục sai nhiều nhất.
 
 ---
 

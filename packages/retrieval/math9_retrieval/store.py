@@ -88,7 +88,7 @@ def _step_prose(steps: list[dict]) -> str:
     return " ".join(lines)
 
 
-def load_worked_examples(path: Path) -> list[Doc]:
+def load_worked_examples(path: Path, require_reviewed: bool = True) -> list[Doc]:
     """Nạp bài giải mẫu: mỗi file `*.json` trong `path` là MỘT bài, theo định
     dạng chia từng bước ở `data/problems/QUY-CACH.md` (không phải JSONL một
     dòng một bài — bài mẫu để giáo viên đọc và sửa tay, một file riêng dễ soát
@@ -111,6 +111,10 @@ def load_worked_examples(path: Path) -> list[Doc]:
             continue
         if r.get("solution_type") == "answer_key":
             skipped.append(f"{f.name} (hướng dẫn chấm, không dùng làm mẫu)")
+            continue
+        # Cùng cổng chặn với sổ tay: bài mẫu do máy sinh phải qua giáo viên soát mới vào RAG
+        if require_reviewed and r.get("status", "reviewed") != "reviewed":
+            skipped.append(f"{f.name} (chưa soát: {r.get('status')})")
             continue
 
         statement = r.get("statement", "")

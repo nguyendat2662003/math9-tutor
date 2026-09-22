@@ -1,0 +1,82 @@
+{
+  "id": "mau-viete-tham-so",
+  "source": "Tự soạn theo dạng đề vào 10",
+  "mode": "exam10",
+  "solution_type": "detailed",
+  "status": "needs_teacher",
+  "statement": "Cho phương trình x^2 - 2(m+1)x + m^2 + 2 = 0 (m là tham số). a) Giải phương trình khi m = 1. b) Tìm m để phương trình có hai nghiệm phân biệt x1, x2 thỏa mãn x1^2 + x2^2 = 10.",
+  "subproblems": [
+    {
+      "label": "a",
+      "statement": "Giải phương trình x^2 - 2(m+1)x + m^2 + 2 = 0 khi m = 1.",
+      "topic": "ALG-6",
+      "goal_type": "solve_equation",
+      "difficulty": 1,
+      "approach_ref": null,
+      "steps": [
+        {
+          "id": "a1",
+          "claim": "Khi m = 1, phương trình trở thành x^2 - 4x + 3 = 0.",
+          "justification": "Thay m = 1 vào phương trình đã cho: x^2 - 2(1+1)x + 1^2 + 2 = 0."
+        },
+        {
+          "id": "a2",
+          "claim": "Phương trình x^2 - 4x + 3 = 0 có Δ = 4 > 0.",
+          "justification": "Với a = 1, b = -4, c = 3, ta có Δ = b^2 - 4ac = (-4)^2 - 4.1.3 = 4 > 0 nên phương trình có hai nghiệm phân biệt."
+        },
+        {
+          "id": "a3",
+          "claim": "Các nghiệm của phương trình là x_1 = 3 và x_2 = 1.",
+          "justification": "Theo công thức nghiệm, x = (-b ± √Δ)/(2a) = (4 ± 2)/2, suy ra x_1 = 3, x_2 = 1."
+        }
+      ],
+      "answer": "Khi m = 1, phương trình có hai nghiệm x_1 = 3, x_2 = 1."
+    },
+    {
+      "label": "b",
+      "statement": "Tìm m để phương trình có hai nghiệm phân biệt x1, x2 thỏa mãn x1^2 + x2^2 = 10.",
+      "topic": "ALG-6",
+      "goal_type": "find_parameter",
+      "difficulty": 2,
+      "approach_ref": null,
+      "steps": [
+        {
+          "id": "b1",
+          "claim": "Phương trình có hai nghiệm phân biệt khi m > 1/2.",
+          "justification": "Ta có Δ = [-2(m+1)]^2 - 4(m^2+2) = 4(m+1)^2 - 4(m^2+2) = 4(2m-1). Phương trình có hai nghiệm phân biệt khi Δ > 0, tức là 4(2m-1) > 0, suy ra m > 1/2."
+        },
+        {
+          "id": "b2",
+          "claim": "Theo định lí Viète, x_1 + x_2 = 2(m+1) và x_1x_2 = m^2 + 2.",
+          "justification": "Phương trình có dạng x^2 - 2(m+1)x + m^2 + 2 = 0 nên theo định lí Viète, tổng hai nghiệm bằng 2(m+1), tích hai nghiệm bằng m^2+2."
+        },
+        {
+          "id": "b3",
+          "claim": "Ta có x_1^2 + x_2^2 = [2(m+1)]^2 - 2(m^2+2) = 2m^2 + 8m.",
+          "justification": "Dùng hằng đẳng thức x_1^2+x_2^2=(x_1+x_2)^2-2x_1x_2 và thay các giá trị tổng, tích theo định lí Viète."
+        },
+        {
+          "id": "b4",
+          "claim": "Điều kiện x_1^2 + x_2^2 = 10 tương đương với m^2 + 4m - 5 = 0.",
+          "justification": "Từ 2m^2+8m=10, chia hai vế cho 2 được m^2+4m-5=0."
+        },
+        {
+          "id": "b5",
+          "claim": "Phương trình m^2 + 4m - 5 = 0 có hai nghiệm m = 1 và m = -5.",
+          "justification": "Ta có m^2+4m-5=(m-1)(m+5)=0 nên m=1 hoặc m=-5."
+        },
+        {
+          "id": "b6",
+          "claim": "Đối chiếu điều kiện m > 1/2, chỉ nhận m = 1.",
+          "justification": "Giá trị m=-5 không thỏa mãn điều kiện để phương trình có hai nghiệm phân biệt; giá trị m=1 thỏa mãn."
+        }
+      ],
+      "answer": "Giá trị cần tìm là m = 1."
+    }
+  ],
+  "verification": {
+    "algebra_ok": true,
+    "geometry_ok": null,
+    "n_configs": null
+  }
+}

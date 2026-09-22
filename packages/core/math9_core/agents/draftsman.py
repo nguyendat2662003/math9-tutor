@@ -33,6 +33,8 @@ def try_build(raw: dict) -> tuple[Construction | None, str]:
         build(c, seed=1)
     except GeometryError as e:
         return None, f"Engine không dựng được: {e}"
+    except Exception as e:              # tham số lạ (branch không phải số, ratio thiếu value...)
+        return None, f"Engine lỗi khi dựng ({type(e).__name__}): {e}"
     return c, ""
 
 
@@ -49,16 +51,20 @@ class DraftsmanAgent(Agent):
         feedback, raw = state.verification.detail.get("draftsman_feedback", ""), {}
         for attempt in range(1, MAX_ATTEMPTS + 1):
             user = self.render(op_catalog=op_catalog(), latex=state.latex or state.raw_input, retry_feedback=feedback)
-            raw = self.parse_json(self.complete(
-                state, user, system="Bạn là kỹ sư dựng hình cho phần mềm hình học. Chỉ trả JSON hợp lệ.",
-                max_tokens=3000,
-            ))
-            c, err = try_build(raw)
-            if c:
-                state.construction = c
-                state.entities = entities_from(build(c, seed=1))
-                state.verification.detail.pop("draftsman_error", None)
-                return state
+            try:
+                raw = self.parse_json(self.complete(
+                    state, user, system="Bạn là kỹ sư dựng hình cho phần mềm hình học. Chỉ trả JSON hợp lệ.",
+                    max_tokens=12000,
+                ))
+            except Exception as e:      # LLM rỗng, JSON hỏng, lỗi mạng: tính là một lượt hỏng
+                raw, err = {}, f"Không nhận được kịch bản hợp lệ: {e}"
+            else:
+                c, err = try_build(raw)
+                if c:
+                    state.construction = c
+                    state.entities = entities_from(build(c, seed=1))
+                    state.verification.detail.pop("draftsman_error", None)
+                    return state
             log.info("Draftsman lượt %d lỗi: %s", attempt, err.splitlines()[0])
             feedback = err + "\n\nKịch bản đã gửi:\n" + json.dumps(raw, ensure_ascii=False)
 

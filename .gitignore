@@ -10,3 +10,5 @@ demo/out*/
 *.egg-info/
 demo/*.png
 demo/solve*/
+demo/*.json
+demo/*.log

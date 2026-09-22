@@ -23,7 +23,7 @@ class PedagogueAgent(Agent):
             return state
         user = self.render(latex=state.latex or state.raw_input, solution="\n".join(steps_txt))
         data = self.parse_json(self.complete(
-            state, user, system="Bạn là giáo viên Toán THCS, dạy bằng cách gợi mở. Chỉ trả JSON.", max_tokens=2000,
+            state, user, system="Bạn là giáo viên Toán THCS, dạy bằng cách gợi mở. Chỉ trả JSON.", max_tokens=6000,
         ))
         state.hints = [str(h) for h in data.get("hints", []) if str(h).strip()]
         return state

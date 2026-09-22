@@ -34,20 +34,20 @@ cũng là tài sản thật của dự án.
 | Nhập dữ liệu (`ingest`) | ✅ Chạy được | ✅ |
 | Tái tổ chức sổ tay (`methods`) | ✅ Chạy được | ✅ |
 | Tầng RAG (`retrieval`) | ✅ Chạy được | ✅ |
-| `ProblemState` + orchestrator (`core`) | ⚙️ Khung đầy đủ | — |
-| 6 agent (Parser…Pedagogue) | 🔲 Stub + prompt | — |
-| API + frontend | 🔲 Khung + tầng dữ liệu | — |
+| `ProblemState` + orchestrator (`core`) | ✅ Chạy end-to-end | ✅ (LLM giả) |
+| 6 agent (Parser…Pedagogue) | ✅ Router/Solver/Draftsman/Critic/Pedagogue chạy với LLM thật; Parser ảnh 🔲 | ✅ |
+| Bộ eval (`evals/run.py`) | ✅ Chấm tự động 5 chỉ số, có baseline smoke | — |
+| Demo Streamlit (`apps/demo_streamlit.py`) | ✅ Giải toán + dựng hình | ✅ AppTest |
+| API + frontend Next.js | 🔲 Khung + tầng dữ liệu | — |
 
-37 test đều xanh, chạy `make test` (~0.4 giây).
+53 test đều xanh, chạy `make test` (~1 giây). Chạy thử: `make ui` (Streamlit)
+hoặc `python tools/solve.py "<đề bài>"`.
 
 ## Ba việc lớn còn lại
 
-1. **Sáu agent** — cần API key, cần prompt hoàn chỉnh. Chi tiết ở `02`.
-2. **Bộ eval + baseline** — việc tuần đầu, làm TRƯỚC khi viết agent. Ở `08`.
-3. **Nội dung của giáo viên** — bản đồ chương trình, sổ tay. Ở `04`.
-
-## Vì sao agent để stub có chủ đích
-
-Viết prompt Solver trước khi biết model sai ở trục nào là đầu tư sai chỗ. Bộ
-eval tuần đầu (`08`) sẽ cho biết chính xác cần ưu tiên gì. Xây lõi kiểm chứng
-trước, agent sau, là thứ tự đúng.
+1. **Giáo viên soát nội dung** — 26 sổ tay, 10 file chương trình, bài mẫu do
+   máy sinh (`data/problems/`). Chưa soát thì RAG không nạp. Ở `04`.
+2. **Nâng chất lượng theo eval** — chạy `python evals/run.py --set smoke` sau
+   mỗi thay đổi prompt; xem báo cáo trong `evals/reports/`. Ở `06`.
+3. **Sản phẩm người dùng** — API nối Pipeline (SSE), frontend Next.js với ba
+   yêu cầu sư phạm. Ở `02`.

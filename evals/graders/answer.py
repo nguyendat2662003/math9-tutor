@@ -4,9 +4,13 @@
 báo sai và làm hỏng toàn bộ số liệu eval.
 
 Gold có hai dạng:
-  - chuỗi:  "x = 4; x = −2"
+  - chuỗi:  "x = 4; x = −2", "1040 m (x = 250, y = 270)"
   - dict (trắc nghiệm): {"letter": "B", "value": "14"} — chấp nhận đúng giá trị
     hoặc nêu đúng chữ cái.
+
+Lời giải thường kèm điều kiện, xấp xỉ, hoặc nhắc lại đề ("∛(−27) = −3") — các
+số đó không phải đáp án. Ta cắt bỏ phần đuôi điều kiện rồi thử vài cách lấy
+"phần kết luận" của câu; khớp một cách là đủ.
 """
 
 from __future__ import annotations
@@ -20,34 +24,62 @@ _NORMALIZE = {
     "−": "-", "–": "-", "—": "-",   # − – —
     "×": "*", "·": "*", "⋅": "*",   # × · ⋅
     "÷": "/", "√": "sqrt", "π": "pi",
-    "²": "^2", "³": "^3",
-    ",": ".",
+    "²": "", "³": "",                    # ² ³ — bỏ, tránh sinh số giả (cm² -> 2)
 }
+
+# Đuôi điều kiện / xấp xỉ / diễn giải — không chứa đáp án
+_RE_TAIL = re.compile(r"(\s+với\s|\s+khi\s|\s+trong đó\s|≈|xấp xỉ|tức là|đạt được|\(\s*x\s*=|\(\s*[a-z]\s*=)", re.I)
+# Ngoặc chứa điều kiện/giải thích: "(x = 250, y = 270)", "(h = 8/3 dm)"
+_RE_PAREN_COND = re.compile(r"\((?=[^)]*(?:=|khi|với))[^)]*\)")
+# Từ mở đầu phần kết luận
+_RE_LEAD = re.compile(r"(?:^|\s)(?:là|bằng|được|vậy|=)\s", re.I)
 
 
 def normalize(text: str) -> str:
     for k, v in _NORMALIZE.items():
         text = text.replace(k, v)
-    return text
+    # 2,5 -> 2.5 nhưng "x1, x2" giữ nguyên
+    return re.sub(r"(?<=\d),(?=\d)", ".", text)
 
 
 def extract_numbers(text: str) -> set:
     """Tập các số (kể cả phân số, căn đơn giản) xuất hiện trong chuỗi."""
-    text = normalize(text)
     out = set()
-    for tok in re.findall(r"-?\d+(?:\.\d+)?(?:/\d+)?|sqrt\(?\d+\)?|\\sqrt\{[^}]+\}", text):
+    for tok in re.findall(r"-?\d+(?:\.\d+)?(?:/\d+)?|sqrt\(?\d+\)?", normalize(text)):
         try:
-            tok = tok.replace("\\sqrt{", "sqrt(").replace("}", ")")
             out.add(sp.nsimplify(tok))
         except Exception:
             continue
     return out
 
 
+def _strip_conditions(text: str) -> str:
+    text = _RE_PAREN_COND.sub(" ", text)
+    m = _RE_TAIL.search(text)
+    return text[: m.start()] if m else text
+
+
+def _candidates(text: str) -> list[str]:
+    """Các cách đọc 'phần kết luận' của một câu trả lời."""
+    core = _strip_conditions(text)
+    cands = [core]
+    if "=" in core:
+        cands.append(core.rsplit("=", 1)[1])
+    leads = list(_RE_LEAD.finditer(core))
+    if leads:
+        cands.append(core[leads[-1].end():])
+    return cands
+
+
 def _grade_str(predicted: str, expected: str) -> bool:
     if normalize(predicted).strip().lower() == normalize(expected).strip().lower():
         return True
-    return extract_numbers(predicted) == extract_numbers(expected) != set()
+    gold = extract_numbers(_strip_conditions(expected))
+    if not gold:
+        # Gold không có số (ví dụ "sin B = AC/BC"): so chuỗi sau chuẩn hóa khoảng trắng
+        g = re.sub(r"\s+", "", normalize(expected)).lower()
+        return g in re.sub(r"\s+", "", normalize(predicted)).lower()
+    return any(extract_numbers(c) == gold for c in _candidates(predicted))
 
 
 def grade(predicted: str, expected) -> bool:

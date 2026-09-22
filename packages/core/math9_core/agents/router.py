@@ -29,7 +29,7 @@ class RouterAgent(Agent):
             latex=state.latex or state.raw_input,
         )
         data = self.parse_json(self.complete(
-            state, user, system="Bạn phân loại bài toán Toán 9. Chỉ trả JSON.", max_tokens=1500, temperature=0.0,
+            state, user, system="Bạn phân loại bài toán Toán 9. Chỉ trả JSON.", max_tokens=6000, temperature=0.0,
         ))
 
         topic = str(data.get("topic", "")).strip()

@@ -14,6 +14,16 @@ mỗi file, và tách thành **một bản ghi RAG cho mỗi Ý** (`subproblems[
 mỗi ý mang `goal_type` riêng, đây mới là đơn vị mà RAG cần truy xuất, không
 phải cả bài. Tên bản ghi là `<id file>-<label ý>`, ví dụ `mau-hai-tiep-tuyen-a`.
 
+## Trạng thái soát — cổng chặn RAG
+
+Mỗi file có trường `status`: `needs_teacher` (máy sinh, chưa soát) hoặc `reviewed`.
+`load_worked_examples(require_reviewed=True)` — mặc định ở production — **chỉ nạp
+bản `reviewed`**, cùng cơ chế với sổ tay. File không có trường này coi như đã soát
+(bài giáo viên soạn tay).
+
+Tạo bài mẫu bán tự động: `python tools/make_example.py --id <tên> --file <đề>` —
+chỉ ghi file khi Verifier xác nhận HIGH.
+
 ## Bốn thành phần bắt buộc
 
 | Thành phần | Vì sao cần |

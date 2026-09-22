@@ -1,0 +1,862 @@
+{
+  "id": "mau-hai-tiep-tuyen",
+  "source": "Tự soạn theo dạng đề vào 10",
+  "mode": "exam10",
+  "solution_type": "detailed",
+  "status": "needs_teacher",
+  "statement": "Cho đường tròn (O) và điểm A nằm ngoài đường tròn. Kẻ hai tiếp tuyến AB, AC với đường tròn (B, C là các tiếp điểm). Gọi H là giao điểm của OA và BC. Kẻ đường kính BD của (O). Đường thẳng AD cắt (O) tại điểm thứ hai E.\na) Chứng minh tứ giác ABOC nội tiếp.\nb) Chứng minh OA vuông góc với BC tại H.\nc) Chứng minh AB² = AE·AD.",
+  "subproblems": [
+    {
+      "label": "a",
+      "statement": "Chứng minh tứ giác ABOC nội tiếp.",
+      "topic": "GEO-5",
+      "goal_type": "prove_concyclic",
+      "difficulty": 1,
+      "approach_ref": null,
+      "steps": [
+        {
+          "id": "a1",
+          "claim": "AB vuông góc với BO nên góc ABO bằng 90 độ.",
+          "justification": "AB là tiếp tuyến của đường tròn (O) tại B nên tiếp tuyến vuông góc với bán kính tại tiếp điểm.",
+          "refs": [
+            "A",
+            "B",
+            "O"
+          ],
+          "highlight": [
+            "A",
+            "B",
+            "O"
+          ],
+          "predicate": {
+            "kind": "right_angle",
+            "args": [
+              "A",
+              "B",
+              "O"
+            ]
+          }
+        },
+        {
+          "id": "a2",
+          "claim": "AC vuông góc với CO nên góc ACO bằng 90 độ.",
+          "justification": "AC là tiếp tuyến của đường tròn (O) tại C nên tiếp tuyến vuông góc với bán kính tại tiếp điểm.",
+          "refs": [
+            "A",
+            "C",
+            "O"
+          ],
+          "highlight": [
+            "A",
+            "C",
+            "O"
+          ],
+          "predicate": {
+            "kind": "right_angle",
+            "args": [
+              "A",
+              "C",
+              "O"
+            ]
+          }
+        },
+        {
+          "id": "a3",
+          "claim": "Góc ABO cộng góc ACO bằng 180 độ.",
+          "justification": "Hai góc ABO và ACO đều bằng 90 độ.",
+          "refs": [
+            "A",
+            "B",
+            "O",
+            "C"
+          ],
+          "highlight": [
+            "A",
+            "B",
+            "O",
+            "C"
+          ]
+        },
+        {
+          "id": "a4",
+          "claim": "Tứ giác ABOC nội tiếp.",
+          "justification": "Tứ giác có tổng hai góc đối bằng 180 độ thì nội tiếp.",
+          "refs": [
+            "A",
+            "B",
+            "O",
+            "C"
+          ],
+          "highlight": [
+            "A",
+            "B",
+            "O",
+            "C"
+          ],
+          "predicate": {
+            "kind": "concyclic",
+            "args": [
+              "A",
+              "B",
+              "O",
+              "C"
+            ]
+          }
+        }
+      ],
+      "answer": "Tứ giác ABOC nội tiếp."
+    },
+    {
+      "label": "b",
+      "statement": "Chứng minh OA vuông góc với BC tại H.",
+      "topic": "GEO-5",
+      "goal_type": "prove_perpendicular",
+      "difficulty": 1,
+      "approach_ref": null,
+      "steps": [
+        {
+          "id": "b1",
+          "claim": "OB bằng OC và AB bằng AC.",
+          "justification": "OB và OC là các bán kính của đường tròn (O); AB và AC là hai tiếp tuyến kẻ từ cùng điểm A.",
+          "refs": [
+            "A",
+            "B",
+            "C",
+            "O"
+          ],
+          "highlight": [
+            "A",
+            "B",
+            "C",
+            "O"
+          ],
+          "predicate": {
+            "kind": "equal_length",
+            "args": [
+              "O",
+              "B",
+              "O",
+              "C"
+            ]
+          }
+        },
+        {
+          "id": "b2",
+          "claim": "Tam giác AOB bằng tam giác AOC.",
+          "justification": "Hai tam giác AOB và AOC đều vuông, có cạnh huyền AO chung và OB bằng OC; do đó bằng nhau theo trường hợp cạnh huyền - cạnh góc vuông.",
+          "refs": [
+            "A",
+            "B",
+            "O",
+            "C"
+          ],
+          "highlight": [
+            "A",
+            "B",
+            "O",
+            "C"
+          ]
+        },
+        {
+          "id": "b3",
+          "claim": "Góc BOA bằng góc AOC.",
+          "justification": "Hai tam giác AOB và AOC bằng nhau nên các góc tương ứng bằng nhau.",
+          "refs": [
+            "B",
+            "O",
+            "A",
+            "A",
+            "O",
+            "C"
+          ],
+          "highlight": [
+            "A",
+            "B",
+            "C",
+            "O"
+          ],
+          "predicate": {
+            "kind": "equal_angle",
+            "args": [
+              "B",
+              "O",
+              "A",
+              "A",
+              "O",
+              "C"
+            ]
+          }
+        },
+        {
+          "id": "b4",
+          "claim": "Góc BOH bằng góc HOC.",
+          "justification": "H thuộc OA nên tia OH trùng với tia OA; vì vậy góc BOH bằng góc BOA và góc HOC bằng góc AOC.",
+          "refs": [
+            "B",
+            "O",
+            "H",
+            "C"
+          ],
+          "highlight": [
+            "B",
+            "C",
+            "O",
+            "H"
+          ],
+          "predicate": {
+            "kind": "equal_angle",
+            "args": [
+              "B",
+              "O",
+              "H",
+              "H",
+              "O",
+              "C"
+            ]
+          }
+        },
+        {
+          "id": "b5",
+          "claim": "Tam giác BOH bằng tam giác COH.",
+          "justification": "Có OB bằng OC, OH chung và góc BOH bằng góc HOC; do đó hai tam giác bằng nhau theo trường hợp cạnh - góc - cạnh.",
+          "refs": [
+            "B",
+            "O",
+            "H",
+            "C"
+          ],
+          "highlight": [
+            "B",
+            "C",
+            "O",
+            "H"
+          ]
+        },
+        {
+          "id": "b6",
+          "claim": "Góc BHO bằng góc OHC.",
+          "justification": "Hai tam giác BOH và COH bằng nhau nên các góc tương ứng bằng nhau.",
+          "refs": [
+            "B",
+            "H",
+            "O",
+            "O",
+            "H",
+            "C"
+          ],
+          "highlight": [
+            "B",
+            "C",
+            "H",
+            "O"
+          ],
+          "predicate": {
+            "kind": "equal_angle",
+            "args": [
+              "B",
+              "H",
+              "O",
+              "O",
+              "H",
+              "C"
+            ]
+          }
+        },
+        {
+          "id": "b7",
+          "claim": "Góc BHO và góc OHC đều bằng 90 độ.",
+          "justification": "B, H, C thẳng hàng nên hai góc BHO và OHC là hai góc kề bù; lại bằng nhau nên mỗi góc bằng 90 độ.",
+          "refs": [
+            "B",
+            "H",
+            "O",
+            "C"
+          ],
+          "highlight": [
+            "B",
+            "C",
+            "H",
+            "O"
+          ],
+          "predicate": {
+            "kind": "right_angle",
+            "args": [
+              "B",
+              "H",
+              "O"
+            ]
+          }
+        },
+        {
+          "id": "b8",
+          "claim": "OA vuông góc với BC tại H.",
+          "justification": "H thuộc OA và BC; từ góc BHO bằng 90 độ suy ra HO vuông góc với BC. Vì O, H, A thẳng hàng nên OA vuông góc với BC tại H.",
+          "refs": [
+            "O",
+            "A",
+            "B",
+            "C",
+            "H"
+          ],
+          "highlight": [
+            "O",
+            "A",
+            "B",
+            "C",
+            "H"
+          ],
+          "predicate": {
+            "kind": "perpendicular",
+            "args": [
+              "O",
+              "A",
+              "B",
+              "C"
+            ]
+          }
+        }
+      ],
+      "answer": "OA vuông góc với BC tại H."
+    },
+    {
+      "label": "c",
+      "statement": "Chứng minh AB² = AE·AD.",
+      "topic": "GEO-5",
+      "goal_type": "prove_equal_length",
+      "difficulty": 2,
+      "approach_ref": null,
+      "steps": [
+        {
+          "id": "c1",
+          "claim": "Gọi K là trung điểm của DE.",
+          "justification": "K được dựng là trung điểm của dây DE.",
+          "refs": [
+            "K",
+            "D",
+            "E"
+          ],
+          "highlight": [
+            "D",
+            "E",
+            "K"
+          ],
+          "predicate": {
+            "kind": "midpoint",
+            "args": [
+              "K",
+              "D",
+              "E"
+            ]
+          }
+        },
+        {
+          "id": "c2",
+          "claim": "OK vuông góc với DE tại K.",
+          "justification": "Đường kính đi qua trung điểm của dây thì vuông góc với dây đó.",
+          "refs": [
+            "O",
+            "K",
+            "D",
+            "E"
+          ],
+          "highlight": [
+            "O",
+            "K",
+            "D",
+            "E"
+          ],
+          "predicate": {
+            "kind": "perpendicular",
+            "args": [
+              "O",
+              "K",
+              "D",
+              "E"
+            ]
+          }
+        },
+        {
+          "id": "c3",
+          "claim": "A, E, K, D thẳng hàng và E nằm giữa A, D; K nằm giữa E, D.",
+          "justification": "A, D, E thẳng hàng theo cách dựng; vì A nằm ngoài đường tròn và đường thẳng AD cắt đường tròn tại E rồi tại D nên E nằm giữa A, D. K là trung điểm của DE nên K nằm giữa E, D.",
+          "refs": [
+            "A",
+            "E",
+            "K",
+            "D"
+          ],
+          "highlight": [
+            "A",
+            "E",
+            "K",
+            "D"
+          ],
+          "predicate": {
+            "kind": "collinear",
+            "args": [
+              "A",
+              "E",
+              "D"
+            ]
+          }
+        },
+        {
+          "id": "c4",
+          "claim": "AE nhân AD bằng AK bình phương trừ EK bình phương.",
+          "justification": "Vì K nằm giữa E, D và EK bằng KD nên AE bằng AK trừ EK, AD bằng AK cộng KD bằng AK cộng EK. Do đó AE nhân AD bằng (AK trừ EK) nhân (AK cộng EK) bằng AK bình phương trừ EK bình phương.",
+          "refs": [
+            "A",
+            "E",
+            "K",
+            "D"
+          ],
+          "highlight": [
+            "A",
+            "E",
+            "K",
+            "D"
+          ]
+        },
+        {
+          "id": "c5",
+          "claim": "AK bình phương bằng AO bình phương trừ OK bình phương.",
+          "justification": "Tam giác AOK vuông tại K vì OK vuông góc với AD và A, K thuộc AD. Theo định lý Pythagore, AO bình phương bằng AK bình phương cộng OK bình phương.",
+          "refs": [
+            "A",
+            "O",
+            "K"
+          ],
+          "highlight": [
+            "A",
+            "O",
+            "K"
+          ],
+          "predicate": {
+            "kind": "right_angle",
+            "args": [
+              "A",
+              "K",
+              "O"
+            ]
+          }
+        },
+        {
+          "id": "c6",
+          "claim": "EK bình phương bằng OB bình phương trừ OK bình phương.",
+          "justification": "Tam giác EOK vuông tại K. Theo định lý Pythagore, EO bình phương bằng EK bình phương cộng OK bình phương. Vì EO và OB là các bán kính của đường tròn (O) nên EO bằng OB.",
+          "refs": [
+            "E",
+            "O",
+            "K",
+            "O",
+            "B"
+          ],
+          "highlight": [
+            "E",
+            "O",
+            "K",
+            "B"
+          ],
+          "predicate": {
+            "kind": "right_angle",
+            "args": [
+              "E",
+              "K",
+              "O"
+            ]
+          }
+        },
+        {
+          "id": "c7",
+          "claim": "AE nhân AD bằng AO bình phương trừ OB bình phương.",
+          "justification": "Thay AK bình phương bằng AO bình phương trừ OK bình phương và EK bình phương bằng OB bình phương trừ OK bình phương vào hệ thức ở trên, ta được AE nhân AD bằng AO bình phương trừ OB bình phương.",
+          "refs": [
+            "A",
+            "E",
+            "D",
+            "O",
+            "B"
+          ],
+          "highlight": [
+            "A",
+            "E",
+            "D",
+            "O",
+            "B"
+          ]
+        },
+        {
+          "id": "c8",
+          "claim": "AB bình phương bằng AO bình phương trừ OB bình phương.",
+          "justification": "Tam giác AOB vuông tại B vì AB là tiếp tuyến của đường tròn (O) tại B. Theo định lý Pythagore, AO bình phương bằng AB bình phương cộng OB bình phương.",
+          "refs": [
+            "A",
+            "B",
+            "O"
+          ],
+          "highlight": [
+            "A",
+            "B",
+            "O"
+          ],
+          "predicate": {
+            "kind": "right_angle",
+            "args": [
+              "A",
+              "B",
+              "O"
+            ]
+          }
+        },
+        {
+          "id": "c9",
+          "claim": "AB bình phương bằng AE nhân AD.",
+          "justification": "Cả AB bình phương và AE nhân AD đều bằng AO bình phương trừ OB bình phương.",
+          "refs": [
+            "A",
+            "B",
+            "E",
+            "D"
+          ],
+          "highlight": [
+            "A",
+            "B",
+            "E",
+            "D"
+          ],
+          "predicate": {
+            "kind": "product_equal",
+            "args": [
+              "A",
+              "B",
+              "A",
+              "B",
+              "A",
+              "E",
+              "A",
+              "D"
+            ]
+          }
+        }
+      ],
+      "answer": "AB² = AE·AD."
+    }
+  ],
+  "verification": {
+    "algebra_ok": null,
+    "geometry_ok": true,
+    "n_configs": 5
+  },
+  "construction": {
+    "ops": [
+      {
+        "op": "free",
+        "name": "O",
+        "args": [],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "circle_center_radius",
+        "name": "w",
+        "args": [
+          "O"
+        ],
+        "params": {
+          "radius": 2
+        },
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "free",
+        "name": "A",
+        "args": [],
+        "params": {
+          "outside": "w"
+        },
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "tangent_from",
+        "name": "tB",
+        "args": [
+          "w",
+          "A"
+        ],
+        "params": {
+          "branch": 0,
+          "touch_point": "B"
+        },
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "tangent_from",
+        "name": "tC",
+        "args": [
+          "w",
+          "A"
+        ],
+        "params": {
+          "branch": 1,
+          "touch_point": "C"
+        },
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "line",
+        "name": "OAline",
+        "args": [
+          "O",
+          "A"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "line",
+        "name": "BCline",
+        "args": [
+          "B",
+          "C"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "intersect",
+        "name": "H",
+        "args": [
+          "OAline",
+          "BCline"
+        ],
+        "params": {
+          "branch": 0
+        },
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "reflect_point",
+        "name": "D",
+        "args": [
+          "B",
+          "O"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "line",
+        "name": "ADline",
+        "args": [
+          "A",
+          "D"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "intersect",
+        "name": "E",
+        "args": [
+          "ADline",
+          "w"
+        ],
+        "params": {
+          "not": "D"
+        },
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "segment",
+        "name": "AB",
+        "args": [
+          "A",
+          "B"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "segment",
+        "name": "AC",
+        "args": [
+          "A",
+          "C"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "segment",
+        "name": "BO",
+        "args": [
+          "B",
+          "O"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "segment",
+        "name": "OC",
+        "args": [
+          "O",
+          "C"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "segment",
+        "name": "OA",
+        "args": [
+          "O",
+          "A"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "segment",
+        "name": "BC",
+        "args": [
+          "B",
+          "C"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "segment",
+        "name": "BD",
+        "args": [
+          "B",
+          "D"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "segment",
+        "name": "AD",
+        "args": [
+          "A",
+          "D"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "segment",
+        "name": "AE",
+        "args": [
+          "A",
+          "E"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "right_angle_mark",
+        "name": null,
+        "args": [
+          "A",
+          "H",
+          "B"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "midpoint",
+        "name": "K",
+        "args": [
+          "D",
+          "E"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "segment",
+        "name": "DE",
+        "args": [
+          "D",
+          "E"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      },
+      {
+        "op": "segment",
+        "name": "AK",
+        "args": [
+          "A",
+          "K"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "auxiliary"
+      },
+      {
+        "op": "segment",
+        "name": "KD",
+        "args": [
+          "K",
+          "D"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "auxiliary"
+      },
+      {
+        "op": "segment",
+        "name": "OK",
+        "args": [
+          "O",
+          "K"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "auxiliary"
+      },
+      {
+        "op": "right_angle_mark",
+        "name": null,
+        "args": [
+          "D",
+          "K",
+          "O"
+        ],
+        "params": {},
+        "step_ref": null,
+        "style": "solid"
+      }
+    ],
+    "constraints": [],
+    "seed": null
+  }
+}

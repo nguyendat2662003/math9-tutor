@@ -18,6 +18,7 @@ class LLMResponse:
     tokens_in: int = 0
     tokens_out: int = 0
     model: str = ""
+    finish_reason: str = ""
 
     def json(self) -> dict:
         """Bóc ```json fence nếu có rồi parse."""
@@ -74,11 +75,23 @@ class OpenAICompatClient(LLMClient):
             raise RuntimeError(f"LLM trả về HTTP {r.status_code} (model={model}): {r.text[:500]}")
         data = r.json()
         usage = data.get("usage") or {}
+        choice = data["choices"][0]
+        text = choice["message"].get("content") or ""
+        finish = choice.get("finish_reason", "")
+        if not text.strip():
+            # Model kiểu reasoning có thể tiêu hết max_completion_tokens vào phần suy nghĩ
+            reasoning = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens")
+            raise RuntimeError(
+                f"LLM trả về rỗng (model={model}, finish_reason={finish}, "
+                f"completion_tokens={usage.get('completion_tokens')}, reasoning_tokens={reasoning}). "
+                "Thường do max_tokens quá thấp cho model reasoning."
+            )
         return LLMResponse(
-            text=data["choices"][0]["message"]["content"] or "",
+            text=text,
             tokens_in=usage.get("prompt_tokens", 0),
             tokens_out=usage.get("completion_tokens", 0),
             model=data.get("model", model),
+            finish_reason=finish,
         )
 
 

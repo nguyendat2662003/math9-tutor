@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -71,6 +72,14 @@ def load(path: str) -> list[dict]:
 # Chấm một bài
 # --------------------------------------------------------------------------
 
+_RE_NEEDS_OPTIONS = re.compile(r"nào (?:sau|dưới) đây|khẳng định nào|mệnh đề nào|phát biểu nào", re.I)
+_RE_HAS_OPTIONS = re.compile(r"(?:^|\s)[A-D][.)]\s")
+
+
+def _needs_options(statement: str) -> bool:
+    return bool(_RE_NEEDS_OPTIONS.search(statement)) and not _RE_HAS_OPTIONS.search(statement)
+
+
 def run_item(pipe, item: dict) -> dict:
     from math9_core.state import ProblemState
     from math9_curriculum.schema import Mode
@@ -98,7 +107,11 @@ def run_item(pipe, item: dict) -> dict:
     # Đáp án
     predicted = " ; ".join(sp.answer for sp in s.subproblems if sp.answer)
     row["answer_pred"] = predicted or None
-    if gold.get("answer"):
+    if _needs_options(item["statement"]):
+        # Trắc nghiệm "khẳng định nào sau đây" mà dữ liệu không lưu 4 phương án: không chấm được
+        row["answer_ok"] = None
+        row["data_issue"] = "trắc nghiệm thiếu phương án"
+    elif gold.get("answer"):
         row["answer_ok"] = grade_answer(predicted, gold["answer"]) if predicted else False
     else:
         row["answer_ok"] = None                       # bài chứng minh — chấm qua Verifier
@@ -147,6 +160,7 @@ def summarize(rows: list[dict], set_name: str) -> dict:
     m["curriculum_violation"] = (sum(1 for r in ok_rows if r["violations"]) / len(ok_rows)) if ok_rows else None
     m["confident_wrong"] = (sum(1 for r in ok_rows if r["confident_wrong"]) / len(ok_rows)) if ok_rows else None
     m["confidence_dist"] = {c: sum(1 for r in ok_rows if r["confidence"] == c) for c in ("high", "partial", "low")}
+    m["n_data_issue"] = sum(1 for r in rows if r.get("data_issue"))
     if ok_rows:
         ms = sorted(r["ms"] for r in ok_rows)
         m["latency_p50_s"] = round(ms[len(ms) // 2] / 1000, 1)
@@ -174,7 +188,7 @@ def print_report(m: dict, set_name: str) -> None:
     print(f"  Router topic       {pct(m['router_accuracy'])}   goal_type {pct(m['router_goal_accuracy'])}")
     print(f"  Vi phạm chương trình {pct(m['curriculum_violation'])}")
     print(f"  SAI MÀ TỰ TIN      {pct(m['confident_wrong'])}")
-    print(f"  Độ tin cậy: {m['confidence_dist']}")
+    print(f"  Độ tin cậy: {m['confidence_dist']}" + (f" · lỗi dữ liệu (không chấm): {m['n_data_issue']}" if m.get("n_data_issue") else ""))
     if "latency_p50_s" in m:
         print(f"  Độ trễ p50/p95: {m['latency_p50_s']}s / {m['latency_p95_s']}s · token TB {m['tokens_in_avg']}→{m['tokens_out_avg']}")
     if m["thresholds"]:
@@ -192,10 +206,31 @@ def main() -> None:
     ap.add_argument("--model")
     ap.add_argument("--out", default=None, help="mặc định evals/reports/<ngày>_<set>.json")
     ap.add_argument("--report", help="chỉ in lại một báo cáo đã có")
+    ap.add_argument("--regrade", help="chấm lại đáp án của báo cáo đã có bằng grader hiện tại (không gọi LLM)")
     args = ap.parse_args()
 
     if args.report:
         rep = json.loads(Path(args.report).read_text(encoding="utf-8"))
+        print_report(rep["metrics"], rep["set"])
+        return
+
+    if args.regrade:
+        p = Path(args.regrade)
+        rep = json.loads(p.read_text(encoding="utf-8"))
+        gold = {it["id"]: it["gold"] for it in load(EVAL_SETS[rep["set"]][0])}
+        for r in rep["rows"]:
+            if "error" in r:
+                continue
+            g = gold[r["id"]]
+            stmt = next(it["statement"] for it in load(EVAL_SETS[rep["set"]][0]) if it["id"] == r["id"])
+            if _needs_options(stmt):
+                r["answer_ok"], r["data_issue"] = None, "trắc nghiệm thiếu phương án"
+            elif g.get("answer"):
+                r["answer_ok"] = grade_answer(r["answer_pred"], g["answer"]) if r.get("answer_pred") else False
+            wrong = r["answer_ok"] is False or r.get("figure_ok") is False
+            r["confident_wrong"] = r["confidence"] == "high" and wrong
+        rep["metrics"] = summarize(rep["rows"], rep["set"])
+        p.write_text(json.dumps(rep, ensure_ascii=False, indent=1), encoding="utf-8")
         print_report(rep["metrics"], rep["set"])
         return
 
