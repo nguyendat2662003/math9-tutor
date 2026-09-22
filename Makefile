@@ -1,10 +1,13 @@
-.PHONY: install test lint api eval demo ui
+.PHONY: install test lint api eval demo ui web
 
 demo:
 	python tools/demo_draw.py --file demo/de.txt --out demo/out
 
 ui:
 	streamlit run apps/demo_streamlit.py
+
+web:
+	cd apps/web && npm run dev
 
 install:
 	pip install -e ".[dev]"

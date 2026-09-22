@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 from .construct import Figure
 from .layout import label_offsets
-from .primitives import Circle, Line, Point, Segment, dot
+from .primitives import Circle, Line, Point, Segment, dist, dot
 
 PALETTE = {
     "solid": "#1f2937",
@@ -78,7 +78,7 @@ class SvgRenderer:
             if highlight_step and self.fig.step_refs.get(name) == highlight_step:
                 style = "highlight"
             if isinstance(obj, Circle):
-                body.append(self._circle(obj, style))
+                body.append(self._wrap(name, "circle", self._circle(obj, style), self._pts_on(obj)))
         for name in self.fig.order:
             if name not in allowed:
                 continue
@@ -87,9 +87,9 @@ class SvgRenderer:
             if highlight_step and self.fig.step_refs.get(name) == highlight_step:
                 style = "highlight"
             if isinstance(obj, Segment):
-                body.append(self._seg(obj.a, obj.b, style))
+                body.append(self._wrap(name, "segment", self._seg(obj.a, obj.b, style), self._pts_on(obj)))
             elif isinstance(obj, Line):
-                body.append(self._infinite_line(obj, style))
+                body.append(self._wrap(name, "line", self._infinite_line(obj, style), self._pts_on(obj)))
 
         body += self._marks(allowed)
 
@@ -98,14 +98,14 @@ class SvgRenderer:
             if name not in allowed:
                 continue
             x, y = self.T(p)
-            body.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="{PALETTE["point"]}"/>')
             dx, dy = offs.get(name, (12, -12))
-            body.append(
+            body.append(self._wrap(name, "point", (
+                f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="{PALETTE["point"]}"/>'
                 f'<text x="{x + dx:.1f}" y="{y + dy:.1f}" font-size="15" '
                 f'font-family="Georgia, serif" font-style="italic" '
                 f'fill="{PALETTE["label"]}" text-anchor="middle" '
                 f'dominant-baseline="central">{name}</text>'
-            )
+            ), [name]))
 
         return (
             f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '
@@ -115,6 +115,22 @@ class SvgRenderer:
             + "".join(body)
             + "</svg>"
         )
+
+    @staticmethod
+    def _wrap(name: str, kind: str, inner: str, pts: list[str]) -> str:
+        """Bọc mỗi đối tượng trong <g data-name data-kind data-pts> để frontend tô sáng theo bước."""
+        return f'<g data-name="{name}" data-kind="{kind}" data-pts="{",".join(pts)}">{inner}</g>'
+
+    def _pts_on(self, obj) -> list[str]:
+        """Tên các điểm nằm trên đối tượng (đầu mút đoạn, điểm trên đường/đường tròn)."""
+        out = []
+        for n, p in self.fig.points().items():
+            if isinstance(obj, Segment):
+                if dist(p, obj.a) < 1e-7 or dist(p, obj.b) < 1e-7:
+                    out.append(n)
+            elif isinstance(obj, (Line, Circle)) and obj.contains(p, tol=1e-6):
+                out.append(n)
+        return out
 
     def _allowed_names(self, up_to_step: str | None) -> set[str]:
         if up_to_step is None:

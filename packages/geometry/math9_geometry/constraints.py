@@ -2,6 +2,11 @@
 
 Ví dụ: "lấy M trên cung nhỏ BC sao cho MB = 2MC". Không có phép dựng thước
 compa trực tiếp, nên ta đặt M tự do trên cung rồi tối ưu vị trí.
+
+Biến số là tham số của MỌI điểm tự do (FREE: x, y; ON_OBJECT: một tham số trên
+đối tượng). Mỗi lần thử một bộ tham số, TOÀN BỘ hình được dựng lại từ đầu, nên
+các điểm phụ thuộc (giao điểm, chân đường cao...) luôn đúng quan hệ — và ràng
+buộc có thể nhắc tới cả những điểm phụ thuộc đó.
 """
 
 from __future__ import annotations
@@ -9,7 +14,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.optimize import least_squares
 
-from .dsl import Constraint
+from .dsl import Construction, OpKind
 from .primitives import Circle, GeometryError, Point, angle_at, dist
 
 
@@ -40,35 +45,46 @@ def _circum(a: Point, b: Point, c: Point) -> Circle:
     return circumcircle(a, b, c)
 
 
-def solve_constraints(ctor, constraints: list[Constraint], max_iter: int = 200) -> None:
-    """Tinh chỉnh vị trí các điểm tự do để thỏa mãn ràng buộc.
+def solve_constraints(ctor, construction: Construction, max_iter: int = 300) -> None:
+    """Tinh chỉnh tham số các điểm tự do để thỏa mãn ràng buộc, rồi dựng lại hình."""
+    ops = construction.ops
+    free_ops = [o for o in ops if o.op in (OpKind.FREE, OpKind.ON_OBJECT) and o.name]
+    if not free_ops:
+        raise GeometryError("Không có điểm tự do nào để thỏa ràng buộc")
 
-    Chỉ di chuyển những điểm được sinh bởi FREE/ON_OBJECT — các điểm dựng
-    được giữ nguyên quan hệ vì chúng sẽ được tính lại sau.
-    """
-    movable = [
-        n for n in ctor.order
-        if isinstance(ctor.objects.get(n), Point) and ctor.styles.get(n) != "locked"
-    ]
-    involved = {a for c in constraints for a in c.args}
-    movable = [n for n in movable if n in involved]
-    if not movable:
-        raise GeometryError("Không có điểm nào có thể di chuyển để thỏa ràng buộc")
+    # Tham số ban đầu lấy từ hình vừa dựng
+    x0: list[float] = []
+    layout: list[tuple[str, int]] = []          # (tên, số tham số)
+    for o in free_ops:
+        p = ctor.objects[o.name]
+        if o.op == OpKind.FREE:
+            x0 += [p.x, p.y]
+            layout.append((o.name, 2))
+        else:
+            x0.append(ctor.param_of(ctor._get(o.args[0]), p))
+            layout.append((o.name, 1))
 
-    x0 = np.array([v for n in movable for v in ctor.objects[n].as_tuple()])
+    def apply(x: np.ndarray) -> None:
+        i = 0
+        for name, n in layout:
+            ctor.overrides[name] = tuple(float(v) for v in x[i:i + n])
+            i += n
+        ctor.rebuild(ops)
 
     def f(x: np.ndarray) -> list[float]:
-        for i, n in enumerate(movable):
-            ctor.objects[n] = Point(float(x[2 * i]), float(x[2 * i + 1]))
+        try:
+            apply(x)
+        except GeometryError:
+            return [1e3] * len(construction.constraints)
         out = []
-        for c in constraints:
+        for c in construction.constraints:
             try:
                 out.append(_residual(c.kind, [ctor._pt(a) for a in c.args], c.value))
             except GeometryError:
                 out.append(1e3)
         return out
 
-    res = least_squares(f, x0, max_nfev=max_iter)
-    f(res.x)
-    if max(abs(r) for r in f(res.x)) > 1e-6:
-        raise GeometryError("Không tìm được cấu hình thỏa mãn mọi ràng buộc")
+    res = least_squares(f, np.array(x0), max_nfev=max_iter)
+    worst = max(abs(r) for r in f(res.x))
+    if worst > 1e-6:
+        raise GeometryError(f"Không tìm được cấu hình thỏa mãn mọi ràng buộc (sai lệch {worst:.2e})")

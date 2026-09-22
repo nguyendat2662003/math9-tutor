@@ -1,0 +1,83 @@
+:root {
+  --bg: #fafaf9;
+  --panel: #ffffff;
+  --ink: #1c1917;
+  --muted: #78716c;
+  --line: #e7e5e4;
+  --accent: #2563eb;
+  --accent-soft: #dbeafe;
+  --ok: #15803d;
+  --ok-soft: #dcfce7;
+  --warn: #b45309;
+  --warn-soft: #fef3c7;
+  --bad: #b91c1c;
+  --bad-soft: #fee2e2;
+  --hl: #dc2626;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "Segoe UI", system-ui, -apple-system, sans-serif; }
+button, textarea, select { font: inherit; }
+
+.app { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+.app__head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.app__head h1 { font-size: 22px; margin: 0; }
+.app__head span { color: var(--muted); font-size: 14px; }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.grid { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; margin-top: 16px; }
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+textarea { width: 100%; min-height: 120px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; resize: vertical; }
+select { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.btn { padding: 9px 18px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn--ghost { background: #fff; color: var(--accent); }
+.chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; background: var(--accent-soft); color: var(--accent); margin-right: 6px; }
+.chip--muted { background: #f5f5f4; color: var(--muted); }
+.muted { color: var(--muted); font-size: 14px; }
+.samples { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.samples button { padding: 4px 10px; font-size: 13px; border: 1px solid var(--line); background: #fff; border-radius: 999px; cursor: pointer; }
+
+/* tiến trình */
+.stages { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.stages li { display: flex; gap: 10px; align-items: center; font-size: 14px; color: var(--muted); }
+.stages li.done { color: var(--ink); }
+.stages li.active { color: var(--accent); font-weight: 600; }
+.stages li .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); flex: none; }
+.stages li.done .dot { background: var(--ok); }
+.stages li.active .dot { background: var(--accent); animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: .3; } }
+
+/* độ tin cậy */
+.conf { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; }
+.conf--high { background: var(--ok-soft); color: var(--ok); }
+.conf--partial { background: var(--warn-soft); color: var(--warn); }
+.conf--low { background: var(--bad-soft); color: var(--bad); }
+.conf strong { font-size: 15px; }
+
+/* gợi ý & lời giải */
+.hints { margin: 0; padding-left: 20px; }
+.hints li { margin: 6px 0; }
+.sub { margin-top: 14px; }
+.sub h3 { margin: 0 0 6px; font-size: 16px; }
+.step { padding: 8px 10px; border-radius: 6px; border-left: 3px solid transparent; cursor: default; }
+.step:hover, .step.active { background: #fff7ed; border-left-color: var(--hl); }
+.step__why { color: var(--muted); font-size: 14px; }
+.step__pred { font-size: 12px; color: var(--ok); margin-left: 6px; }
+.answer { margin-top: 6px; font-weight: 600; }
+.reveal { margin-top: 10px; }
+
+/* hình */
+.figure { position: sticky; top: 16px; }
+.figure svg { width: 100%; height: auto; }
+.figure svg g.hl line, .figure svg g.hl circle, .figure svg g.hl polyline { stroke: var(--hl) !important; stroke-width: 2.6 !important; }
+.figure svg g.hl[data-kind="point"] circle { fill: var(--hl) !important; r: 4.5; }
+.figure svg g.hl text { fill: var(--hl) !important; font-weight: bold; }
+.figure svg g.dim { opacity: .35; }
+
+details { margin-top: 12px; }
+details summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+pre { background: #f5f5f4; padding: 10px; border-radius: 6px; font-size: 12px; overflow: auto; }
+.error { background: var(--bad-soft); color: var(--bad); padding: 10px 14px; border-radius: 8px; }

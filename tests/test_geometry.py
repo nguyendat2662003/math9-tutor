@@ -102,3 +102,25 @@ def test_lemma_finder_discovers_midpoint(two_tangents):
     """Bộ dò bổ đề phải tìm ra H là trung điểm BC mà không được mách trước."""
     lemmas = find_lemmas(two_tangents, limit=20)
     assert any(str(p.kind) == "midpoint" and p.args[0] == "H" for p in lemmas)
+
+
+def test_constraints_rebuild_dependents():
+    """Ràng buộc dời điểm tự do thì mọi điểm phụ thuộc phải được dựng lại theo —
+    lỗi từng gặp thật: hình vẽ có điểm nằm lệch khỏi đường tròn sau khi giải ràng buộc."""
+    from math9_geometry.dsl import Constraint
+
+    c = Construction(ops=[
+        Op(op="free", name="B"),
+        Op(op="free", name="C", params={"min_dist": ["B", 3.0]}),
+        Op(op="circle_diameter", name="w", args=["B", "C"]),
+        Op(op="on_object", name="M", args=["w"]),
+        Op(op="foot", name="H", args=["M", "line:BC"]),       # phụ thuộc M
+    ], constraints=[Constraint(kind="ratio", args=["M", "B", "M", "C"], value=2.0)])
+    fig = build(c, seed=5)
+    M, B, C, H = (fig.point(n) for n in "MBCH")
+    assert abs(dist(M, B) - 2 * dist(M, C)) < 1e-6          # ràng buộc thỏa
+    assert fig.objects["w"].contains(M, tol=1e-6)            # M vẫn trên đường tròn
+    from math9_geometry.primitives import Line
+    assert Line.through(B, C).contains(H, tol=1e-6)          # H dựng lại theo M mới
+    assert abs((M - H).x * (C - B).x + (M - H).y * (C - B).y) < 1e-6
+    assert verify(c, [Predicate("right_angle", ["B", "M", "C"])]).ok

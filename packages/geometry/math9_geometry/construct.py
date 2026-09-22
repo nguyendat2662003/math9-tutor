@@ -88,6 +88,8 @@ class Constructor:
         self.order: list[str] = []
         self.styles: dict[str, str] = {}
         self.step_refs: dict[str, str | None] = {}
+        #: Tham số ghi đè cho điểm tự do (FREE: (x, y); ON_OBJECT: (t,)) — bộ giải ràng buộc dùng.
+        self.overrides: dict[str, tuple[float, ...]] = {}
 
     # -- truy xuất -------------------------------------------------------
 
@@ -158,12 +160,11 @@ class Constructor:
         errs = validate_ops(construction.ops)
         if errs:
             raise GeometryError("Kịch bản không hợp lệ: " + "; ".join(errs[:5]))
-        for op in construction.ops:
-            self._exec(op)
+        self.rebuild(construction.ops)
         if construction.constraints:
             from .constraints import solve_constraints
 
-            solve_constraints(self, construction.constraints)
+            solve_constraints(self, construction)
         return Figure(
             objects=dict(self.objects),
             marks=list(self.marks),
@@ -172,6 +173,15 @@ class Constructor:
             step_refs=dict(self.step_refs),
             seed=self.seed,
         )
+
+    def rebuild(self, ops: list[ConstructionOp]) -> None:
+        """Dựng lại toàn bộ từ đầu với cùng seed. Điểm tự do có trong `overrides`
+        nhận tham số ghi đè; các điểm khác ra đúng như lần trước (rng cùng seed)."""
+        self.rng = random.Random(self.seed)
+        self.objects, self.marks, self.order = {}, [], []
+        self.styles, self.step_refs = {}, {}
+        for op in ops:
+            self._exec(op)
 
     def _exec(self, op: ConstructionOp) -> None:  # noqa: C901
         k, a, p = op.op, op.args, op.params
@@ -190,10 +200,17 @@ class Constructor:
 
         # --- điểm ---------------------------------------------------------
         if k == OpKind.FREE:
-            self._put(name, self._random_point(p), op)
+            pt = self._random_point(p)               # luôn gọi để rng tiêu thụ như nhau
+            if name in self.overrides:
+                pt = Point(*self.overrides[name])
+            self._put(name, pt, op)
 
         elif k == OpKind.ON_OBJECT:
-            self._put(name, self._random_on(self._get(a[0]), p), op)
+            obj = self._get(a[0])
+            pt = self._random_on(obj, p)
+            if name in self.overrides:
+                pt = self.point_on(obj, self.overrides[name][0])
+            self._put(name, pt, op)
 
         elif k == OpKind.MIDPOINT:
             self._put(name, midpoint(self._pt(a[0]), self._pt(a[1])), op)
@@ -325,6 +342,29 @@ class Constructor:
                     continue
             return q
         raise GeometryError("Không sinh được điểm tự do thỏa ràng buộc vị trí")
+
+    @staticmethod
+    def point_on(obj: GeoObject, t: float) -> Point:
+        """Điểm trên đối tượng theo một tham số: góc (đường tròn) hoặc t (đoạn/đường)."""
+        if isinstance(obj, Circle):
+            return obj.point_at(t)
+        if isinstance(obj, Segment):
+            return divide_ratio(obj.a, obj.b, t)
+        if isinstance(obj, Line):
+            return Point(obj.p.x + obj.d.x * t, obj.p.y + obj.d.y * t)
+        raise GeometryError("Không đặt được điểm trên đối tượng này")
+
+    @staticmethod
+    def param_of(obj: GeoObject, q: Point) -> float:
+        """Nghịch đảo của point_on: tham số của điểm q đang nằm trên obj."""
+        if isinstance(obj, Circle):
+            return math.atan2(q.y - obj.center.y, q.x - obj.center.x)
+        if isinstance(obj, Segment):
+            d = obj.b - obj.a
+            return ((q - obj.a).x * d.x + (q - obj.a).y * d.y) / max(d.norm() ** 2, 1e-12)
+        if isinstance(obj, Line):
+            return (q - obj.p).x * obj.d.x + (q - obj.p).y * obj.d.y
+        raise GeometryError("Không đặt được điểm trên đối tượng này")
 
     def _random_on(self, obj: GeoObject, params: dict) -> Point:
         if isinstance(obj, Circle):

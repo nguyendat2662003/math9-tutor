@@ -1,36 +1,44 @@
 # Frontend
 
-Next.js 15 (App Router). Chưa dựng UI — đây là khung thư mục và tầng dữ liệu.
+Next.js 15 (App Router), TypeScript, không dùng framework CSS.
 
-## Thư viện
-| Việc | Thư viện |
-|---|---|
-| Render công thức | KaTeX |
-| Nhập công thức | MathLive (bàn phím toán ảo — quan trọng trên mobile) |
-| Hình học tương tác | JSXGraph |
-| Luồng phản hồi | SSE (native EventSource / fetch stream) |
+```bash
+cd apps/web && npm install
+npm run dev            # http://localhost:3000 — cần API chạy ở :8000 (make api)
+npm run typecheck
+```
 
-## Ba yêu cầu giao diện đặc thù
+Biến môi trường: `NEXT_PUBLIC_API_URL` (mặc định `http://localhost:8000`).
 
-**Hình đồng bộ với bước giải.** Hover hoặc chạm vào một bước → tô sáng các đối
-tượng tương ứng trên hình. Dùng trường `highlight` trong `Step`. Đây là điểm
-khác biệt sư phạm lớn nhất so với các sản phẩm hiện có.
+## Ba yêu cầu giao diện đặc thù — đã làm
 
-**Chế độ gợi ý là MẶC ĐỊNH.** Che đáp án, hiện `hints` trước. Học sinh bấm
-"xem lời giải" mới mở. Đây là yêu cầu sư phạm, không phải tùy chọn — một
-chatbot giải sẵn bài tập sẽ bị giáo viên phản đối và làm học sinh học kém đi.
+**Hình đồng bộ với bước giải.** Di chuột/chạm vào một bước → tô sáng các đối tượng
+tương ứng trên hình, làm mờ phần còn lại. Engine bọc mỗi đối tượng SVG trong
+`<g data-name data-kind data-pts>`; `components/figure/Figure.tsx` khớp
+`Step.highlight` (hoặc `refs`) với các thuộc tính đó. Đây là điểm khác biệt sư
+phạm lớn nhất so với các sản phẩm hiện có.
 
-**Nhãn độ tin cậy.** Khi `confidence !== "high"`, hiển thị rõ ràng, không giấu.
-Trả lời sai một cách tự tin là lỗi tệ nhất mà sản phẩm này có thể mắc.
+**Chế độ gợi ý là MẶC ĐỊNH.** `SolutionView` che lời giải, hiện `hints` trước;
+học sinh bấm "Em đã thử — xem lời giải" mới mở. Có thể tắt gợi ý ở ô nhập
+(khi đó lời giải hiện ngay).
+
+**Nhãn độ tin cậy.** `ConfidenceBadge` luôn hiện, đổi màu theo `confidence`,
+kèm lý do (SymPy khớp, hình đúng n/5 cấu hình, kết luận sai, vượt chương trình).
 
 ## Cấu trúc
 ```
-app/                 route + layout
+app/page.tsx                 màn hình chính: nhập đề → tiến trình SSE → kết quả
 components/
-  chat/              khung hội thoại, bong bóng tin nhắn
-  math-input/        MathLive wrapper, bàn phím toán
-  solution-view/     danh sách bước + KaTeX + nhãn độ tin cậy
-  figure/            JSXGraph wrapper, đồng bộ highlight theo bước
-lib/api.ts           client SSE
-types/state.ts       phản chiếu ProblemState
+  chat/ProblemInput.tsx      ô nhập, chế độ, bài mẫu
+  chat/StageProgress.tsx     tiến trình theo sự kiện SSE (kể cả lần giải lại)
+  solution-view/             gợi ý, các bước, đáp án, nhãn độ tin cậy
+  figure/Figure.tsx          SVG + tô sáng theo bước
+  MathText.tsx               KaTeX cho $...$ (dự phòng; Solver xuất Unicode)
+lib/api.ts                   client SSE (stage / done / error)
+types/state.ts               phản chiếu ProblemState — giữ đồng bộ với state.py
 ```
+
+## Chưa làm
+- MathLive (bàn phím toán ảo) — hiện là textarea thường.
+- JSXGraph tương tác — hiện là SVG tĩnh có tô sáng; đủ cho yêu cầu đồng bộ bước.
+- Đăng nhập, lịch sử bài, đầu vào ảnh.

@@ -34,7 +34,7 @@ def _public_state(s: ProblemState) -> dict:
     d["confidence"] = s.confidence().value
     d["verification"]["detail"] = {
         k: v for k, v in d["verification"]["detail"].items()
-        if k in ("geometry", "algebra", "unresolved", "bad_predicates")
+        if k in ("geometry", "algebra", "bad_predicates", "draftsman_error", "retry_feedback")
     }
     d["tokens"] = {"in": sum(t.tokens_in for t in s.trace), "out": sum(t.tokens_out for t in s.trace)}
     return d
