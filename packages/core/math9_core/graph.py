@@ -193,7 +193,9 @@ class Pipeline:
                 if not st.predicate:
                     continue
                 try:
-                    out.append(Predicate(st.predicate["kind"], list(st.predicate["args"]), st.predicate.get("value")))
+                    out.append(Predicate(
+                        st.predicate["kind"], [str(a) for a in st.predicate["args"]], _num(st.predicate.get("value")),
+                    ))
                 except (KeyError, ValueError, TypeError) as e:
                     bad.append(f"{st.id}: {e}")
         if bad:
@@ -251,6 +253,17 @@ class Pipeline:
             and v.algebra_ok is not False
             and v.geometry_ok is not False
         )
+
+
+def _num(v) -> float | None:
+    """value của predicate: số, hoặc biểu thức như 'sqrt(2)', '1/2' -> float."""
+    if v is None or v == "":
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    import sympy as sp
+
+    return float(sp.sympify(str(v).replace("√", "sqrt").replace("^", "**")))
 
 
 def build_pipeline(

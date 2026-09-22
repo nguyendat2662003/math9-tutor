@@ -75,7 +75,13 @@ class Agent(ABC):
         try:
             return json.loads(t, strict=False)
         except json.JSONDecodeError:
-            return json.loads(_repair_latex_escapes(t), strict=False)
+            try:
+                return json.loads(_repair_latex_escapes(t), strict=False)
+            except json.JSONDecodeError as e:
+                raise ValueError(
+                    f"LLM không trả JSON hợp lệ ({e.msg}); {len(resp.text)} ký tự, "
+                    f"đầu: {resp.text[:120]!r} ... cuối: {resp.text[-80:]!r}"
+                ) from e
 
 
 #: Lệnh LaTeX bắt đầu bằng ký tự trùng escape JSON (\b \f \n \r \t \u) — nếu không

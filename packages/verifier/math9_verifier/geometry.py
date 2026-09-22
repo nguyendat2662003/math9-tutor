@@ -77,8 +77,8 @@ def verify(
         worst, err = 0.0, None
         try:
             worst = max(residual(f, c) for f in figs)
-        except (GeometryError, KeyError, IndexError) as e:
-            err = str(e)
+        except (GeometryError, KeyError, IndexError, TypeError, ValueError, ZeroDivisionError) as e:
+            err = f"{type(e).__name__}: {e}"
         results.append(
             PredicateResult(
                 predicate=c,
