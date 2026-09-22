@@ -16,7 +16,7 @@ import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from math9_curriculum.guardrail import check as guardrail_check
 from math9_curriculum.guardrail import feedback_message
@@ -55,16 +55,28 @@ class Pipeline:
     pedagogue: PedagogueAgent
     rag: "RagService | None" = None
     enable_hints: bool = True
+    #: Gọi ở mỗi giai đoạn: on_stage(tên, payload). API dùng để stream SSE.
+    on_stage: "Callable[[str, dict], None] | None" = None
+
+    def _emit(self, stage: str, **payload) -> None:
+        if self.on_stage:
+            self.on_stage(stage, payload)
 
     # -- luồng chính ------------------------------------------------------
 
     def run(self, state: ProblemState) -> ProblemState:
+        self._emit("parsing")
         state = self.parser(state)
+        self._emit("routing")
         state = self.router(state)
+        self._emit("routed", topic=state.topic, difficulty=state.difficulty,
+                   subproblems=[{"label": sp.label, "goal_type": sp.goal_type} for sp in state.subproblems])
         self._retrieve(state)          # RAG: nạp chiến lược + bài mẫu vào state
 
         while True:
+            self._emit("solving", geometry=state.is_geometry(), attempt=state.attempts)
             state = self._solve_and_draw(state)
+            self._emit("verifying")
             state = self._verify(state)
 
             if self._passed(state) or state.attempts >= state.max_attempts:
@@ -72,13 +84,16 @@ class Pipeline:
 
             state.attempts += 1
             log.info("Kiểm chứng thất bại, thử lại lần %d", state.attempts)
+            self._emit("retrying", attempt=state.attempts, reasons=_short_reasons(state))
             state = self.critic(state)
             self._draftsman_feedback(state)
             if state.difficulty >= 3:
                 self._attach_lemmas(state)
 
+        self._emit("rendering")
         state = self._render(state)
         if self.enable_hints and state.confidence() != Confidence.LOW:
+            self._emit("hinting")
             state = self.pedagogue(state)
         return state
 
@@ -255,6 +270,16 @@ class Pipeline:
         )
 
 
+def _short_reasons(state: ProblemState) -> list[str]:
+    v = state.verification
+    out = [x["detail"] for x in v.violations]
+    out += v.detail.get("geometry", {}).get("failures", [])
+    out += v.cross_check
+    if v.algebra_ok is False:
+        out.append("SymPy giải lại không khớp đáp án")
+    return out[:6]
+
+
 def _num(v) -> float | None:
     """value của predicate: số, hoặc biểu thức như 'sqrt(2)', '1/2' -> float."""
     if v is None or v == "":
@@ -269,6 +294,7 @@ def _num(v) -> float | None:
 def build_pipeline(
     llm: "LLMClient | None" = None, model: str | None = None, rag: bool = True,
     require_reviewed: bool = True, enable_hints: bool = True,
+    on_stage: "Callable[[str, dict], None] | None" = None,
 ) -> Pipeline:
     """Dựng Pipeline hoàn chỉnh từ biến môi trường.
 
@@ -294,6 +320,7 @@ def build_pipeline(
         pedagogue=PedagogueAgent(llm, model),
         rag=rag_service,
         enable_hints=enable_hints,
+        on_stage=on_stage,
     )
 
 
