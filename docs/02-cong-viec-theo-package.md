@@ -131,7 +131,7 @@ phụ mà Solver dùng), `build_pipeline()` dựng từ `.env`, `OpenAICompatCli
 
 ---
 
-## agents ✅ (trừ Parser ảnh)
+## agents ✅
 
 | Agent | Trạng thái | Ghi chú |
 |---|---|---|

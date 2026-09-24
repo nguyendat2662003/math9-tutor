@@ -46,4 +46,4 @@ từ ảnh hiện ngay trong khung tiến trình để học sinh đối chiếu
 ## Chưa làm
 - MathLive (bàn phím toán ảo) — hiện là textarea thường.
 - JSXGraph tương tác — hiện là SVG tĩnh có tô sáng; đủ cho yêu cầu đồng bộ bước.
-- Đăng nhập, lịch sử bài, đầu vào ảnh.
+- Đăng nhập, lịch sử bài.
