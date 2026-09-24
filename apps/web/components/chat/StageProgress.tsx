@@ -16,6 +16,8 @@ export function StageProgress({ events, done }: { events: StageEvent[]; done: bo
   const seen = new Set(events.map((e) => e.stage));
   const current = events[events.length - 1]?.stage;
   const routed = events.find((e) => e.stage === "routed");
+  const parsed = events.find((e) => e.stage === "parsed");
+  const fromImage = events.some((e) => e.stage === "parsing" && e.from_image);
   const retries = events.filter((e) => e.stage === "retrying");
 
   return (
@@ -28,7 +30,7 @@ export function StageProgress({ events, done }: { events: StageEvent[]; done: bo
           return (
             <li key={s} className={isActive ? "active" : isDone ? "done" : ""}>
               <span className="dot" />
-              {LABEL[s]}
+              {s === "parsing" && fromImage ? "Đọc đề bài từ ảnh" : LABEL[s]}
               {s === "routing" && routed && (
                 <span className="muted">
                   — {routed.topic} · {routed.subproblems?.map((sp) => `${sp.label}) ${sp.goal_type ?? "?"}`).join(", ")}
@@ -38,6 +40,12 @@ export function StageProgress({ events, done }: { events: StageEvent[]; done: bo
           );
         })}
       </ul>
+      {parsed?.statement && (
+        <details className="ocr" open>
+          <summary>Đề đọc được từ ảnh {parsed.note ? `— ${parsed.note}` : ""}</summary>
+          <pre>{parsed.statement}</pre>
+        </details>
+      )}
       {retries.map((r, i) => (
         <div key={i} className="muted" style={{ marginTop: 8 }}>
           Lần {r.attempt}: kiểm tra chưa đạt, đang giải lại — {r.reasons?.slice(0, 2).join("; ")}

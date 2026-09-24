@@ -32,7 +32,7 @@ class LLMClient(ABC):
     @abstractmethod
     def complete(
         self, system: str, user: str, *, model: str, max_tokens: int = 4000,
-        temperature: float = 0.2, thinking: bool = False,
+        temperature: float = 0.2, thinking: bool = False, images: list[str] | None = None,
     ) -> LLMResponse: ...
 
 
@@ -40,7 +40,7 @@ class AnthropicClient(LLMClient):
     def __init__(self, api_key: str | None = None):
         self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", "")
 
-    def complete(self, system, user, *, model, max_tokens=4000, temperature=0.2, thinking=False):
+    def complete(self, system, user, *, model, max_tokens=4000, temperature=0.2, thinking=False, images=None):
         raise NotImplementedError("Nối vào SDK anthropic ở đây")
 
 
@@ -52,12 +52,17 @@ class OpenAICompatClient(LLMClient):
         self.api_key = api_key or os.environ.get("OPENAI_API_KEY", "")
         self.timeout = timeout
 
-    def complete(self, system, user, *, model, max_tokens=4000, temperature=0.2, thinking=False):
+    def complete(self, system, user, *, model, max_tokens=4000, temperature=0.2, thinking=False, images=None):
         import httpx
 
+        content: str | list[dict] = user
+        if images:
+            content = [{"type": "text", "text": user}] + [
+                {"type": "image_url", "image_url": {"url": to_data_url(i)}} for i in images
+            ]
         body: dict = {
             "model": model,
-            "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+            "messages": [{"role": "system", "content": system}, {"role": "user", "content": content}],
             "max_completion_tokens": max_tokens,
         }
         # Một số model mới không nhận temperature khác mặc định; chỉ gửi khi khác 1.0
@@ -133,10 +138,27 @@ def default_model() -> str:
     return os.environ.get("MODEL_NAME") or os.environ.get("MODEL_API_KEY") or "gpt-4.1-mini"
 
 
+def to_data_url(image: str | os.PathLike) -> str:
+    """Nhận data URL sẵn có, hoặc đường dẫn file ảnh -> data URL base64."""
+    import base64
+    import mimetypes
+    from pathlib import Path
+
+    s = str(image)
+    if s.startswith("data:"):
+        return s
+    p = Path(s)
+    mime = mimetypes.guess_type(p.name)[0] or "image/png"
+    return f"data:{mime};base64,{base64.b64encode(p.read_bytes()).decode()}"
+
+
 # --- chính sách định tuyến model -----------------------------------------
 
 #: (vai trò, độ khó) -> tên model. Sửa ở ĐÂY, không rải rác trong agent.
 MODEL_POLICY: dict[tuple[str, int], str] = {
+    ("parser", 1): "api:vision",
+    ("parser", 2): "api:vision",
+    ("parser", 3): "api:vision",
     ("router", 1): "local:qwen3-8b",
     ("router", 2): "local:qwen3-8b",
     ("router", 3): "local:qwen3-8b",

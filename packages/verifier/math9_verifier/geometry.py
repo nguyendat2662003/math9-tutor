@@ -102,11 +102,24 @@ def cross_check_solution(construction: Construction, referenced: set[str]) -> li
 
     Nếu lời giải nhắc tới điểm K mà kịch bản không dựng K, một trong hai agent
     đã hiểu sai đề. Đây là tín hiệu cảnh báo sớm rất rẻ.
+
+    Lời giải hay nhắc tới đoạn "OB", góc "∠ABO", tam giác "ABC" — đó là tổ hợp
+    của các điểm, không phải đối tượng riêng. Chúng hợp lệ khi MỌI điểm thành
+    phần đều có trên hình; bắt lỗi chúng sẽ gây giải lại vô ích.
     """
     try:
         fig = build(construction, seed=DEFAULT_SEEDS[0])
     except GeometryError as e:
         return [f"Không dựng được hình: {e}"]
-    known = set(fig.objects) | {c for n in fig.objects for c in n}
-    missing = sorted(referenced - known)
+
+    objects = set(fig.objects)
+    points = set(fig.points())
+    missing = []
+    for ref in sorted(referenced):
+        bare = "".join(c for c in ref if c.isalnum())      # bỏ ∠, (), khoảng trắng
+        if not bare or ref in objects or bare in objects:
+            continue
+        if all(c in points for c in bare):                  # 'OB', 'ABC' — tổ hợp điểm đã có
+            continue
+        missing.append(ref)
     return [f"Lời giải nhắc tới '{m}' nhưng hình không có" for m in missing]

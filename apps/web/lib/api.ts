@@ -11,17 +11,29 @@ export interface SolveHandlers {
   onError: (message: string) => void;
 }
 
+export async function uploadImage(file: File): Promise<{ image_id: string; bytes: number }> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`${BASE}/api/upload`, { method: "POST", body: form });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => null);
+    throw new Error(detail?.detail ?? `Tải ảnh thất bại (${res.status})`);
+  }
+  return res.json();
+}
+
 export async function solveStreaming(
   text: string,
   mode: Mode,
   hints: boolean,
+  imageId: string | null,
   h: SolveHandlers,
   signal?: AbortSignal,
 ): Promise<void> {
   const res = await fetch(`${BASE}/api/solve`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, mode, hints, stream: true }),
+    body: JSON.stringify({ text, mode, hints, image_id: imageId, stream: true }),
     signal,
   });
   if (!res.ok) throw new Error(`API trả về ${res.status}`);

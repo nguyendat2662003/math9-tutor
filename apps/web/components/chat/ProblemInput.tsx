@@ -1,6 +1,7 @@
 "use client";
 
 import type { Mode } from "../../types/state";
+import { ImagePicker, type PickedImage } from "./ImagePicker";
 
 const SAMPLES: { label: string; text: string }[] = [
   {
@@ -22,6 +23,9 @@ interface Props {
   mode: Mode;
   hints: boolean;
   busy: boolean;
+  image: PickedImage | null;
+  onImage: (img: PickedImage | null) => void;
+  onError: (msg: string) => void;
   onText: (t: string) => void;
   onMode: (m: Mode) => void;
   onHints: (h: boolean) => void;
@@ -35,9 +39,12 @@ export function ProblemInput(p: Props) {
       <textarea
         value={p.text}
         onChange={(e) => p.onText(e.target.value)}
-        placeholder="Dán đề bài Toán 9 vào đây (đại số hoặc hình học, nhiều ý a, b, c...)"
+        placeholder={p.image
+          ? "Đã có ảnh đề. Có thể ghi thêm chú thích ở đây (không bắt buộc)."
+          : "Dán đề bài Toán 9 vào đây (đại số hoặc hình học, nhiều ý a, b, c...), hoặc gửi ảnh đề bên dưới"}
         disabled={p.busy}
       />
+      <ImagePicker image={p.image} disabled={p.busy} onChange={p.onImage} onError={p.onError} />
       <div className="samples">
         <span className="muted">Bài mẫu:</span>
         {SAMPLES.map((s) => (
@@ -60,7 +67,7 @@ export function ProblemInput(p: Props) {
         {p.busy ? (
           <button className="btn btn--ghost" type="button" onClick={p.onCancel}>Hủy</button>
         ) : (
-          <button className="btn" type="button" onClick={p.onSubmit} disabled={p.text.trim().length < 5}>
+          <button className="btn" type="button" onClick={p.onSubmit} disabled={!p.image && p.text.trim().length < 5}>
             Giải
           </button>
         )}

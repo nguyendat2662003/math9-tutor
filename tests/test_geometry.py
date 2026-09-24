@@ -124,3 +124,14 @@ def test_constraints_rebuild_dependents():
     assert Line.through(B, C).contains(H, tol=1e-6)          # H dựng lại theo M mới
     assert abs((M - H).x * (C - B).x + (M - H).y * (C - B).y) < 1e-6
     assert verify(c, [Predicate("right_angle", ["B", "M", "C"])]).ok
+
+
+def test_cross_check_accepts_point_combinations(two_tangents):
+    """Lời giải nhắc đoạn 'OB', góc '∠ABO', tam giác 'ABC' — hợp lệ khi mọi điểm
+    thành phần đã có trên hình. Bắt lỗi chúng gây giải lại vô ích (lỗi từng gặp thật)."""
+    from math9_verifier.geometry import cross_check_solution
+
+    assert cross_check_solution(two_tangents, {"O", "A", "B", "C", "H"}) == []
+    assert cross_check_solution(two_tangents, {"OB", "∠ABO", "ABC", "(O)"}) == []
+    missing = cross_check_solution(two_tangents, {"K", "MN"})
+    assert len(missing) == 2 and "'K'" in missing[0]

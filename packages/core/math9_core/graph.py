@@ -65,8 +65,10 @@ class Pipeline:
     # -- luồng chính ------------------------------------------------------
 
     def run(self, state: ProblemState) -> ProblemState:
-        self._emit("parsing")
+        self._emit("parsing", from_image=bool(state.image_path))
         state = self.parser(state)
+        if state.ocr:
+            self._emit("parsed", statement=state.latex, note=state.ocr.get("note") or "")
         self._emit("routing")
         state = self.router(state)
         self._emit("routed", topic=state.topic, difficulty=state.difficulty,

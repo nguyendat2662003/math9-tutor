@@ -62,7 +62,7 @@ class FakeLLM(LLMClient):
         self.calls: list[str] = []
         self.solver_calls = 0
 
-    def complete(self, system, user, *, model, max_tokens=4000, temperature=0.2, thinking=False):
+    def complete(self, system, user, *, model, max_tokens=4000, temperature=0.2, thinking=False, images=None):
         if "phân loại" in system:
             role, out = "router", ROUTER
         elif "dựng hình" in system:

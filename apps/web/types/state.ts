@@ -41,9 +41,17 @@ export interface Verification {
   };
 }
 
+export interface Ocr {
+  statement: string;
+  has_figure: boolean;
+  figure_note: string;
+  note: string;
+}
+
 export interface ProblemState {
   raw_input: string;
   latex: string | null;
+  ocr: Ocr | null;
   mode: Mode;
   topic: string | null;
   difficulty: number;
@@ -61,6 +69,9 @@ export interface ProblemState {
 export interface StageEvent {
   stage: string;
   label: string;
+  from_image?: boolean;
+  statement?: string;
+  note?: string;
   topic?: string;
   difficulty?: number;
   subproblems?: { label: string; goal_type: string | null }[];

@@ -23,6 +23,12 @@ export function SolutionView({ s, goalTypeNames, activeStep, onHoverStep }: Prop
   return (
     <div className="card">
       <ConfidenceBadge s={s} />
+      {s.ocr && (
+        <details className="ocr">
+          <summary>Đề đọc từ ảnh {s.ocr.note ? `— ${s.ocr.note}` : ""}</summary>
+          <pre>{s.ocr.statement}</pre>
+        </details>
+      )}
       <div className="muted">
         <span className="chip">{s.topic}</span>
         <span className="chip chip--muted">độ khó {s.difficulty}</span>

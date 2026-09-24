@@ -38,6 +38,11 @@ lib/api.ts                   client SSE (stage / done / error)
 types/state.ts               phản chiếu ProblemState — giữ đồng bộ với state.py
 ```
 
+**Gửi ảnh đề bài.** `components/chat/ImagePicker.tsx`: bấm chọn file, kéo-thả,
+hoặc dán bằng Ctrl+V (nhanh nhất khi chụp màn hình đề). Ảnh đi qua
+`POST /api/upload` → nhận `image_id` → `POST /api/solve` kèm id đó. Đề đọc được
+từ ảnh hiện ngay trong khung tiến trình để học sinh đối chiếu trước khi tin lời giải.
+
 ## Chưa làm
 - MathLive (bàn phím toán ảo) — hiện là textarea thường.
 - JSXGraph tương tác — hiện là SVG tĩnh có tô sáng; đủ cho yêu cầu đồng bộ bước.

@@ -53,11 +53,11 @@ class Agent(ABC):
         return self._template.render(**ctx)
 
     def complete(self, state: ProblemState, user: str, *, system: str, max_tokens: int = 4000,
-                 temperature: float = 0.2) -> LLMResponse:
+                 temperature: float = 0.2, images: list[str] | None = None) -> LLMResponse:
         if self.llm is None:
             raise RuntimeError(f"Agent {self.role} chưa được gắn LLM client")
         resp = self.llm.complete(system=system, user=user, model=self.model_for(state),
-                                 max_tokens=max_tokens, temperature=temperature)
+                                 max_tokens=max_tokens, temperature=temperature, images=images)
         state.log(agent=f"{self.role}.llm", model=resp.model, tokens_in=resp.tokens_in, tokens_out=resp.tokens_out)
         return resp
 

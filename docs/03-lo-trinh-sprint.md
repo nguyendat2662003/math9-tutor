@@ -12,7 +12,7 @@ Sprint 2 tuần. Cột "trạng thái" đánh dấu phần scaffold đã có s�
 | 8 | Sổ tay phương pháp | 40+ tài liệu, RAG theo goal_type, đo lại Hard | RAG ✅, pipeline methods ✅ |
 | 9 | Bài khó | Thang leo thang, hai pha, dò bổ đề | Dò bổ đề ✅ |
 | 10 | Sư phạm | Chế độ gợi ý từng bước, Pedagogue | Stub |
-| 11 | Đầu vào ảnh | Parser OCR/VLM | Khung ingest ✅ |
+| 11 | Đầu vào ảnh | Parser OCR/VLM | **Xong** — VLM đọc đề từ ảnh, có upload + UI |
 | 12 | Tối ưu | Định tuyến model theo độ khó, cache, giảm chi phí | Chính sách model ✅ |
 
 ## Ghi chú quan trọng theo sprint

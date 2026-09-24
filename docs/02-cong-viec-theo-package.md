@@ -135,7 +135,7 @@ phụ mà Solver dùng), `build_pipeline()` dựng từ `.env`, `OpenAICompatCli
 
 | Agent | Trạng thái | Ghi chú |
 |---|---|---|
-| Parser | 🔲 ảnh | Text đi thẳng; ảnh chưa nối OCR/VLM |
+| Parser | ✅ | Ảnh → đề bài bằng VLM; từ chối ảnh không phải đề toán |
 | Router | ✅ | Chấm được bằng eval (`router_accuracy`) |
 | Solver | ✅ | Xuất `predicate` mỗi bước + `algebra_checks` cho SymPy |
 | Draftsman | ✅ | Vòng lặp nội bộ 2 lượt; nhận feedback điểm phụ từ lời giải |
@@ -164,7 +164,11 @@ make api    # :8000
 make web    # :3000
 ```
 
+Đầu vào ảnh: `POST /api/upload` (multipart, ≤12 MB, kiểm chữ ký file, trả
+`image_id`; client KHÔNG gửi đường dẫn — tránh path traversal) rồi `/api/solve`
+với `image_id`. Frontend: chọn file, kéo-thả, dán Ctrl+V.
+
 **Còn thiếu:**
 - 🔲 MathLive (bàn phím toán ảo cho mobile), JSXGraph tương tác.
-- 🔲 Đầu vào ảnh (Parser), đăng nhập, lịch sử bài, giới hạn tần suất.
+- 🔲 Đăng nhập, lịch sử bài, giới hạn tần suất.
 - 🔲 Production: `RAG_REQUIRE_REVIEWED=1`, `CORS_ORIGINS`, Docker.

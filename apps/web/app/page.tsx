@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { fetchTopics, solveStreaming } from "../lib/api";
 import type { Mode, ProblemState, StageEvent } from "../types/state";
 import { ProblemInput } from "../components/chat/ProblemInput";
+import type { PickedImage } from "../components/chat/ImagePicker";
 import { StageProgress } from "../components/chat/StageProgress";
 import { SolutionView } from "../components/solution-view/SolutionView";
 import { Figure } from "../components/figure/Figure";
@@ -17,6 +18,7 @@ export default function Page() {
   const [result, setResult] = useState<ProblemState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [goalTypeNames, setGoalTypeNames] = useState<Record<string, string>>({});
+  const [image, setImage] = useState<PickedImage | null>(null);
   const [activeStep, setActiveStep] = useState<string | null>(null);
   const [highlight, setHighlight] = useState<string[]>([]);
   const abort = useRef<AbortController | null>(null);
@@ -37,6 +39,7 @@ export default function Page() {
         text,
         mode,
         hints,
+        image?.id ?? null,
         {
           onStage: (e) => setEvents((xs) => [...xs, e]),
           onDone: (s) => setResult(s),
@@ -64,8 +67,9 @@ export default function Page() {
       </div>
 
       <ProblemInput
-        text={text} mode={mode} hints={hints} busy={busy}
-        onText={setText} onMode={setMode} onHints={setHints} onSubmit={submit} onCancel={cancel}
+        text={text} mode={mode} hints={hints} busy={busy} image={image}
+        onText={setText} onMode={setMode} onHints={setHints} onImage={setImage}
+        onError={setError} onSubmit={submit} onCancel={cancel}
       />
 
       {(busy || (events.length > 0 && (!result || events.some((e) => e.stage === "retrying")))) && (

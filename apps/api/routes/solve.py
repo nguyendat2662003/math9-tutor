@@ -13,24 +13,33 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
 from math9_core.state import ProblemState
 from math9_curriculum.schema import Mode
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from ..streaming.sse import stream_pipeline
+from .upload import path_for
 
 router = APIRouter(prefix="/api")
 
 
 class SolveRequest(BaseModel):
-    text: str = Field(min_length=5, max_length=4000)
+    """Cần `text` (đề gõ tay) hoặc `image_id` (ảnh đã tải qua /api/upload), hoặc cả hai."""
+
+    text: str = Field(default="", max_length=4000)
     mode: Mode = Mode.EXAM10
-    image_path: str | None = None
+    image_id: str | None = None
     stream: bool = True
     hints: bool = True
+
+    @model_validator(mode="after")
+    def _need_input(self):
+        if not self.image_id and len(self.text.strip()) < 5:
+            raise ValueError("Cần đề bài (ít nhất 5 ký tự) hoặc một ảnh đề")
+        return self
 
 
 def _public_state(s: ProblemState) -> dict:
     """Phần frontend cần; bỏ RAG context và trace chi tiết cho gọn."""
-    d = s.model_dump(mode="json", exclude={"retrieved", "trace", "created_at"})
+    d = s.model_dump(mode="json", exclude={"retrieved", "trace", "created_at", "image_path"})
     d["confidence"] = s.confidence().value
     d["verification"]["detail"] = {
         k: v for k, v in d["verification"]["detail"].items()
@@ -43,7 +52,8 @@ def _public_state(s: ProblemState) -> dict:
 @router.post("/solve")
 async def solve(req: SolveRequest, request: Request):
     base = request.app.state.pipeline
-    state = ProblemState(raw_input=req.text.strip(), mode=req.mode, image_path=req.image_path)
+    image_path = str(path_for(req.image_id)) if req.image_id else None
+    state = ProblemState(raw_input=req.text.strip(), mode=req.mode, image_path=image_path)
 
     if req.stream:
         return StreamingResponse(

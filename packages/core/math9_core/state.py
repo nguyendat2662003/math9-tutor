@@ -68,6 +68,8 @@ class ProblemState(BaseModel):
     image_path: str | None = None
     latex: str | None = None
     mode: Mode = Mode.EXAM10
+    #: Kết quả đọc ảnh của Parser: {statement, has_figure, figure_note, note}
+    ocr: dict[str, Any] | None = None
 
     # --- phân loại ---
     topic: str | None = None

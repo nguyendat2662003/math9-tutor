@@ -22,6 +22,7 @@ log = logging.getLogger(__name__)
 
 STAGE_LABELS = {
     "parsing": "Đang đọc đề bài",
+    "parsed": "Đã đọc xong đề từ ảnh",
     "routing": "Đang xác định dạng toán",
     "routed": "Đã xác định dạng toán",
     "solving": "Đang giải",
@@ -47,6 +48,8 @@ async def stream_pipeline(
         label = STAGE_LABELS.get(stage, stage)
         if stage == "solving" and payload.get("geometry"):
             label = "Đang giải và dựng hình song song"
+        elif stage == "parsing" and payload.get("from_image"):
+            label = "Đang đọc đề bài từ ảnh"
         loop.call_soon_threadsafe(queue.put_nowait, ("stage", {"stage": stage, "label": label, **payload}))
 
     pipe = replace(base, enable_hints=enable_hints, on_stage=on_stage)
