@@ -53,6 +53,23 @@ def extract_numbers(text: str) -> set:
     return out
 
 
+def extract_number_list(text: str) -> list:
+    """Các số theo đúng thứ tự xuất hiện — cho đáp án mà thứ tự có nghĩa, vd (x; y) = (8; 3)."""
+    out = []
+    for tok in re.findall(r"-?\d+(?:\.\d+)?(?:/\d+)?", normalize(text)):
+        try:
+            out.append(sp.nsimplify(tok))
+        except Exception:
+            continue
+    return out
+
+
+def grade_ordered(predicted: str, expected: str) -> bool:
+    """Như `grade` nhưng các số phải khớp cả thứ tự: (3; 8) ≠ (8; 3)."""
+    gold = extract_number_list(_strip_conditions(expected))
+    return bool(gold) and any(extract_number_list(c) == gold for c in [predicted, *_candidates(predicted)])
+
+
 def _strip_conditions(text: str) -> str:
     text = _RE_PAREN_COND.sub(" ", text)
     m = _RE_TAIL.search(text)
@@ -71,9 +88,19 @@ def _candidates(text: str) -> list[str]:
     return cands
 
 
+def _ineq_signs(text: str) -> set[str]:
+    """Dấu bất đẳng thức trong chuỗi: 'x <= 4' và 'x ≤ 4' cùng cho {'≤'}."""
+    t = text.replace("<=", "≤").replace(">=", "≥")
+    return {c for c in t if c in "≤≥<>"}
+
+
 def _grade_str(predicted: str, expected: str) -> bool:
     if normalize(predicted).strip().lower() == normalize(expected).strip().lower():
         return True
+    # Chỉ so số thì 'x ≥ 4' sẽ khớp với 'x ≤ 4' — với bất phương trình, dấu cũng là đáp án
+    need = _ineq_signs(_strip_conditions(expected))
+    if need and not need <= _ineq_signs(_strip_conditions(predicted)):
+        return False
     gold = extract_numbers(_strip_conditions(expected))
     if not gold:
         # Gold không có số (ví dụ "sin B = AC/BC"): so chuỗi sau chuẩn hóa khoảng trắng

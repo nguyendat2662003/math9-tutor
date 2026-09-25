@@ -2,6 +2,7 @@
 // frontend cần steps, figure và confidence riêng biệt để đồng bộ hình với bước giải.
 
 import type { Mode, ProblemState, StageEvent } from "../types/state";
+import type { Answer, BlueprintList, Exam, ExamRequest, ExamResult } from "../types/exam";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -66,4 +67,43 @@ export async function fetchTopics(): Promise<{ topics: Record<string, string>; g
   const res = await fetch(`${BASE}/api/topics`);
   if (!res.ok) throw new Error(`API trả về ${res.status}`);
   return res.json();
+}
+
+// ---------- luyện đề ----------
+
+async function json<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    const detail = body?.detail;
+    throw new Error(typeof detail === "string" ? detail : `API trả về ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function fetchBlueprints(): Promise<BlueprintList> {
+  return json(await fetch(`${BASE}/api/exam/blueprints`));
+}
+
+export async function createExam(req: ExamRequest): Promise<Exam> {
+  return json(
+    await fetch(`${BASE}/api/exam`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+    }),
+  );
+}
+
+export async function getExam(id: string): Promise<Exam> {
+  return json(await fetch(`${BASE}/api/exam/${encodeURIComponent(id)}`));
+}
+
+export async function submitExam(id: string, responses: Record<string, Answer>): Promise<ExamResult> {
+  return json(
+    await fetch(`${BASE}/api/exam/${encodeURIComponent(id)}/submit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ responses }),
+    }),
+  );
 }

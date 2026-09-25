@@ -150,6 +150,50 @@ nghiệm trong eval phải kèm đủ 4 phương án, không thì hệ thống t
 
 ---
 
+## exam ✅
+
+Luyện đề thi vào 10. Chạy được, có test (`tests/test_exam.py`), không cần LLM.
+
+**Đã xong:**
+- **Kho bài thật** (`bank.py`): đọc các bài theo chương trình GDPT 2018 trong `data/eval/`, bỏ bài
+  vượt chương trình và bài chương trình cũ, gộp các ý a/b/c của cùng một bài theo `context_id`.
+  Bài chứng minh để học sinh tự chấm; bài tính ra đáp số thì chấm tự động.
+- **Biến thể đổi số** (`variants.py`): 13 mẫu cho bài tính toán (bất phương trình, phương trình
+  bậc hai, hệ phương trình, Viète, parabol, tham số, căn thức, lập hệ, xác suất, tần số tương đối,
+  tỉ số lượng giác, thể tích). Đáp án tính bằng số học chính xác; test giải lại **độc lập** bằng
+  SymPy trên 60 hạt giống mỗi mẫu. Bài hình chứng minh không làm biến thể.
+- **Cấu trúc đề** (`data/exam/blueprints.yaml`): 6 tỉnh (Hà Nội, TP.HCM, Nghệ An, Thanh Hóa,
+  Quảng Ninh, Hà Tĩnh), suy ra từ đề 2026 trong kho. Có thêm chế độ tự chọn chuyên đề, số câu
+  và mức độ.
+- **Chấm** (`grading.py`): trắc nghiệm, đúng/sai (thang 10/25/50/100%), trả lời ngắn, tự luận có
+  đáp số (so bằng SymPy, có xét dấu bất đẳng thức và thứ tự nghiệm). Bộ so đáp án dùng chung với
+  eval, đặt ở `math9_verifier.answer`.
+- **API** `/api/exam`: đáp án chỉ nằm trên server (`data/exams/`, tra bằng id ngẫu nhiên, tự xóa
+  sau 7 ngày). Trình duyệt chỉ nhận đáp án sau khi nộp bài.
+- **Web** `/exam`: đồng hồ đếm ngược (hết giờ tự nộp), lưu bài đang làm khi tải lại trang, tự chấm
+  câu chứng minh, "làm lại đề này" (cùng seed ra cùng đề), "xem lời giải chi tiết" mở trang Giải bài
+  với đề điền sẵn. Đã kiểm tra trong Edge headless (`demo/browser_exam_check.mjs`).
+
+- **Hình của đề** (`figures.py`, `data/exam/figures.yaml`): bài nói "như hình vẽ", "biểu đồ..." có
+  hình do server vẽ ra SVG (biểu đồ cột, đoạn thẳng, ghép nhóm, quạt, đồ thị parabol, hình học bằng
+  engine dựng hình). Bài nhắc tới hình mà chưa có mục trong `figures.yaml` thì **tự bị loại khỏi
+  đề**; test báo tên bài thiếu hình. Nhập đề mới có hình thì thêm mục vào file này.
+
+**Lưu ý dữ liệu:** kho luyện đề dùng chung bài với bộ eval. **Không bao giờ** nạp bài trong kho,
+hay lời giải sinh ra khi học sinh bấm "xem lời giải", vào RAG (`data/problems/`). Nếu làm vậy,
+Solver sẽ thuộc đáp án và điểm eval không còn ý nghĩa.
+
+**Còn thiếu:**
+- 🔲 Giáo viên xác nhận **điểm từng ý và thời gian** trong `blueprints.yaml` (hiện là ước lượng,
+  tổng luôn 10).
+- 🔲 Kho bài hình chứng minh nhỏ: chỉ khoảng 9 bài hình nhiều ý, làm vài đề là gặp lại. Nhập thêm đề
+  (qua `ingest`) sẽ tăng kho.
+- 🔲 Đúng/Sai chỉ có 2 bài; chưa có biến thể cho dạng này.
+- 🔲 Lịch sử làm bài, thống kê chuyên đề yếu (cần đăng nhập).
+- 🔲 Chấm bài chứng minh từ ảnh bài làm (dùng VLM + Verifier).
+
+---
+
 ## api + web ✅ (MVP)
 
 **Đã xong:** FastAPI dựng Pipeline một lần khi khởi động; `POST /api/solve`

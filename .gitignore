@@ -17,3 +17,4 @@ apps/web/next-env.d.ts
 apps/web/tsconfig.tsbuildinfo
 demo/*.png
 data/uploads/
+data/exams/

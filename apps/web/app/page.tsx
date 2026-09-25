@@ -25,6 +25,9 @@ export default function Page() {
 
   useEffect(() => {
     fetchTopics().then((t) => setGoalTypeNames(t.goal_types)).catch(() => {});
+    // Trang luyện đề mở "xem lời giải chi tiết" bằng /?q=<đề bài>
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) setText(q);
   }, []);
 
   async function submit() {

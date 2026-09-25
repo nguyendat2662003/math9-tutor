@@ -43,6 +43,11 @@ hoặc dán bằng Ctrl+V (nhanh nhất khi chụp màn hình đề). Ảnh đi 
 `POST /api/upload` → nhận `image_id` → `POST /api/solve` kèm id đó. Đề đọc được
 từ ảnh hiện ngay trong khung tiến trình để học sinh đối chiếu trước khi tin lời giải.
 
+**Luyện đề** (`app/exam/page.tsx`): chọn đề theo tỉnh hoặc tự chọn → làm bài có đồng hồ →
+nộp → kết quả kèm đáp án, lời giải, tự chấm câu chứng minh. Bài đang làm lưu trong
+`localStorage` (chỉ id đề và câu trả lời, không có đáp án). Component ở `components/exam/`.
+Kiểm tra toàn luồng: `node demo/browser_exam_check.mjs`.
+
 ## Chưa làm
 - MathLive (bàn phím toán ảo) — hiện là textarea thường.
 - JSXGraph tương tác — hiện là SVG tĩnh có tô sáng; đủ cho yêu cầu đồng bộ bước.

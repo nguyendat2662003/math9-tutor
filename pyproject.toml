@@ -29,12 +29,14 @@ ingest = [
 where = [
     "packages/core", "packages/curriculum",
     "packages/geometry", "packages/verifier", "packages/ingest", "packages/methods", "packages/retrieval",
+    "packages/exam",
 ]
 
 [tool.pytest.ini_options]
 pythonpath = [
     "packages/core", "packages/curriculum",
     "packages/geometry", "packages/verifier", "packages/ingest", "packages/methods", "packages/retrieval",
+    "packages/exam",
 ]
 testpaths = ["tests"]
 

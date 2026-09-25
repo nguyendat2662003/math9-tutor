@@ -1,0 +1,155 @@
+# Cấu trúc đề thi vào 10 theo tỉnh — dùng để sinh đề luyện tập.
+#
+# Thứ tự câu, chuyên đề, độ khó suy ra từ đề 2026 có trong data/eval/.
+# ĐIỂM TỪNG Ý VÀ THỜI GIAN LÀ ƯỚC LƯỢNG (tổng điểm luôn 10) — cần giáo viên đối chiếu hướng dẫn chấm thật.
+#
+# Mỗi slot là một trong hai dạng:
+#   {format, topic | topics, difficulty, points}  — một câu (topics: mỗi chuyên đề một câu)
+#   {group: <chuyên đề>, points: [..]}             — một bài nhiều ý lấy nguyên từ đề thật
+# format: trac_nghiem | tra_loi_ngan | dung_sai | tu_luan
+
+- id: ha-noi
+  name: Hà Nội
+  style: Tự luận
+  minutes: 120
+  based_on: Tuyển sinh 10 Hà Nội 2026
+  sections:
+    - title: Bài I
+      slots:
+        - {format: tu_luan, topic: STA-7, difficulty: 1, points: 0.75}
+        - {format: tu_luan, topic: PRO-8, difficulty: 1, points: 0.75}
+    - title: Bài II
+      slots:
+        - {format: tu_luan, topic: ALG-3, difficulty: 1, points: 0.5}
+        - {format: tu_luan, topic: ALG-3, difficulty: 1, points: 0.5}
+        - {format: tu_luan, topic: ALG-3, difficulty: 2, points: 0.5}
+    - title: Bài III
+      slots:
+        - {format: tu_luan, topic: ALG-2, difficulty: 1, points: 0.75}
+        - {format: tu_luan, topic: ALG-1, difficulty: 1, points: 1.0}
+        - {format: tu_luan, topic: ALG-6, difficulty: 2, points: 0.75}
+    - title: Bài IV
+      slots:
+        - {group: GEO-10, points: [0.5, 0.5]}
+        - {group: GEO-9, points: [1.0, 1.0, 1.0]}
+    - title: Bài V
+      slots:
+        - {format: tu_luan, topic: ALG-2, difficulty: 3, points: 0.5}
+
+- id: tp-hcm
+  name: TP. Hồ Chí Minh
+  style: Tự luận
+  minutes: 120
+  based_on: Tuyển sinh 10 TP.HCM 2026
+  sections:
+    - title: Bài 1
+      slots:
+        - {format: tu_luan, topic: ALG-6, difficulty: 1, points: 0.75}
+        - {format: tu_luan, topic: ALG-6, difficulty: 1, points: 0.75}
+    - title: Bài 2
+      slots:
+        - {format: tu_luan, topic: ALG-6, difficulty: 1, points: 0.5}
+        - {format: tu_luan, topic: ALG-6, difficulty: 2, points: 0.5}
+    - title: Bài 3
+      slots:
+        - {format: tu_luan, topic: STA-7, difficulty: 1, points: 0.5}
+        - {format: tu_luan, topic: PRO-8, difficulty: 1, points: 0.5}
+        - {format: tu_luan, topic: PRO-8, difficulty: 2, points: 0.5}
+    - title: Bài 4
+      slots:
+        - {format: tu_luan, topic: ALG-1, difficulty: 2, points: 1.0}
+    - title: Bài 5
+      slots:
+        - {group: GEO-10, points: [0.5, 0.5]}
+    - title: Bài 6
+      slots:
+        - {format: tu_luan, topic: ALG-2, difficulty: 3, points: 1.0}
+    - title: Bài 7
+      slots:
+        - {group: GEO-9, points: [1.0, 1.0, 1.0]}
+
+- id: nghe-an
+  name: Nghệ An
+  style: Tự luận
+  minutes: 120
+  based_on: Tuyển sinh 10 Nghệ An 2026
+  sections:
+    - title: Câu 1
+      slots:
+        - {format: tu_luan, topic: STA-7, difficulty: 1, points: 0.5}
+        - {format: tu_luan, topic: PRO-8, difficulty: 1, points: 0.5}
+    - title: Câu 2
+      slots:
+        - {format: tu_luan, topic: ALG-3, difficulty: 1, points: 0.75}
+        - {format: tu_luan, topic: ALG-3, difficulty: 1, points: 0.75}
+        - {format: tu_luan, topic: ALG-6, difficulty: 1, points: 0.5}
+    - title: Câu 3
+      slots:
+        - {format: tu_luan, topic: ALG-1, difficulty: 1, points: 1.0}
+        - {format: tu_luan, topic: ALG-6, difficulty: 2, points: 0.75}
+        - {format: tu_luan, topic: ALG-6, difficulty: 3, points: 0.75}
+    - title: Câu 4
+      slots:
+        - {group: GEO-9, points: [1.0, 1.0, 1.0]}
+    - title: Câu 5
+      slots:
+        - {format: tu_luan, topic: GEO-10, difficulty: 1, points: 0.75}
+        - {format: tu_luan, topic: GEO-10, difficulty: 3, points: 0.75}
+
+- id: thanh-hoa
+  name: Thanh Hóa
+  style: Trắc nghiệm + tự luận
+  minutes: 120
+  based_on: Tuyển sinh 10 Thanh Hóa 2026
+  sections:
+    - title: Phần I. Trắc nghiệm
+      slots:
+        - {format: trac_nghiem, topics: [ALG-2, ALG-3, ALG-6, ALG-2, GEO-9, GEO-5, STA-7, PRO-8], difficulty: 1, points: 0.25}
+    - title: Phần II. Tự luận
+      slots:
+        - {format: tu_luan, topic: ALG-6, difficulty: 1, points: 0.5}
+        - {format: tu_luan, topic: ALG-1, difficulty: 1, points: 0.5}
+        - {format: tu_luan, topic: ALG-3, difficulty: 1, points: 1.0}
+        - {format: tu_luan, topic: ALG-6, difficulty: 2, points: 1.0}
+        - {format: tu_luan, topic: ALG-1, difficulty: 1, points: 1.0}
+        - {group: GEO-10, points: [0.5, 0.5]}
+        - {group: GEO-9, points: [1.0, 1.0, 1.0]}
+
+- id: quang-ninh
+  name: Quảng Ninh
+  style: Trắc nghiệm + tự luận
+  minutes: 120
+  based_on: Tuyển sinh 10 Quảng Ninh 2026
+  sections:
+    - title: Phần I. Trắc nghiệm
+      slots:
+        - {format: trac_nghiem, topics: [ALG-3, ALG-6, ALG-2, ALG-1, STA-7, GEO-4, GEO-9, GEO-10, GEO-10, ALG-3, PRO-8, GEO-4], difficulty: 1, points: 0.25}
+    - title: Phần II. Tự luận
+      slots:
+        - {format: tu_luan, topic: ALG-3, difficulty: 1, points: 0.75}
+        - {format: tu_luan, topic: ALG-1, difficulty: 1, points: 0.75}
+        - {format: tu_luan, topic: ALG-2, difficulty: 1, points: 0.5}
+        - {format: tu_luan, topic: ALG-6, difficulty: 2, points: 0.75}
+        - {format: tu_luan, topic: ALG-6, difficulty: 2, points: 0.75}
+        - {group: GEO-9, points: [1.0, 1.0, 0.5]}
+        - {format: tu_luan, topic: GEO-4, difficulty: 3, points: 1.0}
+
+- id: ha-tinh
+  name: Hà Tĩnh
+  style: Trắc nghiệm + tự luận
+  minutes: 120
+  based_on: Tuyển sinh 10 Hà Tĩnh 2026
+  sections:
+    - title: Phần I. Trắc nghiệm
+      slots:
+        - {format: trac_nghiem, topics: [ALG-3, ALG-2, ALG-2, PRO-8, ALG-6, GEO-4, GEO-10, STA-7], difficulty: 1, points: 0.25}
+    - title: Phần II. Tự luận
+      slots:
+        - {format: tu_luan, topic: ALG-3, difficulty: 1, points: 1.0}
+        - {format: tu_luan, topic: ALG-6, difficulty: 2, points: 1.0}
+        - {format: tu_luan, topic: ALG-1, difficulty: 1, points: 1.0}
+        - {format: tu_luan, topic: PRO-8, difficulty: 1, points: 0.5}
+        - {format: tu_luan, topic: ALG-6, difficulty: 2, points: 0.5}
+        - {group: GEO-9, points: [1.0, 1.0]}
+        - {format: tu_luan, topic: GEO-10, difficulty: 3, points: 1.0}
+        - {format: tu_luan, topic: ALG-2, difficulty: 3, points: 1.0}

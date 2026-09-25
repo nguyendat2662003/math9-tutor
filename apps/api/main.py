@@ -15,13 +15,13 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-for pkg in ("core", "curriculum", "geometry", "verifier", "retrieval"):
+for pkg in ("core", "curriculum", "geometry", "verifier", "retrieval", "exam"):
     sys.path.insert(0, str(ROOT / "packages" / pkg))
 
 from fastapi import FastAPI  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 
-from .routes import health, solve, upload  # noqa: E402
+from .routes import exam, health, solve, upload  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
@@ -49,3 +49,4 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(solve.router)
 app.include_router(upload.router)
+app.include_router(exam.router)
