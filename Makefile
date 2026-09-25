@@ -4,7 +4,7 @@ demo:
 	python tools/demo_draw.py --file demo/de.txt --out demo/out
 
 ui:
-	streamlit run apps/demo_streamlit.py
+	python -m streamlit run apps/demo_streamlit.py
 
 web:
 	cd apps/web && npm run dev
@@ -19,7 +19,7 @@ lint:
 	ruff check . && ruff format --check .
 
 api:
-	uvicorn apps.api.main:app --reload --port 8000
+	python -m uvicorn apps.api.main:app --reload --port 8000
 
 eval:
 	python evals/run.py --set smoke

@@ -129,7 +129,7 @@ def client_from_env() -> LLMClient:
     load_env()
     if os.environ.get("OPENAI_API_KEY"):
         return OpenAICompatClient()
-    return OpenAICompatClient(base_url=os.environ.get("LOCAL_LLM_URL", "http://localhost:8000/v1"), api_key="")
+    return OpenAICompatClient(base_url=os.environ.get("LOCAL_LLM_URL", "http://localhost:8001/v1"), api_key="")
 
 
 def default_model() -> str:

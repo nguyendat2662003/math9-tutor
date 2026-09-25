@@ -2,23 +2,87 @@
 
 Chatbot giải toán lớp 9 (Đại số + Hình học) bám chương trình GDPT 2018, có vẽ hình.
 
-## Trạng thái scaffold
+## Trạng thái
 
 | Phần | Trạng thái |
 |---|---|
 | Engine dựng hình (`packages/geometry`) | **Chạy được, có test** |
 | Verifier hình học + đại số (`packages/verifier`) | **Chạy được, có test** |
-| Guardrail chương trình (`packages/curriculum`) | **Chạy được, có test** |
-| `ProblemState`, orchestrator (`packages/core`) | Cấu trúc đầy đủ, agent là stub |
-| Agent (Parser/Router/Solver/Draftsman/Critic/Pedagogue) | Stub + prompt template |
-| API, frontend | Khung + tầng dữ liệu |
+| Guardrail chương trình (`packages/curriculum`) | **Chạy được, có test** — 10 file YAML chờ giáo viên soát |
+| `ProblemState`, orchestrator (`packages/core`) | **Chạy end-to-end với LLM thật** |
+| Agent (Parser/Router/Solver/Draftsman/Critic/Pedagogue) | **Đủ 6 agent**; Parser đọc đề từ ảnh |
+| API (FastAPI + SSE), frontend (Next.js) | **MVP chạy được** |
+| Luyện đề thi vào 10 (`packages/exam`) | **Chạy được, có test** — 6 cấu trúc tỉnh + tự chọn, chấm tự động |
 
-Ba phần đầu là phần **không phụ thuộc LLM** — cũng chính là tài sản thật của
-dự án. Chúng kiểm thử được tất định và nên được hoàn thiện trước.
+Chi tiết từng package: [`docs/02-cong-viec-theo-package.md`](docs/02-cong-viec-theo-package.md).
+
+## Cách chạy
+
+### 1. Yêu cầu
+
+- Python **3.11+** (đang dùng 3.14)
+- Node.js **20+** (chỉ cần cho giao diện web)
+- API key của một model hỗ trợ đọc ảnh, dùng giao thức OpenAI (OpenAI, hoặc vLLM/Ollama local)
+
+### 2. Cài đặt (một lần)
 
 ```bash
-make install && make test     # 14 test, ~0.2s
+pip install -e ".[dev]"
+cd apps/web && npm install && cd ../..
 ```
+
+Tạo file `.env` ở thư mục gốc (xem `.env.example`):
+
+```ini
+OPENAI_API_KEY=sk-...
+MODEL_NAME=gpt-4.1-mini          # model phải đọc được ảnh nếu muốn gửi ảnh đề
+# OPENAI_BASE_URL=http://localhost:8001/v1   # nếu dùng model local
+```
+
+### 3. Chạy ứng dụng web
+
+Mở **hai terminal**, cả hai đứng ở thư mục gốc dự án:
+
+```bash
+# Terminal 1 — API ở http://localhost:8000
+python -m uvicorn apps.api.main:app --reload --port 8000
+
+# Terminal 2 — giao diện ở http://localhost:3000
+cd apps/web
+npm run dev
+```
+
+Mở http://localhost:3000 → gõ đề, hoặc gửi ảnh đề (bấm chọn, kéo-thả, hay dán Ctrl+V).
+Trang **Luyện đề** (http://localhost:3000/exam) sinh đề thi vào 10 theo cấu trúc từng tỉnh
+hoặc tự chọn chuyên đề, có đồng hồ, chấm ngay khi nộp — không cần API key.
+
+### 4. Các cách chạy khác
+
+| Việc | Lệnh |
+|---|---|
+| Chạy test (không cần LLM) | `pytest -q` |
+| Giải một bài trên dòng lệnh | `python tools/solve.py "Giải phương trình x^2 - 5x + 6 = 0."` |
+| Demo dựng hình từ đề | `python tools/demo_draw.py --file demo/de.txt --out demo/out` |
+| Demo Streamlit | `python -m streamlit run apps/demo_streamlit.py` |
+| Chạy eval (bộ smoke) | `python evals/run.py --set smoke` |
+| Xem lại báo cáo eval | `python evals/run.py --report evals/reports/<file>.json` |
+| Kiểm tra kiểu frontend | `cd apps/web && npm run typecheck` |
+
+Máy có `make` (Linux/macOS/Git Bash) dùng được lối tắt: `make install`, `make test`,
+`make api`, `make web`, `make ui`, `make eval`.
+
+### 5. Lỗi hay gặp trên Windows
+
+| Hiện tượng | Nguyên nhân · cách xử lý |
+|---|---|
+| `make` is not recognized | PowerShell không có `make` → gõ thẳng lệnh trong bảng trên |
+| `&&` báo lỗi cú pháp | PowerShell 5.1 không có `&&` → dùng `;` hoặc gõ từng lệnh |
+| `python-multipart not installed` dù đã cài | Lệnh `uvicorn` trỏ tới **Python khác** (vd. 3.11) → luôn chạy `python -m uvicorn ...` |
+| `WinError 10013` khi khởi động API | Cổng 8000 đang bị tiến trình cũ giữ → tắt terminal API cũ, hoặc đổi `--port 8001` và đặt `NEXT_PUBLIC_API_URL=http://localhost:8001` cho web |
+| Web báo không kết nối được API | Chưa chạy terminal 1, hoặc API lỗi khi khởi động — xem log ở terminal đó |
+
+Biến môi trường thêm: `RAG_REQUIRE_REVIEWED=1` (production — chỉ nạp sổ tay đã soát),
+`CORS_ORIGINS` (mặc định `http://localhost:3000`).
 
 ## Bốn nguyên tắc kiến trúc
 
@@ -185,17 +249,20 @@ packages/
   ingest/      crawl, trích xuất, chuẩn hóa, tách bài, khử trùng lặp
   methods/     tái tổ chức tài liệu tra cứu thành sổ tay theo goal_type
   retrieval/   RAG: hybrid search, 3 collection tách biệt, cổng chặn draft
+  exam/        luyện đề: kho bài thật, biến thể đổi số, cấu trúc đề theo tỉnh, chấm
 apps/
   api/         FastAPI + SSE
-  web/         Next.js (khung + tầng dữ liệu)
+  web/         Next.js: nhập đề/ảnh, tiến trình, gợi ý, lời giải, hình tô sáng
 data/
   curriculum/  bản đồ chương trình YAML — KHÔNG qua vector search
   methods/     sổ tay phương pháp theo goal_type — RAG
   problems/    bài giải mẫu — RAG few-shot
-  eval/        bộ đánh giá 4 tầng
+  eval/        bộ đánh giá 4 tầng (đồng thời là kho bài thật cho luyện đề)
+  exam/        cấu trúc đề thi vào 10 theo tỉnh (blueprints.yaml)
 prompts/       template Router, Solver, Draftsman
 evals/         runner + graders (chấm đáp án bằng SymPy, chấm hình bằng verifier)
-tests/         14 test không cần LLM
+tools/         dòng lệnh: giải bài, demo dựng hình, soạn bài mẫu, crawl, hàng đợi soát
+tests/         test không cần LLM (LLM được giả lập)
 ```
 
 ## Rủi ro cần theo dõi
