@@ -126,7 +126,10 @@ phụ mà Solver dùng), `build_pipeline()` dựng từ `.env`, `OpenAICompatCli
 **Còn thiếu:**
 - 🔲 `MODEL_POLICY` chưa có hiệu lực — mọi agent dùng một model (`MODEL_NAME`)
   vì chưa có model local. Khi có vLLM, bỏ tham số `model=` trong `build_pipeline`.
-- 🔲 Tracing (Langfuse) — có key trong `.env`, chưa nối.
+- ✅ Tracing Langfuse (`tracing.py`): mỗi lượt giải một trace `giai-bai`; span cho từng agent, RAG,
+  verifier (WARNING khi không qua), `giai-lai` kèm lý do; generation cho mỗi lượt gọi LLM (prompt, kết quả,
+  token, chi phí). Ảnh đề không gửi lên, chỉ ghi tên + dung lượng. Không có khóa/thư viện thì tự tắt;
+  test đặt `LANGFUSE_TRACING=0`.
 - 🔲 Cache kết quả theo hash đề bài.
 
 ---
@@ -168,8 +171,8 @@ Luyện đề thi vào 10. Chạy được, có test (`tests/test_exam.py`), kh�
 - **Chấm** (`grading.py`): trắc nghiệm, đúng/sai (thang 10/25/50/100%), trả lời ngắn, tự luận có
   đáp số (so bằng SymPy, có xét dấu bất đẳng thức và thứ tự nghiệm). Bộ so đáp án dùng chung với
   eval, đặt ở `math9_verifier.answer`.
-- **API** `/api/exam`: đáp án chỉ nằm trên server (`data/exams/`, tra bằng id ngẫu nhiên, tự xóa
-  sau 7 ngày). Trình duyệt chỉ nhận đáp án sau khi nộp bài.
+- **API** `/api/exam`: đáp án chỉ nằm trên server (bảng `exam_attempts`, gắn với người tạo đề). Trình
+  duyệt chỉ nhận đáp án sau khi nộp bài.
 - **Web** `/exam`: đồng hồ đếm ngược (hết giờ tự nộp), lưu bài đang làm khi tải lại trang, tự chấm
   câu chứng minh, "làm lại đề này" (cùng seed ra cùng đề), "xem lời giải chi tiết" mở trang Giải bài
   với đề điền sẵn. Đã kiểm tra trong Edge headless (`demo/browser_exam_check.mjs`).
@@ -179,6 +182,13 @@ Luyện đề thi vào 10. Chạy được, có test (`tests/test_exam.py`), kh�
   engine dựng hình). Bài nhắc tới hình mà chưa có mục trong `figures.yaml` thì **tự bị loại khỏi
   đề**; test báo tên bài thiếu hình. Nhập đề mới có hình thì thêm mục vào file này.
 
+- **Kho đề Qdrant** (`index.py`, `intake.py`, trang `/admin`): tải PDF/Word/ảnh đề lên → LLM tách bài,
+  **chép đáp án có sẵn trong tài liệu, không tự giải**, kèm đoạn trích làm bằng chứng → kiểm tra (đủ 4
+  phương án, chuyên đề, trùng với kho bằng hash + độ giống ≥ 0,95, cần hình) → người duyệt sửa/duyệt
+  → Qdrant. Bài đã duyệt tự vào kho luyện đề (`load_bank`) và API `GET /api/similar` (không trả đáp án).
+  Embedding `text-embedding-3-small`; tên collection gắn theo model. Trang quản trị cần `ADMIN_TOKEN`.
+  Kiểm tra: `tests/test_problem_index.py`, `demo/browser_admin_check.mjs`.
+
 **Lưu ý dữ liệu:** kho luyện đề dùng chung bài với bộ eval. **Không bao giờ** nạp bài trong kho,
 hay lời giải sinh ra khi học sinh bấm "xem lời giải", vào RAG (`data/problems/`). Nếu làm vậy,
 Solver sẽ thuộc đáp án và điểm eval không còn ý nghĩa.
@@ -186,11 +196,46 @@ Solver sẽ thuộc đáp án và điểm eval không còn ý nghĩa.
 **Còn thiếu:**
 - 🔲 Giáo viên xác nhận **điểm từng ý và thời gian** trong `blueprints.yaml` (hiện là ước lượng,
   tổng luôn 10).
-- 🔲 Kho bài hình chứng minh nhỏ: chỉ khoảng 9 bài hình nhiều ý, làm vài đề là gặp lại. Nhập thêm đề
-  (qua `ingest`) sẽ tăng kho.
+- 🔲 Kho bài hình chứng minh nhỏ: chỉ khoảng 9 bài hình nhiều ý — tăng dần bằng cách tải đề lên `/admin`.
+- 🔲 Đính kèm hình cho bài tải lên (hiện bài cần hình bị loại khỏi đề luyện).
+- 🔲 Chuyển Qdrant cục bộ lên Qdrant Cloud (chờ URL + API key).
 - 🔲 Đúng/Sai chỉ có 2 bài; chưa có biến thể cho dạng này.
 - 🔲 Lịch sử làm bài, thống kê chuyên đề yếu (cần đăng nhập).
 - 🔲 Chấm bài chứng minh từ ảnh bài làm (dùng VLM + Verifier).
+
+---
+
+## accounts ✅
+
+Tài khoản học sinh + lịch sử. PostgreSQL trên Supabase (SQLAlchemy 2 + psycopg 3); test dùng SQLite
+trong bộ nhớ (`tests/test_accounts.py`), kiểm tra trình duyệt `demo/browser_auth_check.mjs`.
+
+**Đã xong:**
+- Đăng ký / đăng nhập bằng tên đăng nhập + mật khẩu (không email — chỉ lưu tên đăng nhập, tên hiển thị,
+  mật khẩu băm scrypt). Sai 5 lần liên tiếp -> khóa 15 phút; thông báo lỗi không lộ tên đăng nhập nào có thật.
+- Phiên 30 ngày trong cookie HttpOnly + SameSite=Lax; bảng phiên chỉ lưu băm của mã. Đổi mật khẩu thì
+  đăng xuất mọi máy khác. Quản trị đặt lại mật khẩu ở `/admin`.
+- Bắt buộc đăng nhập cho giải bài, tải ảnh, luyện đề, gợi ý tương tự, lịch sử. Hạn mức `SOLVE_DAILY_LIMIT`
+  bài/ngày (giờ VN); lượt lỗi cũng tính (vẫn tốn lượt gọi model).
+- Lịch sử bài đã giải (`solve_records`: đề, ảnh đề chép sang `data/user_images/`, ProblemState đầy đủ) và
+  đề đã luyện (`exam_attempts`: đề kèm đáp án — chỉ server đọc, bài làm, kết quả, điểm tự chấm). Mọi truy
+  vấn lọc theo user_id; đề gắn người tạo — người khác có mã đề cũng không mở/nộp được.
+
+- Hỏi đáp sau khi giải (`math9_core/tutor.py`, `prompts/tutor.md`, route `/api/chat/{solve_id}`, bảng
+  `chat_messages`): trả lời thẳng, stream (chữ đầu ~1–2 s), ngữ cảnh là đúng bài đã giải (các bước, căn cứ,
+  kết quả kiểm chứng) + toàn bộ công cụ chương trình, MỖI công cụ gắn sẵn chương của nó (tránh gán nhầm
+  chương của bài cho định lí). Nhắc "[bước a2]" -> giao diện tô sáng bước đó trên hình. Câu trả lời không
+  qua Verifier (ghi rõ trên giao diện). Giới hạn 15 câu/bài, 100 câu/ngày. Test: `tests/test_chat.py`,
+  `demo/browser_chat_check.mjs`.
+
+**Còn thiếu:**
+- 🔲 Dẫn chứng tới cấp BÀI SGK: cần mục lục SGK Toán 9 KNTT (2 tập) để thêm trường `sgk: {chuong, bai, ten}`
+  cho 112 công cụ trong `data/curriculum/*.yaml` — hiện chỉ dẫn tới cấp chương.
+- 🔲 Kiểm tra phép tính trong câu trả lời hỏi đáp bằng SymPy (hiện chưa kiểm).
+- 🔲 Alembic migration (hiện `create_all` — đổi cấu trúc bảng về sau cần migration).
+- 🔲 Ảnh đề trong lịch sử đang nằm trên ổ đĩa server — lên production nên chuyển sang Supabase Storage.
+- 🔲 Vai trò giáo viên/phụ huynh xem tiến độ học sinh; thống kê chuyên đề yếu.
+- 🔲 Chính sách dữ liệu cho học sinh dưới 16 tuổi (Nghị định 13/2023: cần đồng ý của cha mẹ/người giám hộ).
 
 ---
 

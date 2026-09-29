@@ -115,8 +115,9 @@ def _common_lead(statements: list[str]) -> str:
     return a[: cut + 1].strip() if cut > 0 else ""
 
 
-@lru_cache(maxsize=1)
-def load_bank(eval_dir: Path = EVAL_DIR) -> Bank:
+@lru_cache(maxsize=2)
+def load_bank(eval_dir: Path = EVAL_DIR, include_uploads: bool = True) -> Bank:
+    """Kho = bài có sẵn trong data/eval + bài tải lên đã duyệt trên Qdrant (nếu cấu hình)."""
     items: list[BankItem] = []
     # Bài vượt chương trình có thể nằm cả trong tập khác (chuyen_chung) — loại theo id
     oos = eval_dir / "out_of_scope.jsonl"
@@ -158,6 +159,23 @@ def load_bank(eval_dir: Path = EVAL_DIR) -> Bank:
                 item.statement, item.claims = _split_claims(r["statement"])
             items.append(item)
 
+    if include_uploads:
+        for p in _approved_uploads():
+            full = f"{p['lead']} {p['statement']}" if p.get("lead") else p["statement"]
+            key = re.sub(r"\s+", " ", full).strip()
+            if key in seen_text or p["id"] in seen_ids or not p.get("topic"):
+                continue
+            seen_ids.add(p["id"])
+            seen_text.add(key)
+            items.append(BankItem(
+                id=p["id"], source=p.get("source") or "Đề tải lên", format=p["format"], statement=full,
+                answer=p.get("answer"), topic=p["topic"], goal_type=p.get("goal_type") or "",
+                difficulty=int(p.get("difficulty") or 1), group=p.get("group"),
+                options=p.get("options"), claims=p.get("claims"),
+                lead=p.get("lead"), part=p["statement"] if p.get("lead") else None,
+                needs_figure=bool(p.get("needs_figure")) or needs_figure(full + " " + " ".join(p.get("options") or [])),
+            ))
+
     groups: dict[str, list[BankItem]] = {}
     for x in items:
         if x.group:
@@ -168,8 +186,31 @@ def load_bank(eval_dir: Path = EVAL_DIR) -> Bank:
             parts[0].group = None
             continue
         parts.sort(key=lambda x: x.id)
+        if all(p.lead and p.part for p in parts):
+            continue                             # bài tải lên: đề chung đã tách sẵn
         lead = _common_lead([p.statement for p in parts])
         for p in parts:
             p.lead = lead or None
             p.part = p.statement[len(lead):].strip() if lead else p.statement
     return Bank(items=items, groups=groups)
+
+
+def _approved_uploads() -> list[dict]:
+    """Bài tải lên đã duyệt trên Qdrant. Qdrant lỗi -> bỏ qua, kho vẫn chạy với bài có sẵn."""
+    from .index import get_index
+
+    idx = get_index()
+    if idx is None:
+        return []
+    try:
+        return idx.all(status="approved", origin="upload")
+    except Exception as e:
+        import logging
+
+        logging.getLogger(__name__).warning("Không đọc được bài tải lên từ Qdrant: %s", e)
+        return []
+
+
+def refresh_bank() -> None:
+    """Gọi sau khi duyệt bài mới để đề sinh ra lần sau có bài đó."""
+    load_bank.cache_clear()

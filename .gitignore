@@ -18,3 +18,7 @@ apps/web/tsconfig.tsbuildinfo
 demo/*.png
 data/uploads/
 data/exams/
+data/qdrant/
+data/inbox/
+data/app.db
+data/user_images/

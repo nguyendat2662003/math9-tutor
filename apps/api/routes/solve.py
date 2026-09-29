@@ -8,13 +8,16 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
+from math9_accounts import history, service
+from math9_accounts.service import UserInfo
 from math9_core.state import ProblemState
 from math9_curriculum.schema import Mode
 from pydantic import BaseModel, Field, model_validator
 
+from ..auth import current_user
 from ..streaming.sse import stream_pipeline
 from .upload import path_for
 
@@ -50,18 +53,34 @@ def _public_state(s: ProblemState) -> dict:
 
 
 @router.post("/solve")
-async def solve(req: SolveRequest, request: Request):
+async def solve(req: SolveRequest, request: Request, user: UserInfo = Depends(current_user)):
+    used = await run_in_threadpool(service.solves_today, user.id)
+    if used >= service.daily_limit():
+        raise HTTPException(429, f"Hôm nay em đã giải {used} bài — đạt giới hạn {service.daily_limit()} bài/ngày. "
+                                 "Mai quay lại nhé, hoặc xem lại các bài trong Lịch sử.")
     base = request.app.state.pipeline
     image_path = str(path_for(req.image_id)) if req.image_id else None
     state = ProblemState(raw_input=req.text.strip(), mode=req.mode, image_path=image_path)
+    # Ghi lịch sử ngay từ đầu: lượt lỗi cũng tính vào hạn mức (vẫn đã tốn lượt gọi model)
+    record_id = await run_in_threadpool(history.start_solve, user.id, state.raw_input, req.mode.value, image_path)
+
+    def to_public(s: ProblemState) -> dict:
+        d = _public_state(s)
+        history.finish_solve(record_id, d)
+        return d | {"history_id": record_id}
 
     if req.stream:
         return StreamingResponse(
-            stream_pipeline(base, state, enable_hints=req.hints, to_public=_public_state),
+            stream_pipeline(base, state, enable_hints=req.hints, to_public=to_public,
+                            on_error=lambda msg: history.fail_solve(record_id, msg)),
             media_type="text/event-stream",
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
         )
 
     pipe = replace(base, enable_hints=req.hints, on_stage=None)
-    result = await run_in_threadpool(pipe.run, state)
-    return _public_state(result)
+    try:
+        result = await run_in_threadpool(pipe.run, state)
+    except Exception as e:
+        await run_in_threadpool(history.fail_solve, record_id, f"{type(e).__name__}: {e}")
+        raise
+    return await run_in_threadpool(to_public, result)

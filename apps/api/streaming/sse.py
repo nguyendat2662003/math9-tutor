@@ -40,6 +40,7 @@ def event(kind: str, payload: dict) -> str:
 
 async def stream_pipeline(
     base, state: ProblemState, *, enable_hints: bool, to_public: Callable[[ProblemState], dict],
+    on_error: Callable[[str], None] | None = None,
 ) -> AsyncIterator[str]:
     loop = asyncio.get_running_loop()
     queue: asyncio.Queue = asyncio.Queue()
@@ -57,10 +58,17 @@ async def stream_pipeline(
     async def run() -> None:
         try:
             result = await asyncio.to_thread(pipe.run, state)
-            queue.put_nowait(("done", to_public(result)))
+            # to_public có thể ghi lịch sử vào DB (qua mạng) — chạy ngoài event loop
+            queue.put_nowait(("done", await asyncio.to_thread(to_public, result)))
         except Exception as e:
             log.exception("Pipeline lỗi")
-            queue.put_nowait(("error", {"message": f"{type(e).__name__}: {e}"}))
+            msg = f"{type(e).__name__}: {e}"
+            if on_error:
+                try:
+                    await asyncio.to_thread(on_error, msg)
+                except Exception:
+                    log.exception("Ghi lỗi vào lịch sử thất bại")
+            queue.put_nowait(("error", {"message": msg}))
         finally:
             queue.put_nowait(None)
 
