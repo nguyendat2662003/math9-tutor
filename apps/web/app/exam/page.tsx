@@ -140,11 +140,17 @@ export default function ExamPage() {
 
   return (
     <main className="app">
-      <div className="app__head">
-        <h1>Luyện đề thi vào 10</h1>
-        <span>Đề theo cấu trúc từng tỉnh hoặc tự chọn chuyên đề · chấm ngay khi nộp</span>
-      </div>
-      {error && <div className="error" style={{ marginBottom: 12 }}>{error}</div>}
+      {(!exam || !saved) && (
+      <section className="hero hero--exam">
+        <div>
+          <div className="hero__hi">Luyện đề thi vào 10 🏆</div>
+          <h1>Mỗi ngày một đề — vững vàng bước vào phòng thi!</h1>
+          <p>Đề theo cấu trúc từng tỉnh hoặc tự chọn chuyên đề, có đồng hồ bấm giờ và chấm điểm ngay khi nộp.</p>
+        </div>
+        <span className="hero__deco" aria-hidden>10</span>
+      </section>
+      )}
+      {error && <div className="error" style={{ marginBottom: 12 }}><span aria-hidden>😵</span><span>{error}</span></div>}
 
       {!exam || !saved ? (
         <ExamSetup info={info} busy={busy} onStart={start} />

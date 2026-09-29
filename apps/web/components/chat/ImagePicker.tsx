@@ -63,7 +63,7 @@ export function ImagePicker({ image, disabled, onChange, onError }: Props) {
       <div className="pick pick--has">
         <img src={image.previewUrl} alt="Ảnh đề bài" />
         <div>
-          <div>{image.name}</div>
+          <div><b>📸 {image.name}</b></div>
           <div className="muted">Đề trong ảnh sẽ được đọc trước khi giải.</div>
           <button type="button" className="linkbtn" onClick={() => onChange(null)} disabled={disabled}>
             Bỏ ảnh
@@ -87,8 +87,9 @@ export function ImagePicker({ image, disabled, onChange, onError }: Props) {
         hidden
         onChange={(e) => { void accept(e.target.files?.[0]); e.target.value = ""; }}
       />
+      <span className="pick__icon" aria-hidden>📷</span>
       <button type="button" className="btn btn--ghost" onClick={() => inputRef.current?.click()} disabled={disabled || busy}>
-        {busy ? "Đang tải ảnh..." : "Chọn ảnh đề bài"}
+        {busy ? "Đang tải ảnh..." : "Chụp / chọn ảnh đề"}
       </button>
       <span className="muted">hoặc kéo ảnh vào đây, hoặc dán bằng Ctrl+V</span>
     </div>

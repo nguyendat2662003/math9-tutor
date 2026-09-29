@@ -66,10 +66,19 @@ export default function Page() {
 
   return (
     <main className="app">
-      <div className="app__head">
-        <h1>Math9 Tutor</h1>
-        <span>Toán 9 · gợi ý từng bước · hình vẽ chính xác · lời giải được kiểm chứng bằng máy</span>
-      </div>
+      <section className="hero">
+        <div>
+          <div className="hero__hi">Chào em 👋</div>
+          <h1>Hôm nay mình chinh phục bài toán nào?</h1>
+          <p>Gõ đề hoặc chụp ảnh đề gửi lên — thầy AI gợi ý từng bước, vẽ hình chính xác và kiểm tra lại lời giải bằng máy.</p>
+        </div>
+        <div className="hero__badges">
+          <span className="hero__badge">💡 Gợi ý từng bước</span>
+          <span className="hero__badge">📐 Hình vẽ chính xác</span>
+          <span className="hero__badge">✅ Kiểm chứng bằng máy</span>
+        </div>
+        <span className="hero__deco" aria-hidden>∑</span>
+      </section>
 
       <ProblemInput
         text={text} mode={mode} hints={hints} busy={busy} image={image}
@@ -79,10 +88,10 @@ export default function Page() {
 
       {(busy || (events.length > 0 && (!result || events.some((e) => e.stage === "retrying")))) && (
         <div style={{ marginTop: 16 }}>
-          <StageProgress events={events} done={!busy} />
+          <StageProgress events={events} done={!busy} ok={!!result} />
         </div>
       )}
-      {error && <div className="error" style={{ marginTop: 16 }}>{error}</div>}
+      {error && <div className="error" style={{ marginTop: 16 }}><span aria-hidden>😵</span><span>{error}</span></div>}
 
       {result && (
         <div className="grid">
@@ -93,14 +102,18 @@ export default function Page() {
             onHoverStep={(id, hl) => { setActiveStep(id); setHighlight(hl); }}
           />
           {result.figure_svg ? (
-            <div>
+            <div className="figure">
               <Figure svg={result.figure_svg} highlight={highlight} />
-              <div className="muted" style={{ marginTop: 6 }}>
-                Di chuột vào một bước giải để tô sáng các điểm, đoạn liên quan.
+              <div className="figure-tip">
+                <span aria-hidden>👆</span> Chạm hoặc di chuột vào một bước giải để tô sáng điểm, đoạn liên quan trên hình.
               </div>
             </div>
           ) : (
-            <div className="card muted">Bài đại số — không có hình.</div>
+            <div className="card empty-fig">
+              <div className="empty-fig__icon" aria-hidden>🔢</div>
+              <strong>Bài đại số</strong>
+              <div className="muted">Bài này không cần hình vẽ — tập trung vào từng bước biến đổi nhé!</div>
+            </div>
           )}
         </div>
       )}

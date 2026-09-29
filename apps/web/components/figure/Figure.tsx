@@ -25,5 +25,10 @@ export function Figure({ svg, highlight }: { svg: string; highlight: string[] })
     });
   }, [svg, highlight]);
 
-  return <div className="card figure" ref={ref} dangerouslySetInnerHTML={{ __html: svg }} />;
+  return (
+    <div className="card">
+      <div className="card__title"><span aria-hidden>📐</span> Hình vẽ</div>
+      <div className="figure__svg" ref={ref} dangerouslySetInnerHTML={{ __html: svg }} />
+    </div>
+  );
 }
