@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import os
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from dataclasses import dataclass
 
 
@@ -34,6 +35,22 @@ class LLMClient(ABC):
         self, system: str, user: str, *, model: str, max_tokens: int = 4000,
         temperature: float = 0.2, thinking: bool = False, images: list[str] | None = None,
     ) -> LLMResponse: ...
+
+    def stream(
+        self, system: str, messages: list[dict], *, model: str, max_tokens: int = 4000,
+        temperature: float = 0.3, usage: dict | None = None,
+    ) -> Iterator[str]:
+        """Hội thoại nhiều lượt, trả từng đoạn chữ. `usage` (nếu truyền) được điền token lúc xong.
+
+        Mặc định: gọi `complete` với lượt cuối và trả một lần — đủ cho client chưa hỗ trợ stream
+        và cho LLM giả trong test. Client thật ghi đè để trả dần.
+        """
+        history = "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in messages[:-1])
+        user = (history + "\n\n[user]\n" if history else "") + messages[-1]["content"]
+        resp = self.complete(system, user, model=model, max_tokens=max_tokens, temperature=temperature)
+        if usage is not None:
+            usage.update(input=resp.tokens_in, output=resp.tokens_out, model=resp.model or model)
+        yield resp.text
 
 
 class AnthropicClient(LLMClient):
@@ -65,15 +82,12 @@ class OpenAICompatClient(LLMClient):
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": content}],
             "max_completion_tokens": max_tokens,
         }
-        # Một số model mới không nhận temperature khác mặc định; chỉ gửi khi khác 1.0
-        if temperature != 1.0:
-            body["temperature"] = temperature
-        headers = {"Content-Type": "application/json"}
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
+        self._set_temperature(body, model, temperature)
+        headers = self._headers()
 
         r = httpx.post(f"{self.base_url}/chat/completions", json=body, headers=headers, timeout=self.timeout)
         if r.status_code == 400 and "temperature" in r.text and "temperature" in body:
+            self._no_temperature.add(model)          # nhớ lại: lần sau khỏi tốn một request bị từ chối
             body.pop("temperature")
             r = httpx.post(f"{self.base_url}/chat/completions", json=body, headers=headers, timeout=self.timeout)
         if r.status_code >= 400:
@@ -98,6 +112,60 @@ class OpenAICompatClient(LLMClient):
             model=data.get("model", model),
             finish_reason=finish,
         )
+
+    # Model reasoning (vd gpt-5.x) chỉ nhận temperature mặc định: gửi là bị HTTP 400.
+    _no_temperature: set[str] = set()
+
+    def _set_temperature(self, body: dict, model: str, temperature: float) -> None:
+        if temperature != 1.0 and model not in self._no_temperature:
+            body["temperature"] = temperature
+
+    def _headers(self) -> dict:
+        h = {"Content-Type": "application/json"}
+        if self.api_key:
+            h["Authorization"] = f"Bearer {self.api_key}"
+        return h
+
+    def stream(self, system, messages, *, model, max_tokens=4000, temperature=0.3, usage=None):
+        """Stream thật qua SSE của /chat/completions — học sinh thấy chữ hiện dần, không phải chờ."""
+        import httpx
+
+        body: dict = {
+            "model": model, "stream": True, "stream_options": {"include_usage": True},
+            "messages": [{"role": "system", "content": system}, *messages],
+            "max_completion_tokens": max_tokens,
+        }
+        self._set_temperature(body, model, temperature)
+        for attempt in (1, 2):
+            with httpx.stream("POST", f"{self.base_url}/chat/completions", json=body,
+                              headers=self._headers(), timeout=self.timeout) as r:
+                if r.status_code == 400 and attempt == 1 and "temperature" in body:
+                    if "temperature" in r.read().decode(errors="ignore"):
+                        self._no_temperature.add(model)
+                        body.pop("temperature")
+                        continue
+                if r.status_code >= 400:
+                    raise RuntimeError(f"LLM trả về HTTP {r.status_code} (model={model}): {r.read().decode(errors='ignore')[:500]}")
+                got_text = False
+                for line in r.iter_lines():
+                    if not line.startswith("data:"):
+                        continue
+                    data = line[5:].strip()
+                    if data == "[DONE]":
+                        break
+                    chunk = json.loads(data)
+                    if chunk.get("usage") and usage is not None:
+                        u = chunk["usage"]
+                        usage.update(input=u.get("prompt_tokens", 0), output=u.get("completion_tokens", 0),
+                                     model=chunk.get("model", model))
+                    for ch in chunk.get("choices") or []:
+                        piece = (ch.get("delta") or {}).get("content")
+                        if piece:
+                            got_text = True
+                            yield piece
+                if not got_text:
+                    raise RuntimeError(f"LLM không trả chữ nào (model={model}) — có thể do max_tokens quá thấp cho model reasoning")
+                return
 
 
 LocalOpenAICompatClient = OpenAICompatClient

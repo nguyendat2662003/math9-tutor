@@ -27,7 +27,7 @@ Chi tiết từng package: [`docs/02-cong-viec-theo-package.md`](docs/02-cong-vi
 ### 2. Cài đặt (một lần)
 
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev,tracing,kho]"  # tracing: Langfuse · kho: Qdrant + đọc PDF/Word (tùy chọn)
 cd apps/web && npm install && cd ../..
 ```
 
@@ -80,6 +80,39 @@ Máy có `make` (Linux/macOS/Git Bash) dùng được lối tắt: `make install
 | `python-multipart not installed` dù đã cài | Lệnh `uvicorn` trỏ tới **Python khác** (vd. 3.11) → luôn chạy `python -m uvicorn ...` |
 | `WinError 10013` khi khởi động API | Cổng 8000 đang bị tiến trình cũ giữ → tắt terminal API cũ, hoặc đổi `--port 8001` và đặt `NEXT_PUBLIC_API_URL=http://localhost:8001` cho web |
 | Web báo không kết nối được API | Chưa chạy terminal 1, hoặc API lỗi khi khởi động — xem log ở terminal đó |
+
+### 6. Đăng nhập và lịch sử (Supabase)
+
+Mọi trang giải bài / luyện đề / lịch sử **bắt buộc đăng nhập** (tên đăng nhập + mật khẩu, không cần email).
+
+1. Supabase → **Connect** → **Session pooler** → chép chuỗi kết nối, thay `[YOUR-PASSWORD]`, dán vào `.env`:
+   `DATABASE_URL=postgresql://postgres.<ref>:<mật khẩu>@aws-0-<vùng>.pooler.supabase.com:5432/postgres`
+   (không dùng "Direct connection" — gói miễn phí chỉ có IPv6). Bảng tự tạo khi API khởi động.
+2. Chưa có `DATABASE_URL` thì API dùng SQLite `data/app.db` — chỉ để phát triển.
+3. `SOLVE_DAILY_LIMIT` (mặc định 30): số bài mỗi học sinh được giải mỗi ngày.
+4. Học sinh quên mật khẩu: vào `/admin` → "Đặt lại mật khẩu".
+
+**Hỏi thêm sau khi giải:** dưới lời giải có ô "Hỏi thêm về bài này" — trợ lý trả lời thẳng dựa trên
+đúng lời giải đó, nhắc "[bước a2]" thì bước đó được tô sáng trên hình, dẫn chứng định lí tới cấp chương
+SGK. Câu trả lời KHÔNG qua Verifier như lời giải chính (giao diện ghi rõ). Giới hạn `CHAT_PER_SOLVE_LIMIT`
+câu/bài, `CHAT_DAILY_LIMIT` câu/ngày. Hỏi đáp lưu cùng bài trong Lịch sử.
+
+Lịch sử lưu: mỗi lượt giải (đề, ảnh đề, lời giải, gợi ý, hình — mở lại không tốn lượt gọi model) và mỗi
+đề luyện (bài làm, điểm, điểm tự chấm). Mỗi học sinh chỉ xem được lịch sử của mình.
+
+### 7. Kho đề Qdrant — thêm đề mỗi ngày
+
+1. Đặt trong `.env`: `QDRANT_URL` + `QDRANT_API_KEY` (Qdrant Cloud), hoặc tạm `QDRANT_PATH=data/qdrant`
+   (lưu cục bộ); và `ADMIN_TOKEN=<mã tự đặt>`.
+2. Đưa kho có sẵn lên Qdrant (một lần; tắt API trước nếu dùng kho cục bộ):
+   `python tools/index_bank.py`
+3. Mở http://localhost:3000/admin, nhập mã → kéo-thả PDF / Word / ảnh đề (nên kèm đáp án) → sửa và
+   duyệt từng bài. Chỉ bài đã duyệt mới vào đề luyện và gợi ý bài tương tự.
+4. Chuyển kho (vd cục bộ → Cloud): đổi `.env`, rồi `python tools/index_bank.py --uploads` để ghi lại cả
+   bài tải lên đã duyệt.
+
+Máy ít RAM (dưới 8 GB) mà `npm run dev` bị "heap out of memory": chạy bản build
+`npm run build && npm run start` — nhẹ hơn nhiều.
 
 Biến môi trường thêm: `RAG_REQUIRE_REVIEWED=1` (production — chỉ nạp sổ tay đã soát),
 `CORS_ORIGINS` (mặc định `http://localhost:3000`).

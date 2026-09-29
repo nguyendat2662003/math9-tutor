@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 import { Nav } from "../components/Nav";
+import { AuthProvider } from "../components/auth/AuthProvider";
 
 export const metadata: Metadata = {
   title: "Math9 Tutor — Học Toán 9 thật vui",
@@ -25,8 +26,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <Nav />
-        {children}
+        <AuthProvider>
+          <Nav />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

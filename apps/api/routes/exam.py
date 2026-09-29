@@ -1,7 +1,8 @@
 """Luyện đề: sinh đề theo cấu trúc tỉnh hoặc tự chọn, nộp bài, chấm.
 
-Đáp án chỉ nằm trên server. `POST /api/exam` trả đề KHÔNG kèm đáp án; đáp án và
-lời giải chỉ trả về sau khi nộp bài.
+Đáp án chỉ nằm trên server (bảng exam_attempts). `POST /api/exam` trả đề KHÔNG kèm đáp án;
+đáp án và lời giải chỉ trả về sau khi nộp bài. Mỗi đề gắn với người tạo — người khác có
+mã đề cũng không mở hay nộp hộ được.
 """
 
 from __future__ import annotations
@@ -9,16 +10,21 @@ from __future__ import annotations
 from random import Random
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.concurrency import run_in_threadpool
+from math9_accounts import history
+from math9_accounts.service import UserInfo
 from math9_curriculum.loader import curriculum
-from math9_exam import store
 from math9_exam.bank import load_bank
 from math9_exam.builder import CustomSpec, build_exam, custom_blueprint, load_blueprints
 from math9_exam.grading import grade_exam
+from math9_exam.models import Exam
 from math9_exam.variants import TEMPLATES
 from pydantic import BaseModel, model_validator
 
-router = APIRouter(prefix="/api/exam")
+from ..auth import current_user
+
+router = APIRouter(prefix="/api/exam", dependencies=[Depends(current_user)])
 
 
 class CreateExam(BaseModel):
@@ -54,7 +60,7 @@ def blueprints() -> dict:
 
 
 @router.post("")
-def create(req: CreateExam) -> dict:
+async def create(req: CreateExam, user: UserInfo = Depends(current_user)) -> dict:
     if req.blueprint:
         bp = load_blueprints().get(req.blueprint)
         if not bp:
@@ -67,24 +73,29 @@ def create(req: CreateExam) -> dict:
     exam = build_exam(bp, seed=req.seed)
     if not exam.questions:
         raise HTTPException(422, "Không đủ câu hỏi cho lựa chọn này — thử thêm chuyên đề khác.")
-    store.save(exam)
+    request = req.model_dump(mode="json") | {"seed": exam.seed}     # lưu seed để "làm lại đề này" ra đúng đề
+    await run_in_threadpool(history.save_exam, user.id, exam.model_dump(mode="json"), request)
     return exam.public()
 
 
-def _load(exam_id: str):
-    try:
-        return store.load(exam_id)
-    except ValueError:
-        raise HTTPException(400, "exam_id không hợp lệ")
-    except store.ExamNotFound:
-        raise HTTPException(404, "Không tìm thấy đề (có thể đã hết hạn)")
+def _load(exam_id: str, user: UserInfo) -> tuple[Exam, dict]:
+    row = history.get_exam_row(user.id, exam_id)
+    if row is None:
+        raise HTTPException(404, "Không tìm thấy đề")
+    return Exam.model_validate(row["exam"]), row
 
 
 @router.get("/{exam_id}")
-def get(exam_id: str) -> dict:
-    return _load(exam_id).public()
+def get(exam_id: str, user: UserInfo = Depends(current_user)) -> dict:
+    exam, row = _load(exam_id, user)
+    return exam.public() | {"started_at": row["created_at"], "submitted": bool(row["submitted_at"])}
 
 
 @router.post("/{exam_id}/submit")
-def submit(exam_id: str, req: Submit) -> dict:
-    return grade_exam(_load(exam_id), req.responses)
+def submit(exam_id: str, req: Submit, user: UserInfo = Depends(current_user)) -> dict:
+    exam, row = _load(exam_id, user)
+    if row["result"] is not None:
+        return row["result"]                    # nộp lại (bấm hai lần, mạng chập chờn): trả kết quả cũ
+    result = grade_exam(exam, req.responses)
+    history.submit_exam(user.id, exam_id, req.responses, result)
+    return result

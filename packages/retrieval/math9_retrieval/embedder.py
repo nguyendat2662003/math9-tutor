@@ -59,6 +59,32 @@ class HashingEmbedder(Embedder):
         return out
 
 
+class OpenAIEmbedder(Embedder):
+    """API embedding tương thích OpenAI. `text-embedding-3-small`: đa ngữ, tiếng Việt ổn, rẻ
+    (khoảng 0,02 USD / 1 triệu token — cả kho vài nghìn đề chưa tới 1 cent)."""
+
+    def __init__(self, model: str = "text-embedding-3-small", dim: int = 1536,
+                 base_url: str | None = None, api_key: str | None = None, batch: int = 64):
+        import os
+
+        self.model, self.dim, self.batch = model, dim, batch
+        self.base_url = (base_url or os.environ.get("OPENAI_BASE_URL") or "https://api.openai.com/v1").rstrip("/")
+        self.api_key = api_key or os.environ.get("OPENAI_API_KEY", "")
+
+    def encode(self, texts: list[str]) -> list[list[float]]:
+        import httpx
+
+        out: list[list[float]] = []
+        for i in range(0, len(texts), self.batch):
+            chunk = [t[:8000] or " " for t in texts[i:i + self.batch]]      # API từ chối chuỗi rỗng
+            r = httpx.post(f"{self.base_url}/embeddings", json={"model": self.model, "input": chunk},
+                           headers={"Authorization": f"Bearer {self.api_key}"}, timeout=60)
+            if r.status_code >= 400:
+                raise RuntimeError(f"Embedding HTTP {r.status_code}: {r.text[:300]}")
+            out += [d["embedding"] for d in sorted(r.json()["data"], key=lambda d: d["index"])]
+        return out
+
+
 class LocalEmbedder(Embedder):
     """sentence-transformers self-host. Khuyên dùng bge-m3 cho tiếng Việt."""
 

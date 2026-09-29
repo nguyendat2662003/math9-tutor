@@ -17,11 +17,19 @@ PNG = bytes.fromhex(
 
 
 @pytest.fixture
-def client(tmp_path, monkeypatch):
+def client(tmp_path, monkeypatch, mem_db):
+    from conftest import make_client
+
     monkeypatch.setattr(up, "UPLOAD_DIR", tmp_path / "uploads")
-    app = FastAPI()
-    app.include_router(up.router)
-    return TestClient(app)
+    return make_client(up.router)
+
+
+def test_upload_requires_login(tmp_path, monkeypatch, mem_db):
+    from conftest import make_client
+
+    monkeypatch.setattr(up, "UPLOAD_DIR", tmp_path / "uploads")
+    anon = make_client(up.router, login=False)
+    assert anon.post("/api/upload", files={"file": ("de.png", PNG, "image/png")}).status_code == 401
 
 
 def test_upload_and_lookup(client, tmp_path, monkeypatch):

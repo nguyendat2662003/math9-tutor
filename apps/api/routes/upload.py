@@ -12,9 +12,11 @@ import time
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
-router = APIRouter(prefix="/api")
+from ..auth import current_user
+
+router = APIRouter(prefix="/api", dependencies=[Depends(current_user)])
 log = logging.getLogger(__name__)
 
 UPLOAD_DIR = Path(__file__).resolve().parents[3] / "data" / "uploads"

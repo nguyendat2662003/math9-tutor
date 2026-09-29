@@ -8,12 +8,11 @@ from random import Random
 
 import pytest
 import sympy as sp
-from math9_exam import store
 from math9_exam.bank import load_bank, parse_options, parse_true_false
 from math9_exam.builder import CustomSpec, build_exam, custom_blueprint, load_blueprints
 from math9_exam.figures import load_figures, needs_figure
 from math9_exam.grading import grade_exam, grade_question
-from math9_exam.models import Question
+from math9_exam.models import Exam, Question
 from math9_exam.variants import TEMPLATE_BY_ID, TEMPLATES
 from math9_verifier.answer import grade, grade_ordered
 
@@ -266,16 +265,20 @@ def test_grade_exam_perfect_auto_score():
 # ---------- API ----------
 
 @pytest.fixture
-def client(tmp_path, monkeypatch):
-    from fastapi import FastAPI
-    from fastapi.testclient import TestClient
-
+def client(mem_db):
     from apps.api.routes import exam as exam_route
+    from conftest import make_client
 
-    monkeypatch.setattr(store, "EXAM_DIR", tmp_path / "exams")
-    app = FastAPI()
-    app.include_router(exam_route.router)
-    return TestClient(app)
+    return make_client(exam_route.router)
+
+
+def test_api_requires_login(mem_db):
+    from apps.api.routes import exam as exam_route
+    from conftest import make_client
+
+    anon = make_client(exam_route.router, login=False)
+    assert anon.get("/api/exam/blueprints").status_code == 401
+    assert anon.post("/api/exam", json={"blueprint": "ha-noi"}).status_code == 401
 
 
 def test_api_create_get_submit(client):
@@ -289,7 +292,15 @@ def test_api_create_get_submit(client):
 
     assert client.get(f"/api/exam/{pub['id']}").json()["questions"] == pub["questions"]
 
-    exam = store.load(pub["id"])
+    from math9_accounts import history
+    from math9_accounts.service import normalize_username
+    from math9_accounts.models import User
+    from math9_accounts import db
+    from sqlalchemy import select
+
+    with db.session() as s:
+        uid = s.scalar(select(User.id).where(User.username == normalize_username("hocsinh1")))
+    exam = Exam.model_validate(history.get_exam_row(uid, pub["id"])["exam"])   # đáp án: chỉ server đọc được
     first = next(q for q in exam.questions if q.auto)
     res = client.post(f"/api/exam/{pub['id']}/submit", json={"responses": {first.qid: str(first.answer)}}).json()
     item = next(i for i in res["items"] if i["qid"] == first.qid)

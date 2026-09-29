@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createExam, fetchBlueprints, getExam, submitExam } from "../../lib/api";
+import { createExam, examHistoryDetail, fetchBlueprints, getExam, saveSelfMarks, submitExam } from "../../lib/api";
 import type { Answer, BlueprintList, Exam, ExamRequest, ExamResult as Result } from "../../types/exam";
 import { ExamSetup } from "../../components/exam/ExamSetup";
 import { ExamPaper, isAnswered } from "../../components/exam/ExamPaper";
@@ -58,12 +58,40 @@ export default function ExamPage() {
 
   useEffect(() => {
     fetchBlueprints().then(setInfo).catch((e) => setError(`Không tải được danh sách đề: ${e.message}`));
-    const s = readSaved();
-    if (!s) return;
-    getExam(s.examId)
-      .then((e) => { setExam(e); setSaved(s); })
-      .catch(() => writeSaved(null));              // đề đã hết hạn trên server
-  }, []);
+    const local = readSaved();
+    const resume = new URLSearchParams(window.location.search).get("resume");
+    if (resume) {
+      // Mở từ trang Lịch sử: đề, bài làm, kết quả, điểm tự chấm đều lấy từ server
+      examHistoryDetail(resume)
+        .then((d) => {
+          const sameLocal = local?.examId === d.id ? local : null;
+          const s: Saved = {
+            examId: d.id, request: d.request,
+            responses: d.responses ?? sameLocal?.responses ?? {},
+            startedAt: Date.parse(d.created_at),
+            result: d.result ?? undefined,
+            selfMarks: d.self_marks ?? {},
+          };
+          setExam(d.exam);
+          update(() => s);
+        })
+        .catch((e) => setError(`Không mở được đề: ${e.message}`));
+      return;
+    }
+    if (!local) return;
+    getExam(local.examId)
+      .then((e) => { setExam(e); setSaved({ ...local, startedAt: Date.parse(e.started_at) || local.startedAt }); })
+      .catch(() => writeSaved(null));              // đề không còn (đã xóa, hoặc của tài khoản khác)
+  }, [update]);
+
+  function selfMark(qid: string, p: number) {
+    update((s) => {
+      if (!s) return s;
+      const marks = { ...(s.selfMarks ?? {}), [qid]: p };
+      saveSelfMarks(s.examId, marks).catch(() => {});   // lưu vào lịch sử; lỗi mạng thì vẫn giữ trên máy
+      return { ...s, selfMarks: marks };
+    });
+  }
 
   async function start(request: ExamRequest) {
     setBusy(true);
@@ -107,6 +135,7 @@ export default function ExamPage() {
   function reset() {
     update(() => null);
     setExam(null);
+    if (window.location.search) window.history.replaceState(null, "", "/exam");   // bỏ ?resume=
   }
 
   return (
@@ -130,7 +159,7 @@ export default function ExamPage() {
           exam={exam}
           result={saved.result}
           selfMarks={saved.selfMarks ?? {}}
-          onSelfMark={(qid, p) => update((s) => (s ? { ...s, selfMarks: { ...(s.selfMarks ?? {}), [qid]: p } } : s))}
+          onSelfMark={selfMark}
           onRetry={() => start(saved.request)}
           onNew={reset}
         />

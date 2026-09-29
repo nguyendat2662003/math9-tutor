@@ -8,6 +8,8 @@ import type { PickedImage } from "../components/chat/ImagePicker";
 import { StageProgress } from "../components/chat/StageProgress";
 import { SolutionView } from "../components/solution-view/SolutionView";
 import { Figure } from "../components/figure/Figure";
+import { SimilarProblems } from "../components/solution-view/SimilarProblems";
+import { FollowUpChat, stepHighlights } from "../components/solution-view/FollowUpChat";
 
 export default function Page() {
   const [text, setText] = useState("");
@@ -114,6 +116,16 @@ export default function Page() {
             </div>
           )}
         </div>
+      )}
+      {result?.history_id && !busy && (
+        <FollowUpChat solveId={result.history_id} steps={stepHighlights(result)} onHighlight={setHighlight} />
+      )}
+      {result && !busy && (
+        <SimilarProblems
+          text={result.latex || result.raw_input}
+          topic={null /* không lọc cứng theo chuyên đề: bài tiếp tuyến có thể là GEO-5 hay GEO-9 */}
+          onPick={(t) => { setText(t); setImage(null); setResult(null); setEvents([]); window.scrollTo({ top: 0 }); }}
+        />
       )}
     </main>
   );

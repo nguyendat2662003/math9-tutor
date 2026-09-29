@@ -49,6 +49,8 @@ export interface Ocr {
 }
 
 export interface ProblemState {
+  /** Mã lượt giải trong Lịch sử (API trả kèm khi đã lưu) — dùng để hỏi thêm về bài này. */
+  history_id?: string;
   raw_input: string;
   latex: string | null;
   ocr: Ocr | null;

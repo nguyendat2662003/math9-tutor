@@ -11,6 +11,7 @@ from pathlib import Path
 
 from jinja2 import Template
 
+from .. import tracing
 from ..llm.client import LLMClient, LLMResponse, pick_model
 from ..state import ProblemState
 
@@ -32,13 +33,25 @@ class Agent(ABC):
 
     def __call__(self, state: ProblemState) -> ProblemState:
         t0 = time.time()
-        out = self.run(state)
+        with tracing.observe(self.role, kind="agent", input={"attempt": state.attempts, "topic": state.topic}) as span:
+            out = self.run(state)
+            span.update(output=self.trace_summary(out))
         out.log(
             agent=self.role,
             model=self.model_for(state),
             ms=int((time.time() - t0) * 1000),
         )
         return out
+
+    def trace_summary(self, state: ProblemState) -> dict:
+        """Tóm tắt hiện trên span của agent. Prompt/kết quả đầy đủ nằm ở generation con."""
+        return {
+            "topic": state.topic, "difficulty": state.difficulty,
+            "subproblems": [
+                {"label": sp.label, "goal_type": sp.goal_type, "steps": len(sp.steps), "answer": sp.answer}
+                for sp in state.subproblems
+            ],
+        }
 
     # -- tiện ích dùng chung -------------------------------------------------
 
@@ -56,8 +69,18 @@ class Agent(ABC):
                  temperature: float = 0.2, images: list[str] | None = None) -> LLMResponse:
         if self.llm is None:
             raise RuntimeError(f"Agent {self.role} chưa được gắn LLM client")
-        resp = self.llm.complete(system=system, user=user, model=self.model_for(state),
-                                 max_tokens=max_tokens, temperature=temperature, images=images)
+        model = self.model_for(state)
+        messages: list[dict] = [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        if images:
+            # Không đẩy ảnh base64 lên Langfuse — chỉ ghi ảnh nào, nặng bao nhiêu
+            messages.append({"role": "user", "content": [_image_note(i) for i in images]})
+        with tracing.observe(f"{self.role}.llm", kind="generation", model=model, input=messages,
+                             model_parameters={"max_tokens": max_tokens, "temperature": temperature}) as gen:
+            resp = self.llm.complete(system=system, user=user, model=model,
+                                     max_tokens=max_tokens, temperature=temperature, images=images)
+            gen.update(model=resp.model or model, output=resp.text,
+                       usage_details={"input": resp.tokens_in, "output": resp.tokens_out},
+                       metadata={"finish_reason": resp.finish_reason})
         state.log(agent=f"{self.role}.llm", model=resp.model, tokens_in=resp.tokens_in, tokens_out=resp.tokens_out)
         return resp
 
@@ -94,6 +117,14 @@ _LATEX_AMBIGUOUS = (
     "underline", "underbrace", "upsilon",
 )
 _RE_AMBIG = re.compile(r"\\(" + "|".join(sorted(_LATEX_AMBIGUOUS, key=len, reverse=True)) + r")(?![A-Za-z])")
+
+
+def _image_note(image: str) -> str:
+    s = str(image)
+    if s.startswith("data:"):
+        return f"[ảnh data URL, {len(s) // 1024} KB]"
+    p = Path(s)
+    return f"[ảnh {p.name}, {p.stat().st_size // 1024} KB]" if p.exists() else f"[ảnh {p.name}]"
 
 
 def _repair_latex_escapes(t: str) -> str:

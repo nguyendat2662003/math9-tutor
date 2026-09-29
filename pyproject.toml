@@ -11,13 +11,19 @@ dependencies = [
     "sympy>=1.12",
     "fastapi>=0.110",
     "python-multipart>=0.0.9",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
     "uvicorn[standard]>=0.29",
     "httpx>=0.27",
     "jinja2>=3.1",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "pytest-cov", "ruff", "mypy"]
+dev = ["pytest>=8.0", "pytest-cov", "ruff", "mypy", "qdrant-client>=1.12"]
+# Kho đề Qdrant (tải đề lên hằng ngày, gợi ý bài tương tự)
+kho = ["qdrant-client>=1.12", "pdfplumber>=0.11", "python-docx>=1.1"]
+# Tracing lên Langfuse — bật khi .env có LANGFUSE_PUBLIC_KEY/SECRET_KEY
+tracing = ["langfuse>=4,<5"]
 ingest = [
     "httpx>=0.27",
     "pdfplumber>=0.11",
@@ -29,14 +35,14 @@ ingest = [
 where = [
     "packages/core", "packages/curriculum",
     "packages/geometry", "packages/verifier", "packages/ingest", "packages/methods", "packages/retrieval",
-    "packages/exam",
+    "packages/exam", "packages/accounts",
 ]
 
 [tool.pytest.ini_options]
 pythonpath = [
     "packages/core", "packages/curriculum",
     "packages/geometry", "packages/verifier", "packages/ingest", "packages/methods", "packages/retrieval",
-    "packages/exam",
+    "packages/exam", "packages/accounts",
 ]
 testpaths = ["tests"]
 

@@ -12,6 +12,7 @@ kèm nhãn độ tin cậy, không cố nữa.
 
 from __future__ import annotations
 
+import contextvars
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
@@ -28,6 +29,7 @@ from math9_verifier.geometry import cross_check_solution, verify
 from math9_verifier.lemma_finder import find_lemmas, format_for_prompt
 from math9_verifier.predicates import Predicate
 
+from . import tracing
 from .agents.critic import CriticAgent
 from .agents.draftsman import DraftsmanAgent
 from .agents.parser import ParserAgent
@@ -65,6 +67,31 @@ class Pipeline:
     # -- luồng chính ------------------------------------------------------
 
     def run(self, state: ProblemState) -> ProblemState:
+        """Một lượt giải = một trace trên Langfuse (nếu bật)."""
+        mode = state.mode.value if hasattr(state.mode, "value") else state.mode
+        with tracing.attributes(trace_name="giai-bai", tags=[mode]), \
+                tracing.observe("giai-bai", kind="chain",
+                                input={"de": state.raw_input, "co_anh": bool(state.image_path), "mode": mode}) as root:
+            root.set_trace_io(input=state.raw_input or "(ảnh đề)")
+            try:
+                state = self._run(state)
+            finally:
+                summary = {
+                    "topic": state.topic, "difficulty": state.difficulty, "attempts": state.attempts,
+                    "confidence": state.confidence().value,
+                    "answers": {sp.label: sp.answer for sp in state.subproblems if sp.answer},
+                }
+                root.update(output=summary)
+                root.set_trace_io(output=summary)
+                # Chuyên đề + độ tin cậy chỉ biết lúc cuối: gắn tag lên observation gốc để lọc trên Langfuse
+                with tracing.attributes(tags=[t for t in (mode, state.topic, summary["confidence"]) if t]):
+                    pass
+                url = tracing.trace_url()           # phải lấy khi trace còn mở
+        if url:
+            log.info("Langfuse trace: %s", url)
+        return state
+
+    def _run(self, state: ProblemState) -> ProblemState:
         self._emit("parsing", from_image=bool(state.image_path))
         state = self.parser(state)
         if state.ocr:
@@ -73,20 +100,33 @@ class Pipeline:
         state = self.router(state)
         self._emit("routed", topic=state.topic, difficulty=state.difficulty,
                    subproblems=[{"label": sp.label, "goal_type": sp.goal_type} for sp in state.subproblems])
-        self._retrieve(state)          # RAG: nạp chiến lược + bài mẫu vào state
+        with tracing.observe("rag", kind="retriever", input={"goal_types": [sp.goal_type for sp in state.subproblems]}) as span:
+            self._retrieve(state)      # RAG: nạp chiến lược + bài mẫu vào state
+            span.update(output={k: len(v or "") for k, v in (state.retrieved or {}).items()})
 
         while True:
             self._emit("solving", geometry=state.is_geometry(), attempt=state.attempts)
             state = self._solve_and_draw(state)
             self._emit("verifying")
-            state = self._verify(state)
+            with tracing.observe("verifier", kind="evaluator", input={"attempt": state.attempts}) as span:
+                state = self._verify(state)
+                v = state.verification
+                span.update(
+                    output={"passed": self._passed(state), "algebra_ok": v.algebra_ok, "geometry_ok": v.geometry_ok,
+                            "violations": v.violations, "cross_check": v.cross_check,
+                            "geometry": v.detail.get("geometry")},
+                    level="DEFAULT" if self._passed(state) else "WARNING",
+                )
 
             if self._passed(state) or state.attempts >= state.max_attempts:
                 break
 
             state.attempts += 1
             log.info("Kiểm chứng thất bại, thử lại lần %d", state.attempts)
-            self._emit("retrying", attempt=state.attempts, reasons=_short_reasons(state))
+            reasons = _short_reasons(state)
+            with tracing.observe("giai-lai", input={"lan": state.attempts, "ly_do": reasons}, level="WARNING"):
+                pass
+            self._emit("retrying", attempt=state.attempts, reasons=reasons)
             state = self.critic(state)
             self._draftsman_feedback(state)
             if state.difficulty >= 3:
@@ -139,9 +179,10 @@ class Pipeline:
             return self.solver(state)
 
         n0 = len(state.trace)
+        # Mỗi luồng một bản sao context để span của Solver/Draftsman nằm dưới trace hiện tại
         with ThreadPoolExecutor(max_workers=2) as ex:
-            fs = ex.submit(self.solver, state.model_copy(deep=True))
-            fd = ex.submit(self.draftsman, state.model_copy(deep=True))
+            fs = ex.submit(contextvars.copy_context().run, self.solver, state.model_copy(deep=True))
+            fd = ex.submit(contextvars.copy_context().run, self.draftsman, state.model_copy(deep=True))
             solved, drawn = fs.result(), fd.result()
 
         state.subproblems = solved.subproblems
