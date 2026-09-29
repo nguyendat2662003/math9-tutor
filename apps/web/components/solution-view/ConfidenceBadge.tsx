@@ -25,15 +25,20 @@ export function reasons(s: ProblemState): string[] {
   return out;
 }
 
+const ICON = { high: "✅", partial: "⚠️", low: "🤔" };
+
 export function ConfidenceBadge({ s }: { s: ProblemState }) {
   const rs = reasons(s);
   return (
     <div className={`conf conf--${s.confidence}`}>
-      <strong>{s.confidence === "high" ? "Đã kiểm chứng" : s.confidence === "partial" ? "Kiểm chứng một phần" : "Chưa kiểm chứng"}</strong>
-      <span style={{ fontSize: 14 }}>
-        {TEXT[s.confidence]}
-        {rs.length > 0 && <> ({rs.join(" · ")})</>}
-      </span>
+      <span className="conf__icon" aria-hidden>{ICON[s.confidence]}</span>
+      <div>
+        <strong>{s.confidence === "high" ? "Đã kiểm chứng" : s.confidence === "partial" ? "Kiểm chứng một phần" : "Chưa kiểm chứng"}</strong>
+        <span style={{ fontSize: 14 }}>
+          {TEXT[s.confidence]}
+          {rs.length > 0 && <> ({rs.join(" · ")})</>}
+        </span>
+      </div>
     </div>
   );
 }

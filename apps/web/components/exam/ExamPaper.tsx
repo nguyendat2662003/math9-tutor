@@ -28,18 +28,25 @@ export function ExamPaper({ exam, responses, endsAt, busy, onAnswer, onSubmit }:
   return (
     <div>
       <div className="paper-bar">
-        <div>
-          <strong>{exam.title}</strong>
-          <div className="muted">{exam.questions.length} câu · {exam.total_points} điểm · {exam.minutes} phút</div>
+        <div className="paper-bar__info">
+          <strong>📝 {exam.title}</strong>
+          <div className="paper-bar__progress">
+            <div className="progress" role="progressbar" aria-valuenow={answered} aria-valuemin={0} aria-valuemax={exam.questions.length}>
+              <div className="progress__bar" style={{ width: `${(answered / Math.max(1, exam.questions.length)) * 100}%` }} />
+            </div>
+            <span className="muted">{answered}/{exam.questions.length} câu</span>
+          </div>
         </div>
         <Timer endsAt={endsAt} onExpire={() => onSubmit(true)} />
-        <span className="muted">Đã làm {answered}/{exam.questions.length}</span>
         <button className="btn" disabled={busy} onClick={() => onSubmit(false)}>
-          {busy ? "Đang chấm…" : "Nộp bài"}
+          {busy ? "Đang chấm…" : "📤 Nộp bài"}
         </button>
       </div>
+      <div className="muted" style={{ marginTop: 10 }}>
+        {exam.questions.length} câu · {exam.total_points} điểm · {exam.minutes} phút — bình tĩnh, câu dễ làm trước nhé! 💪
+      </div>
 
-      {exam.warnings.length > 0 && <div className="error" style={{ marginTop: 12 }}>{exam.warnings.join(" ")}</div>}
+      {exam.warnings.length > 0 && <div className="error" style={{ marginTop: 12 }}><span aria-hidden>⚠️</span><span>{exam.warnings.join(" ")}</span></div>}
 
       {exam.questions.map((q) => {
         const header = q.section !== lastSection ? <h2 className="section">{q.section}</h2> : null;
@@ -60,9 +67,13 @@ export function ExamPaper({ exam, responses, endsAt, busy, onAnswer, onSubmit }:
         );
       })}
 
-      <div className="row" style={{ marginTop: 20 }}>
-        <button className="btn" disabled={busy} onClick={() => onSubmit(false)}>Nộp bài</button>
-        <span className="muted">Đã làm {answered}/{exam.questions.length} câu</span>
+      <div className="paper-end">
+        <span style={{ fontSize: 28 }} aria-hidden>{answered === exam.questions.length ? "🎉" : "🏁"}</span>
+        <div className="spacer">
+          <strong>{answered === exam.questions.length ? "Em đã làm hết các câu rồi!" : "Sắp về đích rồi!"}</strong>
+          <div className="muted">Đã làm {answered}/{exam.questions.length} câu. Soát lại một lượt rồi nộp bài nhé.</div>
+        </div>
+        <button className="btn btn--big" disabled={busy} onClick={() => onSubmit(false)}>📤 Nộp bài</button>
       </div>
     </div>
   );
@@ -72,7 +83,7 @@ function QuestionCard({ q, value, onChange }: { q: ExamQuestion; value: Answer; 
   return (
     <div className={`q ${isAnswered(value) ? "q--done" : ""}`} id={q.qid}>
       <div className="q__head">
-        <strong>{q.number}</strong>
+        <span className="q__num">{isAnswered(value) ? "✓ " : ""}{q.number}</span>
         <span className="chip chip--muted">{q.points} điểm</span>
         {q.origin === "variant" && <span className="chip chip--muted" title={q.source}>biến thể</span>}
       </div>
@@ -88,7 +99,7 @@ function QuestionCard({ q, value, onChange }: { q: ExamQuestion; value: Answer; 
               aria-pressed={value === LETTERS[i]}
               onClick={() => onChange(value === LETTERS[i] ? null : LETTERS[i])}
             >
-              <b>{LETTERS[i]}.</b> <MathText text={o} />
+              <span className="opt__l">{LETTERS[i]}</span> <span><MathText text={o} /></span>
             </button>
           ))}
         </div>
@@ -107,8 +118,8 @@ function QuestionCard({ q, value, onChange }: { q: ExamQuestion; value: Answer; 
               <div key={i} className="tf__row">
                 <span>{"abcd"[i]}) <MathText text={c} /></span>
                 <span className="tf__btns">
-                  <button type="button" className={cur === true ? "on" : ""} onClick={() => set(true)}>Đúng</button>
-                  <button type="button" className={cur === false ? "on" : ""} onClick={() => set(false)}>Sai</button>
+                  <button type="button" className={cur === true ? "on-true" : ""} aria-pressed={cur === true} onClick={() => set(true)}>✓ Đúng</button>
+                  <button type="button" className={cur === false ? "on-false" : ""} aria-pressed={cur === false} onClick={() => set(false)}>✗ Sai</button>
                 </span>
               </div>
             );
@@ -134,7 +145,7 @@ function QuestionCard({ q, value, onChange }: { q: ExamQuestion; value: Answer; 
             placeholder="Nháp bài làm (không bắt buộc)"
             onChange={(e) => onChange(e.target.value)}
           />
-          <div className="muted">Câu chứng minh: sau khi nộp, em xem lời giải rồi tự chấm.</div>
+          <div className="muted">✍️ Câu chứng minh: sau khi nộp, em xem lời giải rồi tự chấm.</div>
         </>
       )}
     </div>
@@ -169,7 +180,7 @@ function Timer({ endsAt, onExpire }: { endsAt: number; onExpire: () => void }) {
   const ss = String(s % 60).padStart(2, "0");
   return (
     <span className={`timer ${s < 300 ? "timer--low" : ""}`} aria-live="polite">
-      {hh > 0 ? `${hh}:` : ""}{mm}:{ss}
+      <span aria-hidden>⏱</span>{hh > 0 ? `${hh}:` : ""}{mm}:{ss}
     </span>
   );
 }
