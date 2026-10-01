@@ -84,13 +84,18 @@ Máy có `make` (Linux/macOS/Git Bash) dùng được lối tắt: `make install
 ### 6. Đăng nhập và lịch sử (Supabase)
 
 Mọi trang giải bài / luyện đề / lịch sử **bắt buộc đăng nhập** (tên đăng nhập + mật khẩu, không cần email).
+**Không có tự đăng ký**: một tài khoản **admin duy nhất** tạo tài khoản cho học sinh.
 
 1. Supabase → **Connect** → **Session pooler** → chép chuỗi kết nối, thay `[YOUR-PASSWORD]`, dán vào `.env`:
    `DATABASE_URL=postgresql://postgres.<ref>:<mật khẩu>@aws-0-<vùng>.pooler.supabase.com:5432/postgres`
    (không dùng "Direct connection" — gói miễn phí chỉ có IPv6). Bảng tự tạo khi API khởi động.
 2. Chưa có `DATABASE_URL` thì API dùng SQLite `data/app.db` — chỉ để phát triển.
 3. `SOLVE_DAILY_LIMIT` (mặc định 30): số bài mỗi học sinh được giải mỗi ngày.
-4. Học sinh quên mật khẩu: vào `/admin` → "Đặt lại mật khẩu".
+4. Tạo admin (một lần): `python tools/create_admin.py` — in mật khẩu tạm; lần đầu đăng nhập phải đổi.
+   Quên mật khẩu admin: `python tools/create_admin.py --reset`.
+5. Admin vào **Quản trị → Học sinh**: dán danh sách họ tên (mỗi dòng một em) → tạo tài khoản, mật khẩu tự
+   sinh, bấm **In danh sách** để phát. Học sinh phải đổi mật khẩu ở lần đăng nhập đầu. Quên mật khẩu /
+   khóa tài khoản: cũng ở đây.
 
 **Hỏi thêm sau khi giải:** dưới lời giải có ô "Hỏi thêm về bài này" — trợ lý trả lời thẳng dựa trên
 đúng lời giải đó, nhắc "[bước a2]" thì bước đó được tô sáng trên hình, dẫn chứng định lí tới cấp chương
@@ -103,10 +108,10 @@ Lịch sử lưu: mỗi lượt giải (đề, ảnh đề, lời giải, gợi 
 ### 7. Kho đề Qdrant — thêm đề mỗi ngày
 
 1. Đặt trong `.env`: `QDRANT_URL` + `QDRANT_API_KEY` (Qdrant Cloud), hoặc tạm `QDRANT_PATH=data/qdrant`
-   (lưu cục bộ); và `ADMIN_TOKEN=<mã tự đặt>`.
+   (lưu cục bộ).
 2. Đưa kho có sẵn lên Qdrant (một lần; tắt API trước nếu dùng kho cục bộ):
    `python tools/index_bank.py`
-3. Mở http://localhost:3000/admin, nhập mã → kéo-thả PDF / Word / ảnh đề (nên kèm đáp án) → sửa và
+3. Đăng nhập tài khoản admin → **Quản trị → Kho đề** → kéo-thả PDF / Word / ảnh đề (nên kèm đáp án) → sửa và
    duyệt từng bài. Chỉ bài đã duyệt mới vào đề luyện và gợi ý bài tương tự.
 4. Chuyển kho (vd cục bộ → Cloud): đổi `.env`, rồi `python tools/index_bank.py --uploads` để ghi lại cả
    bài tải lên đã duyệt.

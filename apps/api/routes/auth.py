@@ -1,4 +1,4 @@
-"""Đăng ký, đăng nhập, đăng xuất, đổi mật khẩu."""
+"""Đăng nhập, đăng xuất, đổi mật khẩu. KHÔNG có tự đăng ký — tài khoản do admin tạo."""
 
 from __future__ import annotations
 
@@ -8,15 +8,9 @@ from math9_accounts import service
 from math9_accounts.service import AccountError, UserInfo
 from pydantic import BaseModel, Field
 
-from ..auth import COOKIE, clear_session_cookie, current_user, set_session_cookie
+from ..auth import COOKIE, clear_session_cookie, session_user, set_session_cookie
 
 router = APIRouter(prefix="/api/auth")
-
-
-class Register(BaseModel):
-    username: str = Field(max_length=64)
-    password: str = Field(max_length=200)
-    display_name: str = Field(default="", max_length=100)
 
 
 class Login(BaseModel):
@@ -38,10 +32,8 @@ async def _run(fn, *a):
 
 
 @router.post("/register")
-async def register(req: Register, resp: Response) -> dict:
-    user = await _run(service.register, req.username, req.password, req.display_name)
-    set_session_cookie(resp, await run_in_threadpool(service.create_session, user.id))
-    return user.public()
+def register() -> None:
+    raise HTTPException(403, "Không tự tạo tài khoản được — nhờ thầy cô quản trị cấp tài khoản cho em")
 
 
 @router.post("/login")
@@ -59,11 +51,11 @@ def logout(request: Request, resp: Response) -> dict:
 
 
 @router.get("/me")
-def me(user: UserInfo = Depends(current_user)) -> dict:
+def me(user: UserInfo = Depends(session_user)) -> dict:
     return user.public() | {"solves_today": service.solves_today(user.id), "daily_limit": service.daily_limit()}
 
 
 @router.post("/change-password")
-async def change_password(req: ChangePassword, request: Request, user: UserInfo = Depends(current_user)) -> dict:
+async def change_password(req: ChangePassword, request: Request, user: UserInfo = Depends(session_user)) -> dict:
     await _run(service.change_password, user.id, req.old_password, req.new_password, request.cookies.get(COOKIE))
     return {"ok": True}

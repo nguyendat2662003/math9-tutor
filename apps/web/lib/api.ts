@@ -40,8 +40,6 @@ export async function fetchMe(): Promise<Me | null> {
   return res.status === 401 ? null : json(res);
 }
 export const login = async (username: string, password: string): Promise<Me> => json(await post("/api/auth/login", { username, password }));
-export const register = async (username: string, password: string, display_name: string): Promise<Me> =>
-  json(await post("/api/auth/register", { username, password, display_name }));
 export const logout = async (): Promise<void> => { await post("/api/auth/logout"); };
 export const changePassword = async (old_password: string, new_password: string): Promise<void> => {
   await json(await post("/api/auth/change-password", { old_password, new_password }));
@@ -184,11 +182,8 @@ export async function chatStream(
   }
 }
 
-// ---------- quản trị (cần mã ADMIN_TOKEN, không dùng phiên đăng nhập) ----------
+// ---------- quản trị (chỉ tài khoản admin — dùng cookie phiên như mọi trang khác) ----------
 
-export async function admin<T>(token: string, path: string, init: RequestInit = {}): Promise<T> {
-  const headers = new Headers(init.headers);
-  headers.set("X-Admin-Token", token);
-  if (init.body && !(init.body instanceof FormData)) headers.set("Content-Type", "application/json");
-  return json(await fetch(`${BASE}/api/admin${path}`, { ...init, headers }));
+export async function admin<T>(path: string, init: RequestInit = {}): Promise<T> {
+  return json(await call(`/api/admin${path}`, init));
 }

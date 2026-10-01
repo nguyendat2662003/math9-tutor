@@ -5,8 +5,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { fetchMe, logout as apiLogout } from "../../lib/api";
 import type { Me } from "../../types/auth";
 
-// Trang dùng được khi chưa đăng nhập. Còn lại (giải bài, luyện đề, lịch sử) bắt buộc đăng nhập.
-const PUBLIC = ["/login", "/admin"];
+// Trang dùng được khi chưa đăng nhập. Còn lại (giải bài, luyện đề, lịch sử, quản trị) bắt buộc đăng nhập.
+const PUBLIC = ["/login"];
+// Tài khoản mới cấp / vừa được đặt lại mật khẩu: chỉ được ở trang đổi mật khẩu
+const CHANGE_PASSWORD = "/account";
 
 interface AuthState {
   user: Me | null;
@@ -56,10 +58,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (ready && !user && !isPublic) {
       router.replace(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+    } else if (user?.must_change_password && path !== CHANGE_PASSWORD) {
+      router.replace(CHANGE_PASSWORD);
     }
-  }, [ready, user, isPublic, router]);
+  }, [ready, user, isPublic, path, router]);
 
-  const gate = !isPublic && (!ready || !user);
+  const mustChange = !!user?.must_change_password && path !== CHANGE_PASSWORD;
+  const gate = (!isPublic && (!ready || !user)) || mustChange;
   return (
     <Ctx.Provider value={{ user, ready, refresh, logout }}>
       {gate ? <main className="app"><div className="card muted">Đang kiểm tra đăng nhập…</div></main> : children}

@@ -151,48 +151,47 @@ def client(index, monkeypatch, mem_db):
 
     from apps.api.routes import admin, similar
 
-    monkeypatch.setenv("ADMIN_TOKEN", "bi-mat")
     monkeypatch.setattr(admin, "_llm", lambda: (FakeLLM(EXTRACTED), "m"))
     from conftest import make_client
 
-    return make_client(admin.router, similar.router)
+    return make_client(admin.router, similar.router, username="admin", role="admin")
 
 
-def test_admin_requires_token(client, monkeypatch):
-    assert client.get("/api/admin/batches").status_code == 401
-    assert client.get("/api/admin/batches", headers={"X-Admin-Token": "sai"}).status_code == 401
-    monkeypatch.delenv("ADMIN_TOKEN")
-    assert client.get("/api/admin/batches", headers={"X-Admin-Token": "bi-mat"}).status_code == 503
+def test_admin_requires_admin_account(index, mem_db):
+    from conftest import make_client
+
+    from apps.api.routes import admin
+
+    assert make_client(admin.router, login=False).get("/api/admin/batches").status_code == 401
+    assert make_client(admin.router, username="hocsinh").get("/api/admin/batches").status_code == 403
 
 
 def test_admin_rejects_non_documents(client):
-    h = {"X-Admin-Token": "bi-mat"}
-    r = client.post("/api/admin/documents", headers=h, files={"file": ("x.pdf", b"khong phai pdf" * 10, "application/pdf")})
+    r = client.post("/api/admin/documents", files={"file": ("x.pdf", b"khong phai pdf" * 10, "application/pdf")})
     assert r.status_code == 415
-    assert client.get("/api/admin/batches/../../etc", headers=h).status_code in (400, 404)
+    assert client.get("/api/admin/batches/../../etc").status_code in (400, 404)
 
 
 def test_admin_full_flow_and_similar(client):
-    h = {"X-Admin-Token": "bi-mat"}
-    r = client.post("/api/admin/documents", headers=h, files={"file": ("de.png", PNG, "image/png")})
+    r = client.post("/api/admin/documents", files={"file": ("de.png", PNG, "image/png")})
     assert r.status_code == 200
     bid = r.json()["id"]
-    b = client.get(f"/api/admin/batches/{bid}", headers=h).json()      # TestClient chạy xong tác vụ nền
+    b = client.get(f"/api/admin/batches/{bid}").json()      # TestClient chạy xong tác vụ nền
     assert b["status"] == "ready"
     c2 = next(p for p in b["problems"] if p["number"] == "Câu 2")
-    fixed = client.patch(f"/api/admin/batches/{bid}/problems/{c2['id']}", headers=h, json={"topic": "ALG-3"}).json()
+    fixed = client.patch(f"/api/admin/batches/{bid}/problems/{c2['id']}", json={"topic": "ALG-3"}).json()
     assert fixed["topic"] == "ALG-3" and not any("chuyên đề" in w for w in fixed["warnings"])
-    assert client.patch(f"/api/admin/batches/{bid}/problems/{c2['id']}", headers=h,
+    assert client.patch(f"/api/admin/batches/{bid}/problems/{c2['id']}",
                         json={"status": "approved"}).status_code == 400          # không cho tự đổi trạng thái
 
-    res = client.post(f"/api/admin/batches/{bid}/approve", headers=h, json={"ids": [p["id"] for p in b["problems"]]}).json()
+    res = client.post(f"/api/admin/batches/{bid}/approve", json={"ids": [p["id"] for p in b["problems"]]}).json()
     assert res["approved"] == 4 and not res["skipped"]
-    stats = client.get("/api/admin/stats", headers=h).json()
+    stats = client.get("/api/admin/stats").json()
     assert stats["qdrant"]["uploads"] == 4
 
     sim = client.get("/api/similar", params={"text": "Tìm nghiệm của phương trình 3x − 12 = 0"}).json()
     assert sim["enabled"] and sim["items"]
     assert all("answer" not in it for it in sim["items"])                   # không lộ đáp án
 
-    un = client.post(f"/api/admin/batches/{bid}/unpublish", headers=h, json={"ids": [c2["id"]]}).json()
-    assert un["unpublished"] == 1 and client.get("/api/admin/stats", headers=h).json()["qdrant"]["uploads"] == 3
+    un = client.post(f"/api/admin/batches/{bid}/unpublish", json={"ids": [c2["id"]]}).json()
+    assert un["unpublished"] == 1 and client.get("/api/admin/stats").json()["qdrant"]["uploads"] == 3

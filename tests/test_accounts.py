@@ -17,21 +17,21 @@ def test_password_hashing():
     assert hash_password("matkhau-123") != h                  # mỗi lần một salt
 
 
-def test_register_validation(mem_db):
+def test_create_user_validation(mem_db):
     with pytest.raises(AccountError):
-        service.register("ab", "matkhau-123", "")               # tên quá ngắn
+        service.create_user("ab", "matkhau-123", "")               # tên quá ngắn
     with pytest.raises(AccountError):
-        service.register("Nguyễn Văn A", "matkhau-123", "")     # có dấu/khoảng trắng
+        service.create_user("Nguyễn Văn A", "matkhau-123", "")     # có dấu/khoảng trắng
     with pytest.raises(AccountError):
-        service.register("hocsinh1", "1234567", "")             # mật khẩu < 8
-    u = service.register("HocSinh1", "matkhau-123", "Em A")
+        service.create_user("hocsinh1", "1234567", "")             # mật khẩu < 8
+    u = service.create_user("HocSinh1", "matkhau-123", "Em A")
     assert u.username == "hocsinh1"                              # chuẩn hóa chữ thường
     with pytest.raises(AccountError, match="đã có"):
-        service.register("hocsinh1", "matkhau-456", "")
+        service.create_user("hocsinh1", "matkhau-456", "")
 
 
 def test_login_lockout_and_generic_errors(mem_db):
-    service.register("hocsinh1", "matkhau-123", "")
+    service.create_user("hocsinh1", "matkhau-123", "", must_change_password=False)
     with pytest.raises(AccountError) as unknown:
         service.authenticate("khongco", "x")
     with pytest.raises(AccountError) as wrong:
@@ -45,7 +45,7 @@ def test_login_lockout_and_generic_errors(mem_db):
 
 
 def test_sessions_logout_and_password_change(mem_db):
-    u = service.register("hocsinh1", "matkhau-123", "")
+    u = service.create_user("hocsinh1", "matkhau-123", "", must_change_password=False)
     t1, t2 = service.create_session(u.id), service.create_session(u.id)
     assert service.user_by_token(t1).id == u.id
     assert service.user_by_token("bia-dat") is None
@@ -61,6 +61,10 @@ def test_sessions_logout_and_password_change(mem_db):
 
 def test_api_register_login_cookie(mem_db):
     from apps.api.routes import history as hist_route
+
+    anon = make_client(hist_route.router, login=False)
+    r = anon.post("/api/auth/register", json={"username": "tudangky", "password": "matkhau-123"})
+    assert r.status_code == 403                                  # không tự đăng ký — admin cấp tài khoản
 
     c = make_client(hist_route.router)
     cookie = c.cookies.get("m9_session")

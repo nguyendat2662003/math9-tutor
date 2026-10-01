@@ -1,14 +1,14 @@
 // Kiểm tra đăng nhập + lịch sử (Edge headless + CDP): chưa đăng nhập bị chuyển về /login ->
-// đăng ký -> giải một bài -> xem lại trong Lịch sử -> luyện đề, nộp -> mở lại từ Lịch sử ->
-// đăng xuất -> trang cần đăng nhập bị chặn -> sai mật khẩu -> đăng nhập lại.
-//   node demo/browser_auth_check.mjs
+// đăng nhập (tài khoản do admin cấp, ĐÃ đổi mật khẩu) -> giải một bài -> xem lại trong Lịch sử ->
+// luyện đề, nộp -> mở lại từ Lịch sử -> đăng xuất -> trang cần đăng nhập bị chặn -> sai mật khẩu -> đăng nhập lại.
+//   node demo/browser_auth_check.mjs <tên đăng nhập> <mật khẩu>
 import { spawn } from "node:child_process";
 import { existsSync, writeFileSync } from "node:fs";
 
 const EDGE = ["C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe", "C:/Program Files/Microsoft/Edge/Application/msedge.exe"].find(existsSync);
 const PORT = 9340;
-const USER = "thu_" + Date.now().toString(36);
-const PASS = "matkhau-thu-123";
+const [USER, PASS] = process.argv.slice(2);
+if (!USER || !PASS) throw new Error("Cần tên đăng nhập + mật khẩu của một tài khoản học sinh đã đổi mật khẩu");
 const edge = spawn(EDGE, [`--remote-debugging-port=${PORT}`, "--headless=new", "--disable-gpu", "--hide-scrollbars",
   "--window-size=1280,1400", "--user-data-dir=" + process.env.TEMP + "/edge-cdp-auth-" + Date.now(), "about:blank"], { stdio: "ignore" });
 
@@ -52,18 +52,13 @@ console.log("1. Vào /history khi chưa đăng nhập ->", await ev(`location.pa
 await waitFor(`!!document.querySelector(".auth__form")`);
 await sleep(1500);
 
-// 2. Đăng ký
-await click(".tabs button", "Tạo tài khoản");
-await sleep(300);
+// 2. Đăng nhập (không có tự đăng ký — tài khoản do admin tạo)
 await typeInto(".auth__form input[autocomplete=username]", USER);
-await typeInto(".auth__form input[placeholder='Ví dụ: Minh Anh']", "Bạn Thử");
-const pw = await ev(`document.querySelectorAll(".auth__form input[type=password]").length`);
-await ev(`(() => { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
-  document.querySelectorAll(".auth__form input[type=password]").forEach(el => { set.call(el, ${JSON.stringify(PASS)}); el.dispatchEvent(new Event("input", { bubbles: true })); }); })()`);
-await click(".auth__form button", "Tạo tài khoản");
+await typeInto(".auth__form input[type=password]", PASS);
+await click(".auth__form button", "Đăng nhập");
 await waitFor(`location.pathname === "/history" && !!document.querySelector(".nav__user")`);
-console.log(`2. Đăng ký "${USER}" (${pw} ô mật khẩu) -> quay lại đúng trang:`, await ev(`location.pathname`),
-  "· thanh điều hướng:", await ev(`document.querySelector(".nav__user").innerText.replace(/\\n/g, " | ")`));
+console.log(`2. Đăng nhập "${USER}" -> quay lại đúng trang:`, await ev(`location.pathname`),
+  "· thanh điều hướng:", await ev(`document.querySelector(".nav__user").innerText.replace(/\n/g, " | ")`));
 
 // 3. Giải một bài
 await go("/?q=" + encodeURIComponent("Giải phương trình x² − 5x + 6 = 0."));

@@ -23,10 +23,16 @@ def mem_db():
     db.engine().dispose()
 
 
-def make_client(*routers, username: str = "hocsinh1", login: bool = True):
-    """TestClient gắn các router cho trước (+ router đăng nhập); mặc định đã đăng ký và đăng nhập."""
+PASSWORD = "matkhau-123"
+
+
+def make_client(*routers, username: str = "hocsinh1", login: bool = True, role: str = "student",
+                must_change: bool = False):
+    """TestClient gắn các router cho trước (+ router đăng nhập). Không có tự đăng ký nên tài khoản
+    được tạo thẳng qua service (như admin tạo), rồi đăng nhập qua API để có cookie phiên."""
     from fastapi import FastAPI
     from fastapi.testclient import TestClient
+    from math9_accounts import service
 
     from apps.api.routes import auth
 
@@ -36,6 +42,7 @@ def make_client(*routers, username: str = "hocsinh1", login: bool = True):
         app.include_router(r)
     c = TestClient(app)
     if login:
-        r = c.post("/api/auth/register", json={"username": username, "password": "matkhau-123", "display_name": "Em A"})
+        service.create_user(username, PASSWORD, "Em A", role=role, must_change_password=must_change)
+        r = c.post("/api/auth/login", json={"username": username, "password": PASSWORD})
         assert r.status_code == 200, r.text
     return c

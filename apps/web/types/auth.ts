@@ -6,6 +6,9 @@ import type { ProblemState } from "./state";
 export interface Me {
   username: string;
   display_name: string;
+  role: "admin" | "student";
+  /** Mật khẩu do admin cấp: phải đổi trước khi dùng */
+  must_change_password: boolean;
   solves_today?: number;
   daily_limit?: number;
 }
@@ -57,4 +60,25 @@ export interface ExamHistoryDetail {
   submitted_at: string | null;
   score: number | null;
   total: number;
+}
+
+export interface AdminUser {
+  username: string;
+  display_name: string;
+  role: "admin" | "student";
+  active: boolean;
+  must_change_password: boolean;
+  solves: number;
+  created_at: string | null;
+  last_login_at: string | null;
+}
+
+/** Kết quả tạo tài khoản: mật khẩu tự sinh chỉ hiện MỘT lần này. */
+export interface CreatedAccount {
+  line: string;
+  username: string;
+  display_name: string;
+  ok: boolean;
+  password?: string;
+  error?: string;
 }

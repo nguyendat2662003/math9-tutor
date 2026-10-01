@@ -72,6 +72,7 @@ def init_db() -> None:
     from .models import Base
 
     Base.metadata.create_all(engine())
+    _add_missing_columns(Base)
     if engine().dialect.name == "postgresql":
         # Supabase tự mở API REST (PostgREST) cho mọi bảng trong schema public, ai có "anon key"
         # (vốn công khai) cũng gọi được. Bật RLS mà KHÔNG tạo policy nào = API đó bị chặn hoàn toàn.
@@ -79,6 +80,30 @@ def init_db() -> None:
         with engine().begin() as c:
             for table in Base.metadata.tables:
                 c.execute(text(f'ALTER TABLE "{table}" ENABLE ROW LEVEL SECURITY'))
+
+
+def _add_missing_columns(base) -> None:
+    """create_all không sửa bảng đã có. Cột mới thêm vào model (vd users.role) thì bổ sung ở đây —
+    chỉ THÊM cột có giá trị mặc định, không bao giờ xóa/đổi. Đổi cấu trúc lớn hơn: dùng Alembic."""
+    from sqlalchemy import inspect, text
+
+    insp = inspect(engine())
+    with engine().begin() as c:
+        for table in base.metadata.sorted_tables:
+            have = {col["name"] for col in insp.get_columns(table.name)}
+            for col in table.columns:
+                if col.name in have:
+                    continue
+                ddl_type = col.type.compile(dialect=engine().dialect)
+                default = ""
+                if col.server_default is not None:
+                    arg = col.server_default.arg
+                    sql = "'" + arg.replace("'", "''") + "'" if isinstance(arg, str) \
+                        else str(arg.compile(dialect=engine().dialect))
+                    default = f" DEFAULT {sql}"
+                null = "" if col.nullable else " NOT NULL" if default else ""
+                c.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{col.name}" {ddl_type}{default}{null}'))
+                log.info("Thêm cột %s.%s", table.name, col.name)
 
 
 def backend_name() -> str:

@@ -1,46 +1,76 @@
-"""Trang quản trị: tải tài liệu đề lên, duyệt bài, đưa vào kho Qdrant.
+"""Trang quản trị: quản lý tài khoản học sinh, tải tài liệu đề lên, duyệt bài vào kho Qdrant.
 
-Mọi route yêu cầu header `X-Admin-Token` khớp `ADMIN_TOKEN` trong .env. Chưa đặt
-ADMIN_TOKEN thì cả nhóm route này TẮT — không có chuyện ai vào được web cũng nhét
-đề vào kho.
+Mọi route yêu cầu đăng nhập bằng TÀI KHOẢN ADMIN (duy nhất, tạo bằng tools/create_admin.py).
 """
 
 from __future__ import annotations
 
-import hmac
-import os
 from pathlib import Path
 from typing import Any
 
-from fastapi import (
-    APIRouter,
-    BackgroundTasks,
-    Depends,
-    File,
-    Header,
-    HTTPException,
-    UploadFile,
-)
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
+from fastapi.concurrency import run_in_threadpool
+from math9_accounts import service
+from math9_accounts.service import AccountError
 from math9_exam import intake
 from math9_exam.bank import load_bank, refresh_bank
 from math9_exam.index import get_index
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from ..auth import admin_user
 
 MAX_BYTES = 20 * 1024 * 1024
 # Chữ ký đầu file — phần mở rộng và content-type do client gửi, không tin được
 MAGIC = [(b"%PDF", ".pdf"), (b"PK\x03\x04", ".docx"), (b"\x89PNG\r\n\x1a\n", ".png"),
          (b"\xff\xd8\xff", ".jpg"), (b"RIFF", ".webp")]
 
-
-def require_admin(x_admin_token: str | None = Header(default=None)) -> None:
-    expected = os.environ.get("ADMIN_TOKEN", "")
-    if not expected:
-        raise HTTPException(503, "Trang quản trị đang tắt — đặt ADMIN_TOKEN trong .env rồi khởi động lại API")
-    if not x_admin_token or not hmac.compare_digest(x_admin_token.encode(), expected.encode()):
-        raise HTTPException(401, "Sai mã quản trị")
+router = APIRouter(prefix="/api/admin", dependencies=[Depends(admin_user)])
 
 
-router = APIRouter(prefix="/api/admin", dependencies=[Depends(require_admin)])
+# ---------- tài khoản học sinh ----------
+
+class NewStudents(BaseModel):
+    """Mỗi dòng: 'tên_đăng_nhập, Tên hiển thị' hoặc chỉ 'Tên hiển thị' (tên đăng nhập tự sinh)."""
+    lines: list[str] = Field(min_length=1, max_length=200)
+
+
+class ResetPassword(BaseModel):
+    new_password: str | None = Field(default=None, max_length=200)     # bỏ trống = tự sinh
+
+
+class Active(BaseModel):
+    active: bool
+
+
+def _account(fn, *a):
+    try:
+        return fn(*a)
+    except AccountError as e:
+        raise HTTPException(400, str(e))
+
+
+@router.get("/users")
+def users() -> list[dict]:
+    return service.list_users()
+
+
+@router.post("/users")
+async def create_students(req: NewStudents) -> dict:
+    """Tạo một hay nhiều tài khoản; trả mật khẩu tự sinh để in phát (chỉ hiện MỘT lần này)."""
+    results = await run_in_threadpool(service.create_students, req.lines)
+    return {"results": results, "created": sum(1 for r in results if r["ok"])}
+
+
+@router.post("/users/{username}/reset-password")
+async def reset_password(username: str, req: ResetPassword) -> dict:
+    pw = await run_in_threadpool(_account, service.reset_password, username, req.new_password)
+    return {"username": service.normalize_username(username), "password": pw}
+
+
+@router.post("/users/{username}/active")
+def set_active(username: str, req: Active) -> dict:
+    _account(service.set_active, username, req.active)
+    return {"ok": True}
 
 
 class Ids(BaseModel):
@@ -149,24 +179,6 @@ def reject(batch_id: str, req: Ids) -> dict:
             n += 1
     intake.save_batch(b)
     return {"rejected": n}
-
-
-class ResetPassword(BaseModel):
-    new_password: str
-
-
-@router.post("/users/{username}/reset-password")
-def reset_password(username: str, req: ResetPassword) -> dict:
-    """Học sinh quên mật khẩu (không có email để tự khôi phục): quản trị đặt mật khẩu mới,
-    mọi phiên đăng nhập cũ của tài khoản đó bị đăng xuất."""
-    from math9_accounts.service import AccountError
-    from math9_accounts.service import reset_password as do_reset
-
-    try:
-        do_reset(username, req.new_password)
-    except AccountError as e:
-        raise HTTPException(400, str(e))
-    return {"ok": True}
 
 
 @router.post("/batches/{batch_id}/unpublish")

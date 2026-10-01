@@ -186,7 +186,7 @@ Luyện đề thi vào 10. Chạy được, có test (`tests/test_exam.py`), kh�
   **chép đáp án có sẵn trong tài liệu, không tự giải**, kèm đoạn trích làm bằng chứng → kiểm tra (đủ 4
   phương án, chuyên đề, trùng với kho bằng hash + độ giống ≥ 0,95, cần hình) → người duyệt sửa/duyệt
   → Qdrant. Bài đã duyệt tự vào kho luyện đề (`load_bank`) và API `GET /api/similar` (không trả đáp án).
-  Embedding `text-embedding-3-small`; tên collection gắn theo model. Trang quản trị cần `ADMIN_TOKEN`.
+  Embedding `text-embedding-3-small`; tên collection gắn theo model. Trang quản trị chỉ tài khoản admin vào được.
   Kiểm tra: `tests/test_problem_index.py`, `demo/browser_admin_check.mjs`.
 
 **Lưu ý dữ liệu:** kho luyện đề dùng chung bài với bộ eval. **Không bao giờ** nạp bài trong kho,
@@ -211,10 +211,13 @@ Tài khoản học sinh + lịch sử. PostgreSQL trên Supabase (SQLAlchemy 2 +
 trong bộ nhớ (`tests/test_accounts.py`), kiểm tra trình duyệt `demo/browser_auth_check.mjs`.
 
 **Đã xong:**
-- Đăng ký / đăng nhập bằng tên đăng nhập + mật khẩu (không email — chỉ lưu tên đăng nhập, tên hiển thị,
+- Một tài khoản admin duy nhất (`tools/create_admin.py`, `--reset` khi quên mật khẩu); không có tự đăng ký.
+  Admin tạo tài khoản học sinh ở `/admin` → Học sinh (dán danh sách tên, mật khẩu tạm tự sinh, in phát
+  cho lớp), đặt lại mật khẩu, khóa/mở khóa. Mật khẩu do admin cấp phải đổi ở lần đăng nhập đầu (chặn ở server).
+- Đăng nhập bằng tên đăng nhập + mật khẩu (không email — chỉ lưu tên đăng nhập, tên hiển thị,
   mật khẩu băm scrypt). Sai 5 lần liên tiếp -> khóa 15 phút; thông báo lỗi không lộ tên đăng nhập nào có thật.
 - Phiên 30 ngày trong cookie HttpOnly + SameSite=Lax; bảng phiên chỉ lưu băm của mã. Đổi mật khẩu thì
-  đăng xuất mọi máy khác. Quản trị đặt lại mật khẩu ở `/admin`.
+  đăng xuất mọi máy khác. Kiểm tra trình duyệt: `demo/browser_admin_users_check.mjs`.
 - Bắt buộc đăng nhập cho giải bài, tải ảnh, luyện đề, gợi ý tương tự, lịch sử. Hạn mức `SOLVE_DAILY_LIMIT`
   bài/ngày (giờ VN); lượt lỗi cũng tính (vẫn tốn lượt gọi model).
 - Lịch sử bài đã giải (`solve_records`: đề, ảnh đề chép sang `data/user_images/`, ProblemState đầy đủ) và

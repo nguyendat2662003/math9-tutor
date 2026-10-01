@@ -23,14 +23,14 @@ export function Nav() {
             <span className="nav__tag">Bạn đồng hành Toán 9</span>
           </span>
         </Link>
-        {user && LINKS.map((l) => (
+        {user && [...LINKS, ...(user.role === "admin" ? [{ href: "/admin", label: "Quản trị", icon: "🛠️" }] : [])].map((l) => (
           <Link key={l.href} href={l.href} title={l.label} className={`nav__link${path === l.href ? " active" : ""}`}>
             <span aria-hidden>{l.icon}</span> <span className="nav__label">{l.label}</span>
           </Link>
         ))}
         {user && (
           <span className="nav__user">
-            <span title={`@${user.username}`}>{user.display_name}</span>
+            <Link href="/account" title={`@${user.username} · đổi mật khẩu`} className="nav__me">{user.display_name}</Link>
             <button type="button" className="linkbtn" onClick={logout}>Đăng xuất</button>
           </span>
         )}

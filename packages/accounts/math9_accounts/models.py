@@ -7,7 +7,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, false, true
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -33,6 +33,11 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(32), unique=True, index=True)
     display_name: Mapped[str] = mapped_column(String(60))
     password_hash: Mapped[str] = mapped_column(String(200))
+    # Chỉ MỘT admin (tạo bằng tools/create_admin.py); học sinh do admin tạo, không tự đăng ký
+    role: Mapped[str] = mapped_column(String(10), default="student", server_default="student")
+    active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
+    # Mật khẩu do admin đặt thì admin biết — học sinh phải đổi ở lần đăng nhập đầu
+    must_change_password: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # Chống dò mật khẩu: sai nhiều lần liên tiếp thì khóa tạm

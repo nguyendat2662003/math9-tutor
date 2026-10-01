@@ -1,10 +1,10 @@
 // Kiểm tra trang quản trị kho đề + gợi ý bài tương tự (Edge headless + CDP).
-//   node demo/browser_admin_check.mjs <mã ADMIN_TOKEN> <file đề .docx/.pdf/.png>
+//   node demo/browser_admin_check.mjs <admin> <mật khẩu admin> <file đề .docx/.pdf/.png>
 import { spawn } from "node:child_process";
 import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const [TOKEN, DOC] = [process.argv[2], resolve(process.argv[3])];
+const [ADMIN, ADMIN_PW, DOC] = [process.argv[2], process.argv[3], resolve(process.argv[4])];
 const EDGE = ["C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe", "C:/Program Files/Microsoft/Edge/Application/msedge.exe"].find(existsSync);
 const PORT = 9338;
 const edge = spawn(EDGE, [`--remote-debugging-port=${PORT}`, "--headless=new", "--disable-gpu", "--hide-scrollbars",
@@ -39,21 +39,16 @@ const setInput = (sel, val) => ev(`(() => { const el = document.querySelector(${
   el.dispatchEvent(new Event("input", { bubbles: true })); })()`);
 
 await send("Page.enable"); await send("Runtime.enable"); await send("DOM.enable");
-await send("Page.navigate", { url: "http://localhost:3000/admin" });
-await waitFor(`!!document.querySelector(".app__head")`);
-await ev(`localStorage.removeItem("math9.admin.token")`);
-await send("Page.reload");
-await waitFor(`!!document.querySelector(".login")`);
-await sleep(3000);                 // chờ React hydrate xong, không thì gõ vào ô sẽ bị ghi đè
-
-// Sai mã -> bị từ chối
-await setInput(".login input", "sai-ma");
-await ev(`[...document.querySelectorAll(".login button")].find(b => b.textContent === "Vào").click()`);
-await waitFor(`!!document.querySelector(".login .error") || !!document.querySelector(".stats")`, 10000);
-console.log("1. Mã sai:", await ev(`document.querySelector(".login .error")?.textContent ?? "KHÔNG bị chặn"`));
-
-await setInput(".login input", TOKEN);
-await ev(`[...document.querySelectorAll(".login button")].find(b => b.textContent === "Vào").click()`);
+// 1. Đăng nhập bằng tài khoản admin -> /admin -> thẻ Kho đề
+await send("Page.navigate", { url: "http://localhost:3000/login?next=/admin" });
+await waitFor(`!!document.querySelector(".auth__form")`);
+await sleep(1500);                 // chờ React hydrate xong, không thì gõ vào ô sẽ bị ghi đè
+await setInput(".auth__form input[autocomplete=username]", ADMIN);
+await setInput(".auth__form input[type=password]", ADMIN_PW);
+await ev(`[...document.querySelectorAll(".auth__form button")].find(b => b.textContent.includes("Đăng nhập")).click()`);
+await waitFor(`location.pathname === "/admin" && !!document.querySelector(".tabs")`);
+console.log("1. Admin đăng nhập ->", await ev(`location.pathname`));
+await ev(`[...document.querySelectorAll(".tabs button")].find(b => b.textContent.includes("Kho đề")).click()`);
 await waitFor(`!!document.querySelector(".stats")`);
 console.log("2. Thống kê:", await ev(`document.querySelector(".stats").innerText.replace(/\\n+/g, " | ")`));
 console.log("   Các lô:", await ev(`[...document.querySelectorAll(".batches li")].map(l => l.innerText.replace(/\\n/g, " — "))`));
