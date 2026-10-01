@@ -1,25 +1,29 @@
-.PHONY: install test lint api eval demo ui web
-
-demo:
-	python tools/demo_draw.py --file demo/de.txt --out demo/out
-
-ui:
-	python -m streamlit run apps/demo_streamlit.py
-
-web:
-	cd apps/web && npm run dev
+# Lối tắt chạy từ thư mục gốc. Backend và frontend độc lập — xem backend/README.md, frontend/README.md.
+.PHONY: install test lint api eval demo ui web web-install
 
 install:
-	pip install -e ".[dev]"
+	$(MAKE) -C backend install
 
 test:
-	pytest -q
+	$(MAKE) -C backend test
 
 lint:
-	ruff check . && ruff format --check .
+	$(MAKE) -C backend lint
 
 api:
-	python -m uvicorn apps.api.main:app --reload --port 8000
+	$(MAKE) -C backend api
 
 eval:
-	python evals/run.py --set smoke
+	$(MAKE) -C backend eval
+
+demo:
+	$(MAKE) -C backend demo
+
+ui:
+	$(MAKE) -C backend ui
+
+web-install:
+	cd frontend && npm install
+
+web:
+	cd frontend && npm run dev
