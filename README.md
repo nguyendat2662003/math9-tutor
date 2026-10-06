@@ -2,17 +2,24 @@
 
 Chatbot giải toán lớp 9 (Đại số + Hình học) bám chương trình GDPT 2018, có vẽ hình.
 
+Dự án tách thành **hai phần độc lập**, deploy riêng:
+
+| Thư mục | Nội dung | Deploy gợi ý |
+|---|---|---|
+| [`backend/`](backend/README.md) | API FastAPI + toàn bộ engine Python (agent, verifier, dựng hình, dữ liệu, test) | Docker: Render / Railway / Fly.io |
+| [`frontend/`](frontend/README.md) | Giao diện Next.js | Vercel (Root Directory = `frontend`) |
+
 ## Trạng thái
 
 | Phần | Trạng thái |
 |---|---|
-| Engine dựng hình (`packages/geometry`) | **Chạy được, có test** |
-| Verifier hình học + đại số (`packages/verifier`) | **Chạy được, có test** |
-| Guardrail chương trình (`packages/curriculum`) | **Chạy được, có test** — 10 file YAML chờ giáo viên soát |
-| `ProblemState`, orchestrator (`packages/core`) | **Chạy end-to-end với LLM thật** |
+| Engine dựng hình (`backend/packages/geometry`) | **Chạy được, có test** |
+| Verifier hình học + đại số (`backend/packages/verifier`) | **Chạy được, có test** |
+| Guardrail chương trình (`backend/packages/curriculum`) | **Chạy được, có test** — 10 file YAML chờ giáo viên soát |
+| `ProblemState`, orchestrator (`backend/packages/core`) | **Chạy end-to-end với LLM thật** |
 | Agent (Parser/Router/Solver/Draftsman/Critic/Pedagogue) | **Đủ 6 agent**; Parser đọc đề từ ảnh |
 | API (FastAPI + SSE), frontend (Next.js) | **MVP chạy được** |
-| Luyện đề thi vào 10 (`packages/exam`) | **Chạy được, có test** — 6 cấu trúc tỉnh + tự chọn, chấm tự động |
+| Luyện đề thi vào 10 (`backend/packages/exam`) | **Chạy được, có test** — 6 cấu trúc tỉnh + tự chọn, chấm tự động |
 
 Chi tiết từng package: [`docs/02-cong-viec-theo-package.md`](docs/02-cong-viec-theo-package.md).
 
@@ -27,11 +34,12 @@ Chi tiết từng package: [`docs/02-cong-viec-theo-package.md`](docs/02-cong-vi
 ### 2. Cài đặt (một lần)
 
 ```bash
-pip install -e ".[dev,tracing,kho]"  # tracing: Langfuse · kho: Qdrant + đọc PDF/Word (tùy chọn)
-cd apps/web && npm install && cd ../..
+cd backend && pip install -e ".[dev,tracing,kho]" && cd ..   # tracing: Langfuse · kho: Qdrant + PDF/Word (tùy chọn)
+cd frontend && npm install && cd ..
 ```
 
-Tạo file `.env` ở thư mục gốc (xem `.env.example`):
+Tạo file `backend/.env` (xem `backend/.env.example`). **Chuyển từ bản cũ:** file `.env` ở thư mục gốc
+giờ phải nằm trong `backend/`.
 
 ```ini
 OPENAI_API_KEY=sk-...
@@ -41,14 +49,15 @@ MODEL_NAME=gpt-4.1-mini          # model phải đọc được ảnh nếu mu�
 
 ### 3. Chạy ứng dụng web
 
-Mở **hai terminal**, cả hai đứng ở thư mục gốc dự án:
+Mở **hai terminal**:
 
 ```bash
 # Terminal 1 — API ở http://localhost:8000
-python -m uvicorn apps.api.main:app --reload --port 8000
+cd backend
+python -m uvicorn api.main:app --reload --port 8000
 
 # Terminal 2 — giao diện ở http://localhost:3000
-cd apps/web
+cd frontend
 npm run dev
 ```
 
@@ -58,18 +67,20 @@ hoặc tự chọn chuyên đề, có đồng hồ, chấm ngay khi nộp — kh
 
 ### 4. Các cách chạy khác
 
+Các lệnh Python chạy trong thư mục `backend/`:
+
 | Việc | Lệnh |
 |---|---|
 | Chạy test (không cần LLM) | `pytest -q` |
 | Giải một bài trên dòng lệnh | `python tools/solve.py "Giải phương trình x^2 - 5x + 6 = 0."` |
 | Demo dựng hình từ đề | `python tools/demo_draw.py --file demo/de.txt --out demo/out` |
-| Demo Streamlit | `python -m streamlit run apps/demo_streamlit.py` |
+| Demo Streamlit | `python -m streamlit run demo_streamlit.py` |
 | Chạy eval (bộ smoke) | `python evals/run.py --set smoke` |
 | Xem lại báo cáo eval | `python evals/run.py --report evals/reports/<file>.json` |
-| Kiểm tra kiểu frontend | `cd apps/web && npm run typecheck` |
+| Kiểm tra kiểu frontend | `cd frontend && npm run typecheck` |
 
-Máy có `make` (Linux/macOS/Git Bash) dùng được lối tắt: `make install`, `make test`,
-`make api`, `make web`, `make ui`, `make eval`.
+Máy có `make` (Linux/macOS/Git Bash) dùng được lối tắt từ thư mục gốc: `make install`, `make test`,
+`make api`, `make web-install`, `make web`, `make ui`, `make eval`.
 
 ### 5. Lỗi hay gặp trên Windows
 
@@ -86,12 +97,12 @@ Máy có `make` (Linux/macOS/Git Bash) dùng được lối tắt: `make install
 Mọi trang giải bài / luyện đề / lịch sử **bắt buộc đăng nhập** (tên đăng nhập + mật khẩu, không cần email).
 **Không có tự đăng ký**: một tài khoản **admin duy nhất** tạo tài khoản cho học sinh.
 
-1. Supabase → **Connect** → **Session pooler** → chép chuỗi kết nối, thay `[YOUR-PASSWORD]`, dán vào `.env`:
+1. Supabase → **Connect** → **Session pooler** → chép chuỗi kết nối, thay `[YOUR-PASSWORD]`, dán vào `backend/.env`:
    `DATABASE_URL=postgresql://postgres.<ref>:<mật khẩu>@aws-0-<vùng>.pooler.supabase.com:5432/postgres`
    (không dùng "Direct connection" — gói miễn phí chỉ có IPv6). Bảng tự tạo khi API khởi động.
-2. Chưa có `DATABASE_URL` thì API dùng SQLite `data/app.db` — chỉ để phát triển.
+2. Chưa có `DATABASE_URL` thì API dùng SQLite `backend/data/app.db` — chỉ để phát triển.
 3. `SOLVE_DAILY_LIMIT` (mặc định 30): số bài mỗi học sinh được giải mỗi ngày.
-4. Tạo admin (một lần): `python tools/create_admin.py` — in mật khẩu tạm; lần đầu đăng nhập phải đổi.
+4. Tạo admin (một lần, trong `backend/`): `python tools/create_admin.py` — in mật khẩu tạm; lần đầu đăng nhập phải đổi.
    Quên mật khẩu admin: `python tools/create_admin.py --reset`.
 5. Admin vào **Quản trị → Học sinh**: dán danh sách họ tên (mỗi dòng một em) → tạo tài khoản, mật khẩu tự
    sinh, bấm **In danh sách** để phát. Học sinh phải đổi mật khẩu ở lần đăng nhập đầu. Quên mật khẩu /
@@ -107,7 +118,7 @@ Lịch sử lưu: mỗi lượt giải (đề, ảnh đề, lời giải, gợi 
 
 ### 7. Kho đề Qdrant — thêm đề mỗi ngày
 
-1. Đặt trong `.env`: `QDRANT_URL` + `QDRANT_API_KEY` (Qdrant Cloud), hoặc tạm `QDRANT_PATH=data/qdrant`
+1. Đặt trong `backend/.env`: `QDRANT_URL` + `QDRANT_API_KEY` (Qdrant Cloud), hoặc tạm `QDRANT_PATH=data/qdrant`
    (lưu cục bộ).
 2. Đưa kho có sẵn lên Qdrant (một lần; tắt API trước nếu dùng kho cục bộ):
    `python tools/index_bank.py`
@@ -121,6 +132,29 @@ Máy ít RAM (dưới 8 GB) mà `npm run dev` bị "heap out of memory": chạy 
 
 Biến môi trường thêm: `RAG_REQUIRE_REVIEWED=1` (production — chỉ nạp sổ tay đã soát),
 `CORS_ORIGINS` (mặc định `http://localhost:3000`).
+
+### 8. Deploy (frontend và backend riêng)
+
+**Backend** (Render / Railway / Fly.io — có sẵn `backend/Dockerfile`):
+
+1. Tạo dịch vụ Docker, Root Directory = `backend`. Container đọc biến `PORT` của nền tảng.
+2. Đặt biến môi trường như `backend/.env.example`: `OPENAI_API_KEY`, `MODEL_NAME`, `DATABASE_URL`
+   (Supabase — **bắt buộc** khi deploy, ổ đĩa container mất khi khởi động lại), `QDRANT_URL` +
+   `QDRANT_API_KEY`, `COOKIE_SECURE=1`, `RAG_REQUIRE_REVIEWED=1`, `CORS_ORIGINS=<domain frontend>`.
+3. Kiểm tra: `https://<backend>/api/health`. Tạo admin một lần: chạy `python tools/create_admin.py`
+   ở máy mình với cùng `DATABASE_URL`.
+
+**Frontend** (Vercel):
+
+1. Import repo, **Root Directory = `frontend`** (Next.js tự nhận).
+2. Biến môi trường (cách khuyên dùng — đi qua proxy, cookie đăng nhập cùng tên miền):
+   `BACKEND_URL=https://<backend>` và `NEXT_PUBLIC_API_URL=` (để **rỗng**).
+   Trình duyệt gọi `/api/*` trên domain của frontend, Next.js chuyển tiếp sang backend.
+3. Cách khác — gọi thẳng backend: `NEXT_PUBLIC_API_URL=https://<backend>` và ở backend đặt thêm
+   `COOKIE_SAMESITE=none`. Safari chặn cookie bên thứ ba nên đăng nhập có thể hỏng — ưu tiên cách ở bước 2.
+
+Ảnh đề học sinh gửi (`data/uploads`, `data/user_images`) lưu trên đĩa container: gắn volume
+(Render Disk / Railway Volume) vào `/app/data/uploads` và `/app/data/user_images` nếu muốn giữ lâu dài.
 
 ## Bốn nguyên tắc kiến trúc
 
@@ -279,28 +313,32 @@ một trục — đó chính là lý do phải làm trước.
 ## Cấu trúc thư mục
 
 ```
-packages/
-  geometry/    DSL, engine dựng hình, ràng buộc số, layout, render SVG
-  verifier/    vị từ, kiểm chứng hình học, SymPy, dò bổ đề
-  curriculum/  schema, loader YAML, guardrail 2 lớp, retrieval BM25
-  core/        ProblemState, orchestrator, agent, chính sách model
-  ingest/      crawl, trích xuất, chuẩn hóa, tách bài, khử trùng lặp
-  methods/     tái tổ chức tài liệu tra cứu thành sổ tay theo goal_type
-  retrieval/   RAG: hybrid search, 3 collection tách biệt, cổng chặn draft
-  exam/        luyện đề: kho bài thật, biến thể đổi số, cấu trúc đề theo tỉnh, chấm
-apps/
-  api/         FastAPI + SSE
-  web/         Next.js: nhập đề/ảnh, tiến trình, gợi ý, lời giải, hình tô sáng
-data/
-  curriculum/  bản đồ chương trình YAML — KHÔNG qua vector search
-  methods/     sổ tay phương pháp theo goal_type — RAG
-  problems/    bài giải mẫu — RAG few-shot
-  eval/        bộ đánh giá 4 tầng (đồng thời là kho bài thật cho luyện đề)
-  exam/        cấu trúc đề thi vào 10 theo tỉnh (blueprints.yaml)
-prompts/       template Router, Solver, Draftsman
-evals/         runner + graders (chấm đáp án bằng SymPy, chấm hình bằng verifier)
-tools/         dòng lệnh: giải bài, demo dựng hình, soạn bài mẫu, crawl, hàng đợi soát
-tests/         test không cần LLM (LLM được giả lập)
+backend/
+  api/           FastAPI + SSE (điểm vào: api/main.py)
+  packages/
+    geometry/    DSL, engine dựng hình, ràng buộc số, layout, render SVG
+    verifier/    vị từ, kiểm chứng hình học, SymPy, dò bổ đề
+    curriculum/  schema, loader YAML, guardrail 2 lớp, retrieval BM25
+    core/        ProblemState, orchestrator, agent, chính sách model
+    ingest/      crawl, trích xuất, chuẩn hóa, tách bài, khử trùng lặp
+    methods/     tái tổ chức tài liệu tra cứu thành sổ tay theo goal_type
+    retrieval/   RAG: hybrid search, 3 collection tách biệt, cổng chặn draft
+    exam/        luyện đề: kho bài thật, biến thể đổi số, cấu trúc đề theo tỉnh, chấm
+    accounts/    tài khoản, phiên đăng nhập, lịch sử
+  data/
+    curriculum/  bản đồ chương trình YAML — KHÔNG qua vector search
+    methods/     sổ tay phương pháp theo goal_type — RAG
+    problems/    bài giải mẫu — RAG few-shot
+    eval/        bộ đánh giá 4 tầng (đồng thời là kho bài thật cho luyện đề)
+    exam/        cấu trúc đề thi vào 10 theo tỉnh (blueprints.yaml)
+  prompts/       template Router, Solver, Draftsman
+  evals/         runner + graders (chấm đáp án bằng SymPy, chấm hình bằng verifier)
+  tools/         dòng lệnh: giải bài, demo dựng hình, soạn bài mẫu, crawl, hàng đợi soát
+  tests/         test không cần LLM (LLM được giả lập)
+  Dockerfile     image deploy backend
+frontend/        Next.js: nhập đề/ảnh, tiến trình, gợi ý, lời giải, hình tô sáng
+  e2e/           kiểm tra giao diện bằng trình duyệt headless
+docs/            tài liệu thiết kế, công việc
 ```
 
 ## Rủi ro cần theo dõi

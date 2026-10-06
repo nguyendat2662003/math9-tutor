@@ -175,7 +175,7 @@ Luyện đề thi vào 10. Chạy được, có test (`tests/test_exam.py`), kh�
   duyệt chỉ nhận đáp án sau khi nộp bài.
 - **Web** `/exam`: đồng hồ đếm ngược (hết giờ tự nộp), lưu bài đang làm khi tải lại trang, tự chấm
   câu chứng minh, "làm lại đề này" (cùng seed ra cùng đề), "xem lời giải chi tiết" mở trang Giải bài
-  với đề điền sẵn. Đã kiểm tra trong Edge headless (`demo/browser_exam_check.mjs`).
+  với đề điền sẵn. Đã kiểm tra trong Edge headless (`frontend/e2e/browser_exam_check.mjs`).
 
 - **Hình của đề** (`figures.py`, `data/exam/figures.yaml`): bài nói "như hình vẽ", "biểu đồ..." có
   hình do server vẽ ra SVG (biểu đồ cột, đoạn thẳng, ghép nhóm, quạt, đồ thị parabol, hình học bằng
@@ -187,7 +187,7 @@ Luyện đề thi vào 10. Chạy được, có test (`tests/test_exam.py`), kh�
   phương án, chuyên đề, trùng với kho bằng hash + độ giống ≥ 0,95, cần hình) → người duyệt sửa/duyệt
   → Qdrant. Bài đã duyệt tự vào kho luyện đề (`load_bank`) và API `GET /api/similar` (không trả đáp án).
   Embedding `text-embedding-3-small`; tên collection gắn theo model. Trang quản trị chỉ tài khoản admin vào được.
-  Kiểm tra: `tests/test_problem_index.py`, `demo/browser_admin_check.mjs`.
+  Kiểm tra: `tests/test_problem_index.py`, `frontend/e2e/browser_admin_check.mjs`.
 
 **Lưu ý dữ liệu:** kho luyện đề dùng chung bài với bộ eval. **Không bao giờ** nạp bài trong kho,
 hay lời giải sinh ra khi học sinh bấm "xem lời giải", vào RAG (`data/problems/`). Nếu làm vậy,
@@ -208,7 +208,7 @@ Solver sẽ thuộc đáp án và điểm eval không còn ý nghĩa.
 ## accounts ✅
 
 Tài khoản học sinh + lịch sử. PostgreSQL trên Supabase (SQLAlchemy 2 + psycopg 3); test dùng SQLite
-trong bộ nhớ (`tests/test_accounts.py`), kiểm tra trình duyệt `demo/browser_auth_check.mjs`.
+trong bộ nhớ (`tests/test_accounts.py`), kiểm tra trình duyệt `frontend/e2e/browser_auth_check.mjs`.
 
 **Đã xong:**
 - Một tài khoản admin duy nhất (`tools/create_admin.py`, `--reset` khi quên mật khẩu); không có tự đăng ký.
@@ -217,7 +217,7 @@ trong bộ nhớ (`tests/test_accounts.py`), kiểm tra trình duyệt `demo/bro
 - Đăng nhập bằng tên đăng nhập + mật khẩu (không email — chỉ lưu tên đăng nhập, tên hiển thị,
   mật khẩu băm scrypt). Sai 5 lần liên tiếp -> khóa 15 phút; thông báo lỗi không lộ tên đăng nhập nào có thật.
 - Phiên 30 ngày trong cookie HttpOnly + SameSite=Lax; bảng phiên chỉ lưu băm của mã. Đổi mật khẩu thì
-  đăng xuất mọi máy khác. Kiểm tra trình duyệt: `demo/browser_admin_users_check.mjs`.
+  đăng xuất mọi máy khác. Kiểm tra trình duyệt: `frontend/e2e/browser_admin_users_check.mjs`.
 - Bắt buộc đăng nhập cho giải bài, tải ảnh, luyện đề, gợi ý tương tự, lịch sử. Hạn mức `SOLVE_DAILY_LIMIT`
   bài/ngày (giờ VN); lượt lỗi cũng tính (vẫn tốn lượt gọi model).
 - Lịch sử bài đã giải (`solve_records`: đề, ảnh đề chép sang `data/user_images/`, ProblemState đầy đủ) và
@@ -229,7 +229,7 @@ trong bộ nhớ (`tests/test_accounts.py`), kiểm tra trình duyệt `demo/bro
   kết quả kiểm chứng) + toàn bộ công cụ chương trình, MỖI công cụ gắn sẵn chương của nó (tránh gán nhầm
   chương của bài cho định lí). Nhắc "[bước a2]" -> giao diện tô sáng bước đó trên hình. Câu trả lời không
   qua Verifier (ghi rõ trên giao diện). Giới hạn 15 câu/bài, 100 câu/ngày. Test: `tests/test_chat.py`,
-  `demo/browser_chat_check.mjs`.
+  `frontend/e2e/browser_chat_check.mjs`.
 
 **Còn thiếu:**
 - 🔲 Dẫn chứng tới cấp BÀI SGK: cần mục lục SGK Toán 9 KNTT (2 tập) để thêm trường `sgk: {chuong, bai, ten}`
@@ -249,7 +249,7 @@ stream SSE theo giai đoạn (kể cả lần giải lại và lý do) rồi tr�
 ProblemState; `GET /api/topics`. Frontend Next.js 15: nhập đề, tiến trình, gợi ý
 trước – lời giải sau, nhãn độ tin cậy kèm lý do, hình SVG **tô sáng theo bước**
 (engine bọc mỗi đối tượng trong `<g data-name data-pts>`). Đã kiểm tra golden
-path trong Edge headless qua CDP (`demo/browser_check.mjs`).
+path trong Edge headless qua CDP (`frontend/e2e/browser_check.mjs`).
 
 ```bash
 make api    # :8000
