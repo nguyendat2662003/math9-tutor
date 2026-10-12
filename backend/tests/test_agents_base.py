@@ -36,3 +36,21 @@ def test_valid_escapes_untouched():
 
 def test_raw_newline_inside_string_tolerated():
     assert _p('{"s": "a\nb"}')["s"] == "a\nb"
+
+
+def test_double_escaped_latex_kept():
+    # model viết đúng chuẩn JSON: "\frac" — không được biến thành form-feed + "rac"
+    out = _p(r'{"a": "\frac{1}{3}", "b": "\dfrac{60}{17}"}')
+    assert out == {"a": r"\frac{1}{3}", "b": r"\dfrac{60}{17}"}
+
+
+def test_mixed_escaped_and_single_backslash_in_one_json():
+    # trước đây: một "\le" đơn làm hỏng cả "\sqrt" hợp lệ cùng JSON -> "Invalid \escape"
+    out = _p(r'{"a": "\sqrt{5}", "b": "x \le 5", "c": "\{1; 2\}", "d": "\frac{1}{2} \cdot \frac{1}{3}", "e": "50\%"}')
+    assert out == {"a": r"\sqrt{5}", "b": r"x \le 5", "c": r"\{1; 2\}",
+                   "d": r"\frac{1}{2} \cdot \frac{1}{3}", "e": r"50\%"}
+
+
+def test_unicode_escape_and_latex_u_commands():
+    out = _p(r'{"a": "é", "b": "\underline{x}", "c": "\upsilon"}')
+    assert out == {"a": "é", "b": r"\underline{x}", "c": r"\upsilon"}

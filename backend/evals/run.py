@@ -32,6 +32,7 @@ for pkg in ("core", "curriculum", "geometry", "verifier", "retrieval"):
 sys.path.insert(0, str(ROOT))
 
 from evals.graders.answer import grade as grade_answer  # noqa: E402
+from evals.graders.answer import grade_item  # noqa: E402
 from evals.graders.figure import grade as grade_figure  # noqa: E402
 
 EVAL_SETS = {
@@ -40,6 +41,7 @@ EVAL_SETS = {
     "core": ("data/eval/core.jsonl", 200, "bài đề thi vào 10, chương trình GDPT 2018", "mỗi PR"),
     "hard": ("data/eval/hard.jsonl", 80, "độ khó 3 trong đề phổ thông + bài trong-phạm-vi của khối chuyên", "hàng tuần"),
     "figure": ("data/eval/figure.jsonl", 100, "bài hình có predicate — chấm bằng Verifier, không cần mắt người", "hàng tuần"),
+    "golden": ("data/eval/golden.jsonl", 100, "đáp án đã kiểm chứng độc lập (hướng dẫn chấm Sở hoặc giải lại bằng tay + SymPy)", "khi chọn/đổi model"),
 }
 
 #: File tham chiếu, KHÔNG dùng cho `--set` — giữ lại phần không thuộc phạm vi lớp 9
@@ -116,7 +118,7 @@ def run_item(pipe, item: dict) -> dict:
         row["answer_ok"] = None
         row["data_issue"] = "trắc nghiệm thiếu phương án"
     elif gold.get("answer"):
-        row["answer_ok"] = grade_answer(predicted, gold["answer"]) if predicted else False
+        row["answer_ok"] = grade_item(predicted, item) if predicted else False
     else:
         row["answer_ok"] = None                       # bài chứng minh — chấm qua Verifier
 
@@ -221,16 +223,16 @@ def main() -> None:
     if args.regrade:
         p = Path(args.regrade)
         rep = json.loads(p.read_text(encoding="utf-8"))
-        gold = {it["id"]: it["gold"] for it in load(EVAL_SETS[rep["set"]][0])}
+        items = {it["id"]: it for it in load(EVAL_SETS[rep["set"]][0])}
         for r in rep["rows"]:
-            if "error" in r:
+            if "error" in r or r["id"] not in items:
                 continue
-            g = gold[r["id"]]
-            stmt = next(it["statement"] for it in load(EVAL_SETS[rep["set"]][0]) if it["id"] == r["id"])
+            it = items[r["id"]]
+            g, stmt = it["gold"], it["statement"]
             if _needs_options(stmt):
                 r["answer_ok"], r["data_issue"] = None, "trắc nghiệm thiếu phương án"
             elif g.get("answer"):
-                r["answer_ok"] = grade_answer(r["answer_pred"], g["answer"]) if r.get("answer_pred") else False
+                r["answer_ok"] = grade_item(r["answer_pred"], it) if r.get("answer_pred") else False
             wrong = r["answer_ok"] is False or r.get("figure_ok") is False
             r["confident_wrong"] = r["confidence"] == "high" and wrong
         rep["metrics"] = summarize(rep["rows"], rep["set"])

@@ -94,17 +94,13 @@ class Agent(ABC):
         a, b = t.find("{"), t.rfind("}")
         if a >= 0 and b > a:
             t = t[a:b + 1]
-        t = _RE_AMBIG.sub(r"\\\\\1", t)
         try:
-            return json.loads(t, strict=False)
-        except json.JSONDecodeError:
-            try:
-                return json.loads(_repair_latex_escapes(t), strict=False)
-            except json.JSONDecodeError as e:
-                raise ValueError(
-                    f"LLM không trả JSON hợp lệ ({e.msg}); {len(resp.text)} ký tự, "
-                    f"đầu: {resp.text[:120]!r} ... cuối: {resp.text[-80:]!r}"
-                ) from e
+            return json.loads(_fix_json_escapes(t), strict=False)
+        except json.JSONDecodeError as e:
+            raise ValueError(
+                f"LLM không trả JSON hợp lệ ({e.msg}); {len(resp.text)} ký tự, "
+                f"đầu: {resp.text[:120]!r} ... cuối: {resp.text[-80:]!r}"
+            ) from e
 
 
 #: Lệnh LaTeX bắt đầu bằng ký tự trùng escape JSON (\b \f \n \r \t \u) — nếu không
@@ -127,6 +123,34 @@ def _image_note(image: str) -> str:
     return f"[ảnh {p.name}, {p.stat().st_size // 1024} KB]" if p.exists() else f"[ảnh {p.name}]"
 
 
-def _repair_latex_escapes(t: str) -> str:
-    """\\ theo sau không phải escape JSON hợp lệ -> nhân đôi."""
-    return re.sub(r'\\(?!["\\/bfnrtu])', r"\\\\", t)
+def _fix_json_escapes(t: str) -> str:
+    """Duyệt từng dấu \\ theo CẶP vì model viết LaTeX trong chuỗi JSON theo nhiều kiểu:
+
+    - "\\\\frac" (đã nhân đôi đúng chuẩn JSON)           -> giữ nguyên
+    - "\\frac", "\\le", "\\{"... (backslash đơn, không phải escape JSON) -> nhân đôi
+    - "\\n", "\\t"... -> giữ là xuống dòng/tab, TRỪ khi là đầu một lệnh LaTeX (\\neq, \\times, \\frac...)
+
+    Dùng một regex chung cho cả ba kiểu thì backslash thứ hai của "\\\\frac" bị nhân đôi nhầm,
+    thành form-feed + "rac" (hoặc "Invalid \\escape" khi trong JSON có cả hai kiểu).
+    """
+    out, i, n = [], 0, len(t)
+    while i < n:
+        c = t[i]
+        if c != "\\" or i + 1 >= n:
+            out.append(c)
+            i += 1
+            continue
+        nxt = t[i + 1]
+        if nxt in '\\"/':
+            out.append(t[i:i + 2])
+            i += 2
+        elif nxt == "u" and re.fullmatch(r"[0-9a-fA-F]{4}", t[i + 2:i + 6]):
+            out.append(t[i:i + 6])
+            i += 6
+        elif nxt in "bfnrt" and not _RE_AMBIG.match(t, i):
+            out.append(t[i:i + 2])
+            i += 2
+        else:
+            out.append("\\\\")
+            i += 1
+    return "".join(out)
