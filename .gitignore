@@ -26,3 +26,4 @@ backend/data/user_images/
 frontend/next-env.d.ts
 frontend/tsconfig.tsbuildinfo
 frontend/e2e/*.png
+frontend/e2e/web.log

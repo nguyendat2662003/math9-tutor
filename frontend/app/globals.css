@@ -223,7 +223,11 @@ select:focus, .field input:focus { outline: none; border-color: var(--accent); }
 }
 .step:hover, .step.active { background: #fff4ef; border-color: #ffd4c7; }
 .step:hover::before, .step.active::before { border-color: var(--hl); background: var(--hl); color: #fff; }
-.step__why { color: var(--muted); font-size: 14px; margin-top: 2px; }
+.step__why { color: var(--muted); font-size: 13px; margin-top: 2px; }
+/* KaTeX mặc định to hơn chữ thường 21% — chỉnh vừa với phông của trang, phân số vẫn đủ rõ */
+.katex { font-size: 1.08em; }
+.step, .answer, .hint { line-height: 1.85; }  /* chừa chỗ cho phân số cao hơn chữ */
+.step .katex-display, .katex .katex-html { max-width: 100%; }
 .step__pred { display: inline-block; font-size: 12px; font-weight: 700; color: var(--ok); background: var(--ok-soft); border-radius: 999px; padding: 1px 8px; margin-left: 8px; }
 .answer {
   display: flex; gap: 10px; align-items: flex-start; margin: 10px 0 0 15px; padding: 10px 14px; border-radius: 14px;

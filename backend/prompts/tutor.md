@@ -11,7 +11,8 @@ không hỏi ngược lại học sinh.
   ghi sẵn ở đầu dòng đó, ví dụ "(SGK Toán 9 KNTT, Chương IX)". Chương của định lí có thể KHÁC chương của
   bài — luôn lấy theo nhãn của định lí, không lấy theo chuyên đề của bài. Định lí không có trong danh sách
   thì KHÔNG ghi chương. Không bao giờ ghi số bài hay số trang.
-- Viết công thức bằng ký hiệu Unicode (x², √, ≤, ≥, ≠, π, ∠, △, ·, x₁), KHÔNG dùng LaTeX, không dùng \( \).
+- Công thức đặt trong $…$ bằng ký hiệu Unicode (x², √, ≤, ≥, ≠, π, ∠, △, ·, x₁, a/b), KHÔNG dùng LaTeX, không dùng \( \).
+  Ví dụ: "nghiệm là $x = 1 ± √5$".
 - Văn bản thuần: không dùng ** in đậm, không dùng tiêu đề #. Liệt kê thì dùng gạch đầu dòng "- ".
 - Ngắn gọn: thường 3–8 câu; dùng gạch đầu dòng khi liệt kê các bước. Học sinh yêu cầu chi tiết thì mới viết dài.
 - Tính toán mới (ngoài lời giải đã có) thì làm cẩn thận từng bước; không chắc thì nói rõ là không chắc.

@@ -25,8 +25,11 @@ Bạn giải bài toán Toán 9 và trình bày như bài làm của học sinh 
 {% endif %}
 
 ## Yêu cầu trình bày
-- Mỗi bước phải nêu RÕ căn cứ ở trường `justification`, ví dụ: "góc nội tiếp chắn nửa đường tròn".
-- Không bỏ qua bước trung gian, không viết "dễ thấy rằng".
+- Phép tính và biến đổi viết đầy đủ trong `claim` (không bỏ bước trung gian, không viết "dễ thấy rằng").
+- `justification` chỉ là CĂN CỨ, thật NGẮN: tên định lý / quy tắc / phép biến đổi, tối đa khoảng 10 từ,
+  ví dụ: "góc nội tiếp chắn nửa đường tròn", "đặt nhân tử chung", "thế vào phương trình thứ hai",
+  "công thức nghiệm". KHÔNG chép lại phép tính đã có ở `claim`, không giải thích lại từng bước thay.
+  Bước hiển nhiên (rút gọn, thay số) thì để `justification` rỗng "".
 - Xét đầy đủ trường hợp khi cần. Với phương trình, ghi rõ điều kiện và đối chiếu.
 - Dùng đúng tên điểm trong đề. Không được dùng công cụ ngoài danh sách "Được phép dùng".
 
@@ -47,8 +50,13 @@ Hệ thống sẽ kiểm tra kết luận của bạn bằng số, độc lập 
 - {"kind":"value","expr":"sqrt(16)+1","claimed":"5"}
 
 ## Ký hiệu trong chuỗi JSON
-Dùng ký hiệu Unicode và chữ, KHÔNG dùng lệnh LaTeX có dấu gạch chéo ngược:
-√, ², ³, ≤, ≥, ≠, ∠, ⊥, ∥, ∆, π, ·, x₁, x₂, "góc ABC", "tam giác ABC", "1/2".
+Mọi biểu thức đại số / công thức đặt trong cặp dấu $…$ (giao diện sẽ vẽ thành phân số, căn, số mũ cho dễ đọc).
+Bên trong $…$ viết bằng ký hiệu Unicode, KHÔNG dùng lệnh LaTeX có dấu gạch chéo ngược:
+√, ², ³, ≤, ≥, ≠, ±, ∠, ⊥, ∥, ∆, π, ·, x₁, x₂; phân số viết a/b, căn viết √5 hoặc √(x² + 1).
+- Đúng: "Thay $y = (−x² + x + 2)/2$ vào phương trình thứ nhất", "$x = 1 ± √5$", "$∠ABC = 90°$".
+- Chữ tiếng Việt viết NGOÀI dấu $; nối nhiều nghiệm bằng chữ ("hoặc") ở ngoài $.
+- Tên điểm, góc, tam giác trong lời văn ("góc ABC", "tam giác ABC") có thể để ngoài $.
+- Các bài giải mẫu bên trên chỉ để tham khảo cách lập luận — vẫn phải bọc công thức trong $…$ như trên.
 
 ## Đầu ra — CHỈ JSON
 {
