@@ -1,7 +1,7 @@
 """Tạo bài giải mẫu (data/problems/*.json) bán tự động từ Pipeline.
 
-    python tools/make_example.py --id mau-hai-tiep-tuyen --file demo/de.txt --source "Tự soạn"
-    python tools/make_example.py --id mau-viete --from-state demo/solve_alg/state.json
+    python tools/make_example.py --id mau-hai-tiep-tuyen --file de.txt --source "Tự soạn"
+    python tools/make_example.py --id mau-viete --from-state solve_alg/state.json
 
 Quy trình (xem data/problems/QUY-CACH.md, mục "Cách làm bán tự động"):
   1. Pipeline giải + Verifier kiểm chứng.

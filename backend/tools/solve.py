@@ -1,7 +1,7 @@
 """Giải một bài bằng Pipeline đầy đủ với LLM thật, in kết quả và ghi state ra file.
 
     python tools/solve.py "Giải phương trình x^2 - 5x + 6 = 0."
-    python tools/solve.py --file demo/de.txt --out demo/solve_out --mode exam10
+    python tools/solve.py --file de.txt --out solve_out --mode exam10
 """
 
 from __future__ import annotations

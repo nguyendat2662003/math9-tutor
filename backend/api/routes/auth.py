@@ -31,11 +31,6 @@ async def _run(fn, *a):
         raise HTTPException(400, str(e))
 
 
-@router.post("/register")
-def register() -> None:
-    raise HTTPException(403, "Không tự tạo tài khoản được — nhờ thầy cô quản trị cấp tài khoản cho em")
-
-
 @router.post("/login")
 async def login(req: Login, resp: Response) -> dict:
     user = await _run(service.authenticate, req.username, req.password)

@@ -61,8 +61,8 @@ def main() -> None:
 
     llm = None
     if args.use_llm:
-        from math9_core.llm.client import AnthropicClient
-        llm = AnthropicClient()
+        from math9_core.llm.client import client_from_env
+        llm = client_from_env()
 
     r = Reorganizer(llm=llm, provenance=f"{args.map} ({len(sections)} mục)")
     result = r.run(sections, chunks)

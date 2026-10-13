@@ -1,10 +1,4 @@
-.PHONY: install test lint api eval demo ui
-
-demo:
-	python tools/demo_draw.py --file demo/de.txt --out demo/out
-
-ui:
-	python -m streamlit run demo_streamlit.py
+.PHONY: install test lint api eval
 
 install:
 	pip install -e ".[dev]"
