@@ -91,7 +91,6 @@ hàng đợi soát cho giáo viên.
 **Còn thiếu:**
 - 🔲 Adapter cho nguồn cụ thể — mỗi site một file, viết khi có link. Xem
   `packages/ingest/math9_ingest/adapters/README.md`.
-- 🔲 Nối Mathpix thật trong `extract/ocr.py` (hiện là khung, cần API key).
 
 **Việc tiếp theo:** khi có link nguồn → viết adapter (~40-60 dòng/nguồn).
 

@@ -17,7 +17,7 @@ from .segment import Problem
 class Verdict(StrEnum):
     AUTO_ACCEPT = "auto_accept"    # sạch, vào thẳng kho
     NEEDS_REVIEW = "needs_review"  # giáo viên soát
-    NEEDS_OCR = "needs_ocr"        # công thức vỡ, cần Mathpix/VLM
+    NEEDS_OCR = "needs_ocr"        # công thức vỡ, cần VLM
     REJECT = "reject"              # rác, bỏ
 
 

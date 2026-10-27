@@ -37,12 +37,11 @@ cũng là tài sản thật của dự án.
 | `ProblemState` + orchestrator (`core`) | ✅ Chạy end-to-end | ✅ (LLM giả) |
 | 6 agent (Parser…Pedagogue) | ✅ Router/Solver/Draftsman/Critic/Pedagogue chạy với LLM thật; Parser ảnh 🔲 | ✅ |
 | Bộ eval (`evals/run.py`) | ✅ Chấm tự động 5 chỉ số, có baseline smoke | — |
-| Demo Streamlit (`backend/demo_streamlit.py`) | ✅ Giải toán + dựng hình | ✅ AppTest |
 | API FastAPI + SSE | ✅ Nối Pipeline | — |
 | Frontend Next.js | ✅ MVP: gợi ý trước, nhãn tin cậy, hình tô sáng theo bước | ✅ CDP golden path |
 
 56 test đều xanh, chạy `make test` (~2 giây). Chạy sản phẩm: `make api` + `make web`
-(http://localhost:3000). Công cụ phát triển: `make ui` (Streamlit), `python tools/solve.py "<đề>"`.
+(http://localhost:3000). Công cụ phát triển: `python tools/solve.py "<đề>"`.
 
 ## Ba việc lớn còn lại
 

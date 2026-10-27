@@ -73,8 +73,6 @@ Các lệnh Python chạy trong thư mục `backend/`:
 |---|---|
 | Chạy test (không cần LLM) | `pytest -q` |
 | Giải một bài trên dòng lệnh | `python tools/solve.py "Giải phương trình x^2 - 5x + 6 = 0."` |
-| Demo dựng hình từ đề | `python tools/demo_draw.py --file demo/de.txt --out demo/out` |
-| Demo Streamlit | `python -m streamlit run demo_streamlit.py` |
 | Chạy eval (bộ smoke) | `python evals/run.py --set smoke` |
 | Xem lại báo cáo eval | `python evals/run.py --report evals/reports/<file>.json` |
 | Kiểm tra kiểu frontend | `cd frontend && npm run typecheck` |
@@ -333,7 +331,7 @@ backend/
     exam/        cấu trúc đề thi vào 10 theo tỉnh (blueprints.yaml)
   prompts/       template Router, Solver, Draftsman
   evals/         runner + graders (chấm đáp án bằng SymPy, chấm hình bằng verifier)
-  tools/         dòng lệnh: giải bài, demo dựng hình, soạn bài mẫu, crawl, hàng đợi soát
+  tools/         dòng lệnh: giải bài, soạn bài mẫu, crawl, hàng đợi soát
   tests/         test không cần LLM (LLM được giả lập)
   Dockerfile     image deploy backend
 frontend/        Next.js: nhập đề/ảnh, tiến trình, gợi ý, lời giải, hình tô sáng

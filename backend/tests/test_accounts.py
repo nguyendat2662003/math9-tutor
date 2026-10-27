@@ -59,12 +59,12 @@ def test_sessions_logout_and_password_change(mem_db):
 
 # ---------- API ----------
 
-def test_api_register_login_cookie(mem_db):
+def test_api_login_cookie(mem_db):
     from api.routes import history as hist_route
 
     anon = make_client(hist_route.router, login=False)
     r = anon.post("/api/auth/register", json={"username": "tudangky", "password": "matkhau-123"})
-    assert r.status_code == 403                                  # không tự đăng ký — admin cấp tài khoản
+    assert r.status_code in (404, 405)                           # không có tự đăng ký — admin cấp tài khoản
 
     c = make_client(hist_route.router)
     cookie = c.cookies.get("m9_session")

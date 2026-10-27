@@ -3,8 +3,7 @@
 Với đầu vào text, Pipeline bỏ qua bước gọi model và dùng thẳng raw_input.
 
 Dùng VLM đa năng thay vì OCR chuyên dụng: đề toán lớp 9 có nhiều ký hiệu và bố
-cục nhiều ý, VLM giữ được cấu trúc a), b), c) tốt hơn. Mathpix (math9_ingest.
-extract.ocr) vẫn là lựa chọn tốt hơn cho trang in dày đặc công thức.
+cục nhiều ý, VLM giữ được cấu trúc a), b), c) tốt hơn.
 """
 
 from __future__ import annotations

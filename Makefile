@@ -1,5 +1,5 @@
 # Lối tắt chạy từ thư mục gốc. Backend và frontend độc lập — xem backend/README.md, frontend/README.md.
-.PHONY: install test lint api eval demo ui web web-install
+.PHONY: install test lint api eval web web-install
 
 install:
 	$(MAKE) -C backend install
@@ -15,12 +15,6 @@ api:
 
 eval:
 	$(MAKE) -C backend eval
-
-demo:
-	$(MAKE) -C backend demo
-
-ui:
-	$(MAKE) -C backend ui
 
 web-install:
 	cd frontend && npm install

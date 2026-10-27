@@ -53,14 +53,6 @@ class LLMClient(ABC):
         yield resp.text
 
 
-class AnthropicClient(LLMClient):
-    def __init__(self, api_key: str | None = None):
-        self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", "")
-
-    def complete(self, system, user, *, model, max_tokens=4000, temperature=0.2, thinking=False, images=None):
-        raise NotImplementedError("Nối vào SDK anthropic ở đây")
-
-
 class OpenAICompatClient(LLMClient):
     """Endpoint tương thích OpenAI: api.openai.com, hoặc vLLM / Ollama / SGLang local."""
 
